@@ -26,9 +26,9 @@ import java.util.List;
  */
 public class SearchResult {
 
+  @Expose @SerializedName("total_count") Integer totalCount;
   @Expose @SerializedName("incomplete_results") Boolean incompleteResults;
   @Expose @SerializedName("items") List<Repository> repositories = new ArrayList();
-  @Expose @SerializedName("total_count") Integer totalCount;
 
   public Boolean getIncompleteResults() {
     return this.incompleteResults;
@@ -56,9 +56,9 @@ public class SearchResult {
 
   @Override public String toString() {
     return "SearchResult{" +
-        "incompleteResults=" + incompleteResults +
+        "totalCount=" + totalCount +
+        ", incompleteResults=" + incompleteResults +
         ", repositories=" + repositories +
-        ", totalCount=" + totalCount +
         '}';
   }
 }

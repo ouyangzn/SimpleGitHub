@@ -22,6 +22,8 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -29,29 +31,36 @@ import butterknife.ButterKnife;
 import com.ouyangzn.topgithub.R;
 import com.ouyangzn.topgithub.base.BaseActivity;
 import com.ouyangzn.topgithub.base.CommonConstants.GitHub;
+import com.ouyangzn.topgithub.bean.Repository;
 import com.ouyangzn.topgithub.bean.SearchResult;
+import com.ouyangzn.topgithub.module.common.SearchResultAdapter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainView;
 import com.ouyangzn.topgithub.utils.DialogUtil;
 import com.ouyangzn.topgithub.utils.ImageLoader;
 import com.ouyangzn.topgithub.utils.Log;
+import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     implements IMainView, NavigationView.OnNavigationItemSelectedListener {
 
-  /*@BindView(R.id.refreshLayout) */ SwipeRefreshLayout mRefreshLayout;
+  private SwipeRefreshLayout mRefreshLayout;
+  private RecyclerView mRecyclerView;
+  private SearchResultAdapter mAdapter;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
   private ProgressDialog mProgressDialog;
-  private String mKeyword = "android";
+  private String mKeyword;
   private String mLanguage = GitHub.LANG_JAVA;
+  private boolean mIsRefresh = true;
 
   @Override public IMainPresenter initPresenter() {
     return new MainPresenter(this);
   }
 
   @Override protected void initData() {
-    mPresenter.queryData(mKeyword, mLanguage, 0);
+    mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
+    search(false);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
@@ -74,10 +83,13 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     mRefreshLayout = ButterKnife.findById(this, R.id.refreshLayout);
     mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
       @Override public void onRefresh() {
-        mPresenter.queryData(mKeyword, mLanguage, 0);
+        search(true);
       }
     });
 
+    mRecyclerView = ButterKnife.findById(this, R.id.recycler);
+    mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+    mRecyclerView.setAdapter(mAdapter);
   }
 
   @Override public void onBackPressed() {
@@ -137,11 +149,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override public void showProgressDialog() {
-    mProgressDialog = DialogUtil.showProgressDialog(this, getString(R.string.loading), false);
+    if (!mIsRefresh) {
+      mProgressDialog = DialogUtil.showProgressDialog(this, getString(R.string.loading), false);
+    }
   }
 
   @Override public void dismissProgressDialog() {
-    DialogUtil.dismissProgressDialog(mProgressDialog);
+    if (!mIsRefresh) {
+      DialogUtil.dismissProgressDialog(mProgressDialog);
+    }
   }
 
   @Override public void showErrorTips(String tips) {
@@ -149,7 +165,17 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override public void showResult(SearchResult result) {
-    mRefreshLayout.setRefreshing(false);
     Log.d(TAG, result.toString());
+    if (mIsRefresh) {
+      mRefreshLayout.setRefreshing(false);
+      mAdapter.resetData(result.getRepositories());
+    } else {
+      mAdapter.addData(result.getRepositories());
+    }
+  }
+
+  private void search(boolean isRefresh) {
+    mPresenter.queryData(mKeyword, mLanguage, 0);
+    mIsRefresh = isRefresh;
   }
 }

@@ -20,7 +20,7 @@ import com.ouyangzn.topgithub.base.CommonConstants.GitHub;
 import com.ouyangzn.topgithub.bean.SearchResult;
 import com.ouyangzn.topgithub.data.IGitHubDataSource;
 import com.ouyangzn.topgithub.network.Api;
-import java.net.URLEncoder;
+import java.net.URLDecoder;
 import rx.Observable;
 
 import static com.ouyangzn.topgithub.base.CommonConstants.NormalCons.LIMIT_20;
@@ -39,7 +39,8 @@ public class RemoteGitHubData implements IGitHubDataSource {
       String order, int perPage, int page) {
     if (keyword == null) keyword = "";
     if (!TextUtils.isEmpty(language)) {
-      keyword = keyword.concat("+language:" + URLEncoder.encode(language));
+      // 防止无keyword时+被编码，结果搜不到东西
+      keyword = keyword.concat(URLDecoder.decode("+") + "language:" + language);
     }
     return Api.getSearchApi().query(keyword, sort, order, perPage, page);
   }
