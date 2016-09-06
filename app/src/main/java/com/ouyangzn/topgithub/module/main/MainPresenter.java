@@ -15,14 +15,66 @@
 
 package com.ouyangzn.topgithub.module.main;
 
-import com.ouyangzn.topgithub.base.BasePresenter;
+import android.content.Context;
+import com.ouyangzn.topgithub.R;
+import com.ouyangzn.topgithub.bean.SearchResult;
+import com.ouyangzn.topgithub.data.IGitHubDataSource;
+import com.ouyangzn.topgithub.data.remote.RemoteGitHubData;
+import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
+import com.ouyangzn.topgithub.utils.Log;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
  * Description：
  */
-public class MainPresenter extends BasePresenter {
-  @Override protected void onDestroy() {
+public class MainPresenter extends IMainPresenter {
 
+  private final String TAG = MainPresenter.class.getSimpleName();
+
+  private IGitHubDataSource mDataSource;
+  private Context mContext;
+
+  public MainPresenter(Context context) {
+    this.mContext = context.getApplicationContext();
+    mDataSource = new RemoteGitHubData();
+  }
+
+  @Override protected void onDestroy() {
+    mDataSource = null;
+    mContext = null;
+  }
+
+  @Override void queryData(String keyword, String language, int page) {
+    Subscription subscribe = mDataSource.queryByKeyword(keyword, language, page)
+        .subscribeOn(Schedulers.io())
+        .doOnSubscribe(new Action0() {
+          @Override public void call() {
+            if (mView != null) mView.showProgressDialog();
+          }
+        })
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<SearchResult>() {
+          @Override public void call(SearchResult searchResult) {
+            if (mView != null) {
+              mView.dismissProgressDialog();
+              mView.showResult(searchResult);
+            }
+          }
+        }, new Action1<Throwable>() {
+          @Override public void call(Throwable throwable) {
+            Log.e(TAG, "----------查询数据出错:", throwable);
+            if (mView != null) {
+              mView.dismissProgressDialog();
+              mView.showErrorTips(mContext.getString(R.string.error_search_github));
+            }
+          }
+        });
+    addSubscription(subscribe);
   }
 }

@@ -17,13 +17,8 @@ package com.ouyangzn.topgithub.base;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -37,8 +32,8 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
 
   protected String TAG = "BaseActivity";
   protected Context mContext;
-  private com.ouyangzn.topgithub.utils.Toast mToast;
   protected T mPresenter;
+  private com.ouyangzn.topgithub.utils.Toast mToast;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -92,6 +87,10 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
     mToast.show(content, Toast.LENGTH_SHORT);
   }
 
+  protected void toast(int resId) {
+    mToast.show(resId, Toast.LENGTH_SHORT);
+  }
+
   /**
    * 打开一个activity
    *
@@ -139,7 +138,6 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
    * @param clazz 要打开的activity
    * @param requestCode 请求码
    * @param data 要携带过去的数据
-   * @param <T>
    */
   public <T> void openActivityForResult(Class<T> clazz, int requestCode, Bundle data) {
     Intent intent = new Intent(mContext, clazz);

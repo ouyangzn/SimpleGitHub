@@ -15,6 +15,8 @@
 package com.ouyangzn.topgithub.network;
 
 import com.ouyangzn.topgithub.BuildConfig;
+import com.ouyangzn.topgithub.utils.Log;
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -25,8 +27,17 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.ForwardingSource;
+import okio.Okio;
+import okio.Source;
 
 /**
  * 匿名 SSL HttpClient
@@ -38,9 +49,18 @@ public class HttpClient {
     builder.writeTimeout(30, TimeUnit.SECONDS);
     builder.readTimeout(30, TimeUnit.SECONDS);
     if (BuildConfig.LOG_DEBUG) {
-      HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-      loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-      builder.interceptors().add(loggingInterceptor);
+      //HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+      //logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+      //builder.interceptors().add(logging);
+      builder.interceptors().add(new Interceptor() {
+        @Override public Response intercept(Chain chain) throws IOException {
+          Request request = chain.request();
+          Response response = chain.proceed(request);
+          return response.newBuilder()
+              .body(new DebugResponseBody(request, response.body()))
+              .build();
+        }
+      });
     }
     try {
       SSLContext sc = SSLContext.getInstance("SSL");
@@ -71,6 +91,59 @@ public class HttpClient {
   private static class TrustAnyHostnameVerifier implements HostnameVerifier {
     public boolean verify(String hostname, SSLSession session) {
       return true;
+    }
+  }
+
+  /**
+   * 打印请求内容
+   */
+  private static class DebugResponseBody extends ResponseBody {
+    private static final String TAG = DebugResponseBody.class.getSimpleName();
+    private final Request request;
+    private final ResponseBody responseBody;
+    private BufferedSource bufferedSource;
+    private Buffer buffer = new Buffer();
+
+    DebugResponseBody(Request request, ResponseBody responseBody) {
+      this.request = request;
+      this.responseBody = responseBody;
+      Log.d(TAG, "Http start: " + request.toString());
+      Log.d(TAG, "Http headers: " + request.headers());
+    }
+
+    @Override public MediaType contentType() {
+      return responseBody.contentType();
+    }
+
+    @Override public long contentLength() {
+      return responseBody.contentLength();
+    }
+
+    @Override public BufferedSource source() {
+      if (bufferedSource == null) {
+        bufferedSource = Okio.buffer(source(responseBody.source()));
+      }
+      return bufferedSource;
+    }
+
+    @Override public void close() {
+      Log.d(TAG,
+          "Http end: [" + request.url().toString() + "]" + " Data: " + buffer.readByteString()
+              .utf8());
+      buffer.close();
+      super.close();
+    }
+
+    private Source source(Source source) {
+      return new ForwardingSource(source) {
+        @Override public long read(Buffer sink, long byteCount) throws IOException {
+          long bytesRead;
+          if ((bytesRead = super.read(sink, byteCount)) > 0) {
+            sink.copyTo(buffer, 0, bytesRead);
+          }
+          return bytesRead;
+        }
+      };
     }
   }
 }

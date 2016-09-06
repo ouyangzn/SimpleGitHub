@@ -13,4 +13,6 @@
   <string name="language_ruby">ruby</string>
   <string name="language_c_sharp">c#</string>
   <string name="language_shell">shell</string>
+  <string name="loading">加载中...</string>
+  <string name="error_search_github">查询数据失败,请重试</string>
 </resources>

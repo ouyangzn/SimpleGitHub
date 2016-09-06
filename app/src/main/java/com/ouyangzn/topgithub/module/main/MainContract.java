@@ -13,20 +13,33 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.topgithub.network;
+package com.ouyangzn.topgithub.module.main;
 
+import com.ouyangzn.topgithub.base.BasePresenter;
+import com.ouyangzn.topgithub.base.BaseView;
 import com.ouyangzn.topgithub.bean.SearchResult;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
 
 /**
- * Created by ouyangzn on 2016/9/5.<br/>
+ * Created by ouyangzn on 2016/9/6.<br/>
  * Description：
  */
-public interface SearchApi {
+public interface MainContract {
 
-  @GET("/search/repositories") Observable<SearchResult> query(@Query("q") String keyword,
-      @Query("sort") String sort, @Query("order") String order, @Query("per_page") int perPage,
-      @Query("page") int page);
+  interface IMainView extends BaseView<MainPresenter> {
+
+    void showErrorTips(String tips);
+
+    void showResult(SearchResult result);
+  }
+
+  abstract class IMainPresenter extends BasePresenter<IMainView> {
+    /**
+     * 搜索github上的数据
+     *
+     * @param keyword 关键字，可为null
+     * @param language 搜索的语言
+     * @param page 当前页
+     */
+    abstract void queryData(String keyword, String language, int page);
+  }
 }

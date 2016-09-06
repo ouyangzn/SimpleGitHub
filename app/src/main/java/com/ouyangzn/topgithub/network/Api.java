@@ -29,13 +29,13 @@ public class Api {
   private Api() {}
 
   public static SearchApi getSearchApi() {
-    return getRetrofitBuilder().baseUrl("https://api.github.com/search/repositories/")
+    return getRetrofitBuilder()
         .build()
         .create(SearchApi.class);
   }
 
   private static Retrofit.Builder getRetrofitBuilder() {
-    return new Retrofit.Builder().baseUrl("https://api.github.com/")
+    return new Retrofit.Builder().baseUrl("https://api.github.com")
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create(App.getGson()))
         .client(HttpClient.getDefaultHttpClient());

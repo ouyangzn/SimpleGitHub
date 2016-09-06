@@ -15,36 +15,43 @@
 
 package com.ouyangzn.topgithub.module.main;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.ouyangzn.topgithub.R;
 import com.ouyangzn.topgithub.base.BaseActivity;
-import com.ouyangzn.topgithub.base.BasePresenter;
-import com.ouyangzn.topgithub.base.BaseView;
+import com.ouyangzn.topgithub.base.CommonConstants.GitHub;
+import com.ouyangzn.topgithub.bean.SearchResult;
+import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
+import com.ouyangzn.topgithub.module.main.MainContract.IMainView;
+import com.ouyangzn.topgithub.utils.DialogUtil;
 import com.ouyangzn.topgithub.utils.ImageLoader;
+import com.ouyangzn.topgithub.utils.Log;
 
-public class MainActivity extends BaseActivity implements BaseView<MainPresenter>, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
+    implements IMainView, NavigationView.OnNavigationItemSelectedListener {
 
+  /*@BindView(R.id.refreshLayout) */ SwipeRefreshLayout mRefreshLayout;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
+  private ProgressDialog mProgressDialog;
+  private String mKeyword = "android";
+  private String mLanguage = GitHub.LANG_JAVA;
 
-  @Override public BasePresenter initPresenter() {
-    return new MainPresenter();
+  @Override public IMainPresenter initPresenter() {
+    return new MainPresenter(this);
   }
 
   @Override protected void initData() {
-
+    mPresenter.queryData(mKeyword, mLanguage, 0);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
@@ -63,6 +70,13 @@ public class MainActivity extends BaseActivity implements BaseView<MainPresenter
         new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
     mDrawerLayout.addDrawerListener(toggle);
     toggle.syncState();
+
+    mRefreshLayout = ButterKnife.findById(this, R.id.refreshLayout);
+    mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      @Override public void onRefresh() {
+        mPresenter.queryData(mKeyword, mLanguage, 0);
+      }
+    });
 
   }
 
@@ -123,10 +137,19 @@ public class MainActivity extends BaseActivity implements BaseView<MainPresenter
   }
 
   @Override public void showProgressDialog() {
-
+    mProgressDialog = DialogUtil.showProgressDialog(this, getString(R.string.loading), false);
   }
 
   @Override public void dismissProgressDialog() {
+    DialogUtil.dismissProgressDialog(mProgressDialog);
+  }
 
+  @Override public void showErrorTips(String tips) {
+    toast(tips);
+  }
+
+  @Override public void showResult(SearchResult result) {
+    mRefreshLayout.setRefreshing(false);
+    Log.d(TAG, result.toString());
   }
 }
