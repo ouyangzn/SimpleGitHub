@@ -15,7 +15,8 @@
 
 package com.ouyangzn.topgithub.module.main;
 
-import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,9 +26,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import butterknife.ButterKnife;
+import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.ouyangzn.topgithub.R;
 import com.ouyangzn.topgithub.base.BaseActivity;
 import com.ouyangzn.topgithub.base.CommonConstants.GitHub;
@@ -36,23 +40,28 @@ import com.ouyangzn.topgithub.bean.SearchResult;
 import com.ouyangzn.topgithub.module.common.SearchResultAdapter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainView;
-import com.ouyangzn.topgithub.utils.DialogUtil;
 import com.ouyangzn.topgithub.utils.ImageLoader;
 import com.ouyangzn.topgithub.utils.Log;
 import java.util.ArrayList;
 
-public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
-    implements IMainView, NavigationView.OnNavigationItemSelectedListener {
+import static com.ouyangzn.topgithub.base.CommonConstants.NormalCons.LIMIT_20;
 
+public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
+    implements IMainView, NavigationView.OnNavigationItemSelectedListener,
+    BaseRecyclerViewAdapter.OnLoadingMoreListener,
+    BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener {
+
+  private View mLoadingView;
   private SwipeRefreshLayout mRefreshLayout;
   private RecyclerView mRecyclerView;
   private SearchResultAdapter mAdapter;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
-  private ProgressDialog mProgressDialog;
   private String mKeyword;
   private String mLanguage = GitHub.LANG_JAVA;
+  // 刷新或者加载下一页
   private boolean mIsRefresh = true;
+  private int mCurrPage = 1;
 
   @Override public IMainPresenter initPresenter() {
     return new MainPresenter(this);
@@ -60,12 +69,17 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void initData() {
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
+    mAdapter.setOnRecyclerViewItemClickListener(this);
+    mAdapter.setOnLoadingMoreListener(this);
     search(false);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
     setContentView(R.layout.activity_main);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    mLoadingView = ButterKnife.findById(this, R.id.main_loading);
+    mLoadingView.setVisibility(View.VISIBLE);
+
+    Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
@@ -89,6 +103,8 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
     mRecyclerView = ButterKnife.findById(this, R.id.recycler);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+    LayoutInflater inflater = getLayoutInflater();
+    mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, mRecyclerView, false));
     mRecyclerView.setAdapter(mAdapter);
   }
 
@@ -149,15 +165,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override public void showProgressDialog() {
-    if (!mIsRefresh) {
-      mProgressDialog = DialogUtil.showProgressDialog(this, getString(R.string.loading), false);
-    }
   }
 
   @Override public void dismissProgressDialog() {
-    if (!mIsRefresh) {
-      DialogUtil.dismissProgressDialog(mProgressDialog);
-    }
   }
 
   @Override public void showErrorTips(String tips) {
@@ -166,16 +176,35 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override public void showResult(SearchResult result) {
     Log.d(TAG, result.toString());
+    mLoadingView.setVisibility(View.GONE);
+    mCurrPage++;
     if (mIsRefresh) {
       mRefreshLayout.setRefreshing(false);
       mAdapter.resetData(result.getRepositories());
     } else {
       mAdapter.addData(result.getRepositories());
+      mAdapter.loadMoreFinish(result.getRepositories().size() == LIMIT_20,
+          result.getRepositories());
     }
   }
 
   private void search(boolean isRefresh) {
-    mPresenter.queryData(mKeyword, mLanguage, 0);
+    if (isRefresh) {
+      mCurrPage = 1;
+    }
+    mPresenter.queryData(mKeyword, mLanguage, mCurrPage);
     mIsRefresh = isRefresh;
+  }
+
+  @Override public void requestMoreData() {
+    mIsRefresh = false;
+    mPresenter.queryData(mKeyword, mLanguage, mCurrPage);
+  }
+
+  @Override public void onItemClick(View view, int position) {
+    Repository repository = mAdapter.getItem(position);
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.setData(Uri.parse(repository.getHtmlUrl()));
+    startActivity(intent);
   }
 }
