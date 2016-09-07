@@ -15,10 +15,13 @@
 
 package com.ouyangzn.topgithub.module.common;
 
+import android.widget.ImageView;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.ouyangzn.recyclerview.BaseViewHolder;
+import com.ouyangzn.topgithub.App;
 import com.ouyangzn.topgithub.R;
 import com.ouyangzn.topgithub.bean.Repository;
+import com.ouyangzn.topgithub.utils.ImageLoader;
 import java.util.List;
 
 /**
@@ -35,5 +38,10 @@ public class SearchResultAdapter extends BaseRecyclerViewAdapter<Repository> {
     holder.setText(R.id.tv_project_name, item.getFullName());
     holder.setText(R.id.tv_project_desc, item.getDescription());
     holder.setText(R.id.tv_author, item.getOwner().getLogin());
+    holder.setText(R.id.tv_stars,
+        App.getContext().getString(R.string.stars, item.getStargazersCount()));
+    ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
+    ImageLoader.load(photo, item.getOwner().getAvatarUrl());
+
   }
 }

@@ -63,7 +63,7 @@ public class MainPresenter extends IMainPresenter {
           @Override public void call(SearchResult searchResult) {
             if (mView != null) {
               mView.dismissProgressDialog();
-              mView.showResult(searchResult);
+              mView.showQueryDataResult(searchResult);
             }
           }
         }, new Action1<Throwable>() {
@@ -71,7 +71,7 @@ public class MainPresenter extends IMainPresenter {
             Log.e(TAG, "----------查询数据出错:", throwable);
             if (mView != null) {
               mView.dismissProgressDialog();
-              mView.showErrorTips(mContext.getString(R.string.error_search_github));
+              mView.showErrorOnQueryData(mContext.getString(R.string.error_search_github));
             }
           }
         });

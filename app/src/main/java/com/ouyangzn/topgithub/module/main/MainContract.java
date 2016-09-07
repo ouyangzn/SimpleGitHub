@@ -27,9 +27,9 @@ public interface MainContract {
 
   interface IMainView extends BaseView<MainPresenter> {
 
-    void showErrorTips(String tips);
+    void showErrorOnQueryData(String tips);
 
-    void showResult(SearchResult result);
+    void showQueryDataResult(SearchResult result);
   }
 
   abstract class IMainPresenter extends BasePresenter<IMainView> {

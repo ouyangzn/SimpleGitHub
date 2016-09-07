@@ -34,7 +34,8 @@ public class CommonConstants {
     // -----------搜索的语言-----------
     public static final String LANG_ALL = "";
     public static final String LANG_JAVA = "Java";
-    public static final String LANG_OC = "Object-C";
+    public static final String LANG_OC = "Objective-C";
+    public static final String LANG_SWIFT = "swift";
     public static final String LANG_C = "C";
     public static final String LANG_CPP = "C++";
     public static final String LANG_PHP = "PHP";
@@ -43,6 +44,12 @@ public class CommonConstants {
     public static final String LANG_RUBY = "Ruby";
     public static final String LANG_C_SHARP = "C#";
     public static final String LANG_SHELL = "Shell";
+  }
+
+  public static class ConfigSP {
+    public static final String SP_NAME = "config";
+    /** 所选语言 */
+    public static final String KEY_LANGUAGE = "language";
   }
 
   public static class NormalCons {

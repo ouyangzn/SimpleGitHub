@@ -2,11 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
   <group android:checkableBehavior="single">
     <item
+        android:id="@+id/nav_all"
+        android:title="@string/language_all"/>
+    <item
         android:id="@+id/nav_java"
         android:title="@string/language_java"/>
     <item
         android:id="@+id/nav_oc"
         android:title="@string/language_oc"/>
+    <item
+        android:id="@+id/nav_swift"
+        android:title="@string/language_swift"/>
     <item
         android:id="@+id/nav_c"
         android:title="@string/language_c"/>

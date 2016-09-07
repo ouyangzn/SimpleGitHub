@@ -16,6 +16,7 @@
 package com.ouyangzn.topgithub.module.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -34,6 +35,7 @@ import butterknife.ButterKnife;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.ouyangzn.topgithub.R;
 import com.ouyangzn.topgithub.base.BaseActivity;
+import com.ouyangzn.topgithub.base.CommonConstants.ConfigSP;
 import com.ouyangzn.topgithub.base.CommonConstants.GitHub;
 import com.ouyangzn.topgithub.bean.Repository;
 import com.ouyangzn.topgithub.bean.SearchResult;
@@ -51,6 +53,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     BaseRecyclerViewAdapter.OnLoadingMoreListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener {
 
+  private SharedPreferences mConfigSp;
   private View mLoadingView;
   private SwipeRefreshLayout mRefreshLayout;
   private RecyclerView mRecyclerView;
@@ -58,8 +61,8 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
   private String mKeyword;
-  private String mLanguage = GitHub.LANG_JAVA;
-  // 刷新或者加载下一页
+  private String mLanguage;
+  // 重新加载或者加载下一页
   private boolean mIsRefresh = true;
   private int mCurrPage = 1;
 
@@ -67,7 +70,14 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     return new MainPresenter(this);
   }
 
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    mConfigSp.edit().putString(ConfigSP.KEY_LANGUAGE, mLanguage).apply();
+  }
+
   @Override protected void initData() {
+    mConfigSp = getSharedPreferences(ConfigSP.SP_NAME, MODE_PRIVATE);
+    mLanguage = mConfigSp.getString(ConfigSP.KEY_LANGUAGE, GitHub.LANG_JAVA);
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
@@ -76,6 +86,8 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void initView(Bundle savedInstanceState) {
     setContentView(R.layout.activity_main);
+    setTitle(GitHub.LANG_ALL.equals(mLanguage) ? getString(R.string.app_name) : mLanguage);
+
     mLoadingView = ButterKnife.findById(this, R.id.main_loading);
     mLoadingView.setVisibility(View.VISIBLE);
 
@@ -84,6 +96,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
     mNavView.setNavigationItemSelectedListener(this);
+    initNavView();
     ImageView img_photo = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.img_photo);
     ImageLoader.loadAsCircle(img_photo, R.drawable.ic_photo);
 
@@ -119,47 +132,57 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override public boolean onNavigationItemSelected(MenuItem item) {
     int id = item.getItemId();
     switch (id) {
+      case R.id.nav_all: {
+        mLanguage = GitHub.LANG_ALL;
+        break;
+      }
       case R.id.nav_java: {
-
+        mLanguage = GitHub.LANG_JAVA;
         break;
       }
       case R.id.nav_oc: {
-
+        mLanguage = GitHub.LANG_OC;
+        break;
+      }
+      case R.id.nav_swift: {
+        mLanguage = GitHub.LANG_SWIFT;
         break;
       }
       case R.id.nav_c: {
-
+        mLanguage = GitHub.LANG_C;
         break;
       }
       case R.id.nav_cpp: {
-
+        mLanguage = GitHub.LANG_CPP;
         break;
       }
       case R.id.nav_php: {
-
+        mLanguage = GitHub.LANG_PHP;
         break;
       }
       case R.id.nav_js: {
-
+        mLanguage = GitHub.LANG_JS;
         break;
       }
       case R.id.nav_python: {
-
+        mLanguage = GitHub.LANG_PYTHON;
         break;
       }
       case R.id.nav_ruby: {
-
+        mLanguage = GitHub.LANG_RUBY;
         break;
       }
       case R.id.nav_c_sharp: {
-
+        mLanguage = GitHub.LANG_C_SHARP;
         break;
       }
       case R.id.nav_shell: {
-
+        mLanguage = GitHub.LANG_SHELL;
         break;
       }
     }
+    search(true);
+    setTitle(GitHub.LANG_ALL.equals(mLanguage) ? getString(R.string.app_name) : mLanguage);
     mDrawerLayout.closeDrawer(GravityCompat.START);
     return true;
   }
@@ -170,11 +193,13 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override public void dismissProgressDialog() {
   }
 
-  @Override public void showErrorTips(String tips) {
+  @Override public void showErrorOnQueryData(String tips) {
     toast(tips);
+    mLoadingView.setVisibility(View.GONE);
+    if (mIsRefresh) mRefreshLayout.setRefreshing(false);
   }
 
-  @Override public void showResult(SearchResult result) {
+  @Override public void showQueryDataResult(SearchResult result) {
     Log.d(TAG, result.toString());
     mLoadingView.setVisibility(View.GONE);
     mCurrPage++;
@@ -191,14 +216,14 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   private void search(boolean isRefresh) {
     if (isRefresh) {
       mCurrPage = 1;
+      mRefreshLayout.setRefreshing(true);
     }
     mPresenter.queryData(mKeyword, mLanguage, mCurrPage);
     mIsRefresh = isRefresh;
   }
 
   @Override public void requestMoreData() {
-    mIsRefresh = false;
-    mPresenter.queryData(mKeyword, mLanguage, mCurrPage);
+    search(false);
   }
 
   @Override public void onItemClick(View view, int position) {
@@ -206,5 +231,31 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.setData(Uri.parse(repository.getHtmlUrl()));
     startActivity(intent);
+  }
+
+  private void initNavView() {
+    if (GitHub.LANG_ALL.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_all);
+    } else if (GitHub.LANG_JAVA.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_java);
+    } else if (GitHub.LANG_OC.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_oc);
+    } else if (GitHub.LANG_SWIFT.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_swift);
+    } else if (GitHub.LANG_C.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_c);
+    } else if (GitHub.LANG_CPP.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_cpp);
+    } else if (GitHub.LANG_PHP.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_php);
+    } else if (GitHub.LANG_JS.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_js);
+    } else if (GitHub.LANG_PYTHON.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_ruby);
+    } else if (GitHub.LANG_C_SHARP.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_c_sharp);
+    } else if (GitHub.LANG_SHELL.equals(mLanguage)) {
+      mNavView.setCheckedItem(R.id.nav_shell);
+    }
   }
 }
