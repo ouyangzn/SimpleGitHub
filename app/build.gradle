@@ -31,7 +31,9 @@ dependencies {
   compile "com.android.support:appcompat-v7:${APPCOMPAT_V7_VERSION}"
   compile "com.android.support:design:${DESIGN_VERSION}"
   compile "com.android.support:cardview-v7:${CARDVIEW_VERSION}"
-  compile project(':BaseRecyclerViewAdapter')
+//  compile project(':BaseRecyclerViewAdapter')
+  compile "com.github.ouyangzn:BaseRecyclerAdapter:${BASE_RECYCLER_ADAPTER_VERSION}"
+
   // rxJava系列
   compile "io.reactivex:rxandroid:${RXANDROID_VERSION}"
   compile "io.reactivex:rxjava:${RXJAVA_VERSION}"
@@ -51,4 +53,6 @@ dependencies {
   // butterknife系列
   compile "com.jakewharton:butterknife:${BUTTERKNIFE_VERSION}"
   apt "com.jakewharton:butterknife-compiler:${BUTTERKNIFE_COMPILER_VERSION}"
+  // 日期选择
+  compile "com.squareup:android-times-square:${ANDROID_TIMES_SQUARE_VERSION}@aar"
 }

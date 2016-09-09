@@ -41,5 +41,12 @@ public interface MainContract {
      * @param page 当前页
      */
     abstract void queryData(String keyword, String language, int page);
+
+    /**
+     * 保存搜索的语言
+     *
+     * @param language 搜索的语言
+     */
+    abstract void saveLanguage(String language);
   }
 }

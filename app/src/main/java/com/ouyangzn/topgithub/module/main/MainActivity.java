@@ -15,6 +15,7 @@
 
 package com.ouyangzn.topgithub.module.main;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -26,12 +27,21 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ImageView;
 import butterknife.ButterKnife;
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.widget.RxTextView;
+import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.ouyangzn.topgithub.R;
 import com.ouyangzn.topgithub.base.BaseActivity;
@@ -42,9 +52,17 @@ import com.ouyangzn.topgithub.bean.SearchResult;
 import com.ouyangzn.topgithub.module.common.SearchResultAdapter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainView;
+import com.ouyangzn.topgithub.utils.DialogUtil;
+import com.ouyangzn.topgithub.utils.Formatter;
 import com.ouyangzn.topgithub.utils.ImageLoader;
 import com.ouyangzn.topgithub.utils.Log;
+import com.ouyangzn.topgithub.utils.ScreenUtils;
+import com.squareup.timessquare.CalendarPickerView;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 import static com.ouyangzn.topgithub.base.CommonConstants.NormalCons.LIMIT_20;
 
@@ -53,10 +71,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     BaseRecyclerViewAdapter.OnLoadingMoreListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener {
 
-  private SharedPreferences mConfigSp;
   private View mLoadingView;
+  private EditText mSearchEdit;
   private SwipeRefreshLayout mRefreshLayout;
-  private RecyclerView mRecyclerView;
   private SearchResultAdapter mAdapter;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
@@ -72,12 +89,12 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    mConfigSp.edit().putString(ConfigSP.KEY_LANGUAGE, mLanguage).apply();
+    mPresenter.saveLanguage(mLanguage);
   }
 
   @Override protected void initData() {
-    mConfigSp = getSharedPreferences(ConfigSP.SP_NAME, MODE_PRIVATE);
-    mLanguage = mConfigSp.getString(ConfigSP.KEY_LANGUAGE, GitHub.LANG_JAVA);
+    SharedPreferences configSp = getSharedPreferences(ConfigSP.SP_NAME, MODE_PRIVATE);
+    mLanguage = configSp.getString(ConfigSP.KEY_LANGUAGE, GitHub.LANG_JAVA);
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
@@ -93,6 +110,23 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
+    final SearchView searchView = new SearchView(mContext);
+    searchView.setQueryHint(getString(R.string.hint_input_keyword));
+    Toolbar.LayoutParams params = new Toolbar.LayoutParams(Gravity.RIGHT);
+    searchView.setLayoutParams(params);
+    toolbar.addView(searchView);
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+      @Override public boolean onQueryTextSubmit(String s) {
+        toast("准备搜索：" + s);
+        searchView.clearFocus();
+        return true;
+      }
+
+      @Override public boolean onQueryTextChange(String s) {
+        return false;
+      }
+    });
+
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
     mNavView.setNavigationItemSelectedListener(this);
@@ -114,11 +148,33 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       }
     });
 
-    mRecyclerView = ButterKnife.findById(this, R.id.recycler);
-    mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+    mSearchEdit = ButterKnife.findById(this, R.id.et_search);
+    RxTextView.editorActionEvents(mSearchEdit).subscribe(new Action1<TextViewEditorActionEvent>() {
+      @Override public void call(TextViewEditorActionEvent actionEvent) {
+        if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
+          String keyword = mSearchEdit.getText().toString().trim();
+          ScreenUtils.hideKeyBoard(mSearchEdit);
+          mSearchEdit.clearFocus();
+          if (!TextUtils.isEmpty(keyword)) {
+            mKeyword = keyword;
+            search(true);
+          }
+        }
+      }
+    });
+    RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler);
+    recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
     LayoutInflater inflater = getLayoutInflater();
-    mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, mRecyclerView, false));
-    mRecyclerView.setAdapter(mAdapter);
+    mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, recyclerView, false));
+    recyclerView.setAdapter(mAdapter);
+    RxView.touches(recyclerView, new Func1<MotionEvent, Boolean>() {
+      @Override public Boolean call(MotionEvent event) {
+        ScreenUtils.hideKeyBoard(mSearchEdit);
+        mSearchEdit.clearFocus();
+        return false;
+      }
+    }).subscribe();
+
   }
 
   @Override public void onBackPressed() {
@@ -181,9 +237,33 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         break;
       }
     }
-    search(true);
-    setTitle(GitHub.LANG_ALL.equals(mLanguage) ? getString(R.string.app_name) : mLanguage);
+    boolean isAll = GitHub.LANG_ALL.equals(mLanguage);
     mDrawerLayout.closeDrawer(GravityCompat.START);
+    // 搜索全部语言时，必须有创建时间限制，否则搜不到结果
+    if (isAll) {
+      Calendar nextYear = Calendar.getInstance();
+      nextYear.add(Calendar.YEAR, -1);
+      Date today = new Date();
+      CalendarPickerView pickerView = new CalendarPickerView(mContext, null);
+      pickerView.init(today, nextYear.getTime())
+          .withSelectedDate(today)
+          .inMode(CalendarPickerView.SelectionMode.SINGLE);
+      final AlertDialog dialog = DialogUtil.getAlertDialog(mContext).setView(pickerView).show();
+      dialog.setCancelable(false);
+      pickerView.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
+        @Override public void onDateSelected(Date date) {
+          dialog.dismiss();
+          toast("选择了：" + Formatter.formatDate(date, Formatter.FORMAT_YYYY_MM_DD_CHINA));
+        }
+
+        @Override public void onDateUnselected(Date date) {
+
+        }
+      });
+      return true;
+    }
+    setTitle(isAll ? getString(R.string.app_name) : mLanguage);
+    search(true);
     return true;
   }
 

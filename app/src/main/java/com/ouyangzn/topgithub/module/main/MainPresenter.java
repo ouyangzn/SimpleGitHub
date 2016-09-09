@@ -16,12 +16,15 @@
 package com.ouyangzn.topgithub.module.main;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import com.ouyangzn.topgithub.R;
+import com.ouyangzn.topgithub.base.CommonConstants;
 import com.ouyangzn.topgithub.bean.SearchResult;
 import com.ouyangzn.topgithub.data.IGitHubDataSource;
 import com.ouyangzn.topgithub.data.remote.RemoteGitHubData;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.topgithub.utils.Log;
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -38,10 +41,13 @@ public class MainPresenter extends IMainPresenter {
 
   private IGitHubDataSource mDataSource;
   private Context mContext;
+  private SharedPreferences mConfigSp;
 
   public MainPresenter(Context context) {
     this.mContext = context.getApplicationContext();
     mDataSource = new RemoteGitHubData();
+    mConfigSp =
+        mContext.getSharedPreferences(CommonConstants.ConfigSP.SP_NAME, Context.MODE_PRIVATE);
   }
 
   @Override protected void onDestroy() {
@@ -68,7 +74,7 @@ public class MainPresenter extends IMainPresenter {
           }
         }, new Action1<Throwable>() {
           @Override public void call(Throwable throwable) {
-            Log.e(TAG, "----------查询数据出错:", throwable);
+            Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
             if (mView != null) {
               mView.dismissProgressDialog();
               mView.showErrorOnQueryData(mContext.getString(R.string.error_search_github));
@@ -76,5 +82,13 @@ public class MainPresenter extends IMainPresenter {
           }
         });
     addSubscription(subscribe);
+  }
+
+  @Override void saveLanguage(final String language) {
+    Observable.just(language).observeOn(Schedulers.io()).doOnNext(new Action1<String>() {
+      @Override public void call(String language) {
+        mConfigSp.edit().putString(CommonConstants.ConfigSP.KEY_LANGUAGE, language).apply();
+      }
+    }).subscribe();
   }
 }
