@@ -18,6 +18,7 @@ package com.ouyangzn.topgithub.module.main;
 import com.ouyangzn.topgithub.base.BasePresenter;
 import com.ouyangzn.topgithub.base.BaseView;
 import com.ouyangzn.topgithub.bean.SearchResult;
+import java.util.Date;
 
 /**
  * Created by ouyangzn on 2016/9/6.<br/>
@@ -37,10 +38,11 @@ public interface MainContract {
      * 搜索github上的数据
      *
      * @param keyword 关键字，可为null
+     * @param createDate 项目的最早创建时间，可为null（表示搜索的项目创建时间不低于此时间）
      * @param language 搜索的语言
      * @param page 当前页
      */
-    abstract void queryData(String keyword, String language, int page);
+    abstract void queryData(String keyword, Date createDate, String language, int page);
 
     /**
      * 保存搜索的语言

@@ -28,6 +28,7 @@ public interface IGitHubDataSource {
    * 查询GitHub的数据
    *
    * @param keyword 关键字
+   * @param createTime 项目创建时间
    * @param language 搜索的语言
    * @param sort 查询的类别 {@link GitHub#SORT_STARS}、{@link GitHub#SORT_FORKS}、{@link
    * GitHub#SORT_UPDATED}
@@ -35,10 +36,18 @@ public interface IGitHubDataSource {
    * @param perPage 每页的数据数
    * @param page 搜索页数
    */
-  Observable<SearchResult> queryByKeyword(String keyword, String language, String sort,
+  Observable<SearchResult> queryByKeyword(String keyword, String createTime, String language,
+      String sort,
       String order, int perPage, int page);
+
+  Observable<SearchResult> queryByKeyword(String keyword, String createDate, String language,
+      int perPage, int page);
+
+  Observable<SearchResult> queryByKeyword(String keyword, String createDate, String language,
+      int page);
+
+  Observable<SearchResult> queryByKeyword(String keyword, String language, int perPage, int page);
 
   Observable<SearchResult> queryByKeyword(String keyword, String language, int page);
 
-  Observable<SearchResult> queryByKeyword(String keyword, int page);
 }

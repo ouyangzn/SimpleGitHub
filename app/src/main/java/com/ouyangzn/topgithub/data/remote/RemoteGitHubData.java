@@ -31,27 +31,46 @@ import static com.ouyangzn.topgithub.base.CommonConstants.NormalCons.LIMIT_20;
  * <p>eg:</p>
  * <li>no keyword-->https://api.github.com/search/repositories?q=+language:java&sort=stars&per_page=5&page=0</li>
  * <li>has keyword-->https://api.github.com/search/repositories?q=android+language:java&sort=stars&per_page=5&page=0</li>
+ * <li>has keyword-->https://api.github.com/search/repositories?q=android+created:>2015-01-09+language:java&sort=stars&order=desc&per_page=3&page=1</li>
  */
 public class RemoteGitHubData implements IGitHubDataSource {
 
   @Override
-  public Observable<SearchResult> queryByKeyword(String keyword, String language, String sort,
-      String order, int perPage, int page) {
+  public Observable<SearchResult> queryByKeyword(String keyword, String createDate, String language,
+      String sort, String order, int perPage, int page) {
     if (keyword == null) keyword = "";
+    if (!TextUtils.isEmpty(createDate)) {
+      // 防止无keyword时，结果搜不到东西
+      keyword = keyword.concat(URLDecoder.decode("+") + "created:>" + createDate);
+    }
     if (!TextUtils.isEmpty(language)) {
-      // 防止无keyword时+被编码，结果搜不到东西
+      // 防止无keyword时，结果搜不到东西
       keyword = keyword.concat(URLDecoder.decode("+") + "language:" + language);
     }
     return Api.getSearchApi().query(keyword, sort, order, perPage, page);
   }
 
   @Override
-  public Observable<SearchResult> queryByKeyword(String keyword, String language, int page) {
-    return queryByKeyword(keyword, language, GitHub.SORT_STARS, GitHub.ORDER_DESC, LIMIT_20, page);
+  public Observable<SearchResult> queryByKeyword(String keyword, String createDate, String language,
+      int perPage, int page) {
+    return queryByKeyword(keyword, createDate, language, GitHub.SORT_STARS, GitHub.ORDER_DESC,
+        perPage, page);
   }
 
-  @Override public Observable<SearchResult> queryByKeyword(String keyword, int page) {
-    return queryByKeyword(keyword, GitHub.LANG_ALL, GitHub.SORT_STARS, GitHub.ORDER_DESC, LIMIT_20,
-        page);
+  @Override
+  public Observable<SearchResult> queryByKeyword(String keyword, String createDate, String language,
+      int page) {
+    return queryByKeyword(keyword, createDate, language, LIMIT_20, page);
+  }
+
+  @Override
+  public Observable<SearchResult> queryByKeyword(String keyword, String language, int perPage,
+      int page) {
+    return queryByKeyword(keyword, null, language, perPage, page);
+  }
+
+  @Override
+  public Observable<SearchResult> queryByKeyword(String keyword, String language, int page) {
+    return queryByKeyword(keyword, language, LIMIT_20, page);
   }
 }

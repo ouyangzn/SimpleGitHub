@@ -23,7 +23,9 @@ import com.ouyangzn.topgithub.bean.SearchResult;
 import com.ouyangzn.topgithub.data.IGitHubDataSource;
 import com.ouyangzn.topgithub.data.remote.RemoteGitHubData;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
+import com.ouyangzn.topgithub.utils.Formatter;
 import com.ouyangzn.topgithub.utils.Log;
+import java.util.Date;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -42,6 +44,7 @@ public class MainPresenter extends IMainPresenter {
   private IGitHubDataSource mDataSource;
   private Context mContext;
   private SharedPreferences mConfigSp;
+  private Subscription mQueyDataSubscribe;
 
   public MainPresenter(Context context) {
     this.mContext = context.getApplicationContext();
@@ -55,8 +58,17 @@ public class MainPresenter extends IMainPresenter {
     mContext = null;
   }
 
-  @Override void queryData(String keyword, String language, int page) {
-    Subscription subscribe = mDataSource.queryByKeyword(keyword, language, page)
+  public void queryData(String keyword, String language, int page) {
+    queryData(keyword, null, language, page);
+  }
+
+  @Override public void queryData(String keyword, Date createDate, String language, int page) {
+    if (mQueyDataSubscribe != null && !mQueyDataSubscribe.isUnsubscribed()) {
+      mQueyDataSubscribe.unsubscribe();
+    }
+    mQueyDataSubscribe = mDataSource.queryByKeyword(keyword,
+        createDate == null ? null : Formatter.formatDate(createDate, Formatter.FORMAT_YYYY_MM_DD),
+        language, page)
         .subscribeOn(Schedulers.io())
         .doOnSubscribe(new Action0() {
           @Override public void call() {
@@ -81,7 +93,7 @@ public class MainPresenter extends IMainPresenter {
             }
           }
         });
-    addSubscription(subscribe);
+    addSubscription(mQueyDataSubscribe);
   }
 
   @Override void saveLanguage(final String language) {

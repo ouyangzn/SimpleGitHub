@@ -15,7 +15,6 @@
 
 package com.ouyangzn.topgithub.module.main;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -27,10 +26,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -39,6 +36,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import butterknife.ButterKnife;
+import com.huidr.lib.pickview.TimePickerView;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
@@ -52,14 +50,11 @@ import com.ouyangzn.topgithub.bean.SearchResult;
 import com.ouyangzn.topgithub.module.common.SearchResultAdapter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.topgithub.module.main.MainContract.IMainView;
-import com.ouyangzn.topgithub.utils.DialogUtil;
 import com.ouyangzn.topgithub.utils.Formatter;
 import com.ouyangzn.topgithub.utils.ImageLoader;
 import com.ouyangzn.topgithub.utils.Log;
 import com.ouyangzn.topgithub.utils.ScreenUtils;
-import com.squareup.timessquare.CalendarPickerView;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -79,6 +74,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   private NavigationView mNavView;
   private String mKeyword;
   private String mLanguage;
+  private Date mCreateDate;
+  /** 上一次选择的语言item */
+  private int mPreSelectedId = 0;
   // 重新加载或者加载下一页
   private boolean mIsRefresh = true;
   private int mCurrPage = 1;
@@ -98,6 +96,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
+    // TODO 退出前选择all语言，下次进来会搜不到任何结果，原因是language=null，keyword=null，createDate=null，待处理
     search(false);
   }
 
@@ -110,22 +109,6 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
-    final SearchView searchView = new SearchView(mContext);
-    searchView.setQueryHint(getString(R.string.hint_input_keyword));
-    Toolbar.LayoutParams params = new Toolbar.LayoutParams(Gravity.RIGHT);
-    searchView.setLayoutParams(params);
-    toolbar.addView(searchView);
-    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-      @Override public boolean onQueryTextSubmit(String s) {
-        toast("准备搜索：" + s);
-        searchView.clearFocus();
-        return true;
-      }
-
-      @Override public boolean onQueryTextChange(String s) {
-        return false;
-      }
-    });
 
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
@@ -157,6 +140,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
           mSearchEdit.clearFocus();
           if (!TextUtils.isEmpty(keyword)) {
             mKeyword = keyword;
+            mCreateDate = null;
             search(true);
           }
         }
@@ -186,10 +170,13 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override public boolean onNavigationItemSelected(MenuItem item) {
+    mCreateDate = null;
     int id = item.getItemId();
+    boolean isAllLanguage = false;
     switch (id) {
       case R.id.nav_all: {
         mLanguage = GitHub.LANG_ALL;
+        isAllLanguage = true;
         break;
       }
       case R.id.nav_java: {
@@ -237,33 +224,34 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         break;
       }
     }
-    boolean isAll = GitHub.LANG_ALL.equals(mLanguage);
     mDrawerLayout.closeDrawer(GravityCompat.START);
-    // 搜索全部语言时，必须有创建时间限制，否则搜不到结果
-    if (isAll) {
-      Calendar nextYear = Calendar.getInstance();
-      nextYear.add(Calendar.YEAR, -1);
-      Date today = new Date();
-      CalendarPickerView pickerView = new CalendarPickerView(mContext, null);
-      pickerView.init(today, nextYear.getTime())
-          .withSelectedDate(today)
-          .inMode(CalendarPickerView.SelectionMode.SINGLE);
-      final AlertDialog dialog = DialogUtil.getAlertDialog(mContext).setView(pickerView).show();
-      dialog.setCancelable(false);
-      pickerView.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
-        @Override public void onDateSelected(Date date) {
-          dialog.dismiss();
-          toast("选择了：" + Formatter.formatDate(date, Formatter.FORMAT_YYYY_MM_DD_CHINA));
-        }
-
-        @Override public void onDateUnselected(Date date) {
-
+    // 搜索全部语言时，必须有项目创建时间限制，否则搜不到结果
+    if (isAllLanguage) {
+      TimePickerView pickerView = new TimePickerView(this, TimePickerView.Type.YEAR_MONTH_DAY);
+      pickerView.setCancelable(false);
+      pickerView.setRange(2006, 2016);
+      pickerView.setCyclic(true);
+      pickerView.setTime(new Date());
+      pickerView.setOnCancelListener(new TimePickerView.OnCancelListener() {
+        @Override public void onCancel() {
+          // 点取消，回到原来的状态
+          mNavView.setCheckedItem(mPreSelectedId);
         }
       });
+      pickerView.setOnTimeSelectListener(new TimePickerView.OnTimeSelectListener() {
+        @Override public void onTimeSelect(Date date) {
+          setTitle(getString(R.string.app_name));
+          // 搜索，加入createDate限制
+          mCreateDate = date;
+          search(true);
+        }
+      });
+      pickerView.show();
       return true;
     }
-    setTitle(isAll ? getString(R.string.app_name) : mLanguage);
+    setTitle(mLanguage);
     search(true);
+    mPreSelectedId = item.getItemId();
     return true;
   }
 
@@ -277,19 +265,24 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     toast(tips);
     mLoadingView.setVisibility(View.GONE);
     if (mIsRefresh) mRefreshLayout.setRefreshing(false);
+    if (mAdapter.isLoadingMore()) mAdapter.loadMoreFinish(true, null);
   }
 
   @Override public void showQueryDataResult(SearchResult result) {
     Log.d(TAG, result.toString());
     mLoadingView.setVisibility(View.GONE);
     mCurrPage++;
+    mAdapter.setHasMore(result.getRepositories().size() == LIMIT_20);
     if (mIsRefresh) {
       mRefreshLayout.setRefreshing(false);
       mAdapter.resetData(result.getRepositories());
     } else {
-      mAdapter.addData(result.getRepositories());
-      mAdapter.loadMoreFinish(result.getRepositories().size() == LIMIT_20,
-          result.getRepositories());
+      if (mAdapter.isLoadingMore()) {
+        mAdapter.loadMoreFinish(result.getRepositories().size() == LIMIT_20,
+            result.getRepositories());
+      } else {
+        mAdapter.addData(result.getRepositories());
+      }
     }
   }
 
@@ -298,11 +291,21 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       mCurrPage = 1;
       mRefreshLayout.setRefreshing(true);
     }
-    mPresenter.queryData(mKeyword, mLanguage, mCurrPage);
+    Log.d(TAG, "----------搜索数据:mKeyword = "
+        + mKeyword
+        + " ,mLanguage = "
+        + mLanguage
+        + " ,mCurrPage = "
+        + mCurrPage
+        + " ,mCreateDate = "
+        + (mCreateDate != null ? Formatter.formatDate(mCreateDate,
+        Formatter.FORMAT_YYYY_MM_DD_CHINA) : null));
+    mPresenter.queryData(mKeyword, mCreateDate, mLanguage, mCurrPage);
     mIsRefresh = isRefresh;
   }
 
   @Override public void requestMoreData() {
+    Log.d(TAG, "----------------requestMoreData-------------------");
     search(false);
   }
 
@@ -316,26 +319,37 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   private void initNavView() {
     if (GitHub.LANG_ALL.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_all);
+      mPreSelectedId = R.id.nav_all;
     } else if (GitHub.LANG_JAVA.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_java);
+      mPreSelectedId = R.id.nav_java;
     } else if (GitHub.LANG_OC.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_oc);
+      mPreSelectedId = R.id.nav_oc;
     } else if (GitHub.LANG_SWIFT.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_swift);
+      mPreSelectedId = R.id.nav_swift;
     } else if (GitHub.LANG_C.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_c);
+      mPreSelectedId = R.id.nav_c;
     } else if (GitHub.LANG_CPP.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_cpp);
+      mPreSelectedId = R.id.nav_cpp;
     } else if (GitHub.LANG_PHP.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_php);
+      mPreSelectedId = R.id.nav_php;
     } else if (GitHub.LANG_JS.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_js);
+      mPreSelectedId = R.id.nav_js;
     } else if (GitHub.LANG_PYTHON.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_ruby);
+      mPreSelectedId = R.id.nav_ruby;
     } else if (GitHub.LANG_C_SHARP.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_c_sharp);
+      mPreSelectedId = R.id.nav_c_sharp;
     } else if (GitHub.LANG_SHELL.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_shell);
+      mPreSelectedId = R.id.nav_shell;
     }
   }
 }
