@@ -15,6 +15,7 @@
 
 package com.ouyangzn.github.utils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -52,5 +53,24 @@ public class Formatter {
   public static String formatDate(long time, String format) {
     SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.CHINA);
     return sdf.format(new Date(time));
+  }
+
+  /**
+   * 将日期转换为time
+   *
+   * @param date 时间字符串
+   * @param format 时间格式
+   * @return millisecond
+   */
+  public static long date2time(String date, String format) {
+    long time = 0L;
+    SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.CHINA);
+    try {
+      Date d = sdf.parse(date);
+      time = d.getTime();
+    } catch (ParseException e) {
+      Log.e("Formatter", "---------将日期转换为time出错:", e);
+    }
+    return time;
   }
 }

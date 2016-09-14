@@ -43,10 +43,10 @@ public interface MainContract {
     abstract void queryData(SearchFactor factor, int page);
 
     /**
-     * 保存搜索的语言
+     * 保存搜索因子
      *
-     * @param language 搜索的语言
+     * @param factor 搜索因子
      */
-    abstract void saveLanguage(String language);
+    abstract void saveSearchFactor(SearchFactor factor);
   }
 }

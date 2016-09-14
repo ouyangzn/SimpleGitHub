@@ -38,6 +38,7 @@ import butterknife.ButterKnife;
 import com.huidr.lib.pickview.TimePickerView;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.base.CommonConstants.ConfigSP;
@@ -48,6 +49,7 @@ import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.common.SearchResultAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
+import com.ouyangzn.github.utils.Formatter;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtils;
@@ -85,16 +87,19 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    mPresenter.saveLanguage(mLanguage);
+    SearchFactor factor = new SearchFactor();
+    factor.language = mLanguage;
+    if (GitHub.LANG_ALL.equals(mLanguage)) {
+      factor.setCreateDate(mCreateDate);
+    }
+    mPresenter.saveSearchFactor(factor);
   }
 
   @Override protected void initData() {
-    SharedPreferences configSp = getSharedPreferences(ConfigSP.SP_NAME, MODE_PRIVATE);
-    mLanguage = configSp.getString(ConfigSP.KEY_LANGUAGE, GitHub.LANG_JAVA);
+    initSearchFactor();
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
-    // TODO 退出前选择all语言，下次进来会搜不到任何结果，原因是language=null，keyword=null，createDate=null，待处理
     search(false);
   }
 
@@ -345,6 +350,20 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     } else if (GitHub.LANG_SHELL.equals(mLanguage)) {
       mNavView.setCheckedItem(R.id.nav_shell);
       mPreSelectedId = R.id.nav_shell;
+    }
+  }
+
+  private void initSearchFactor() {
+    SharedPreferences configSp = getSharedPreferences(ConfigSP.SP_NAME, MODE_PRIVATE);
+    String searchFactorJson = configSp.getString(ConfigSP.KEY_LANGUAGE, "");
+    if (TextUtils.isEmpty(searchFactorJson)) {
+      mLanguage = GitHub.LANG_JAVA;
+    } else {
+      SearchFactor factor = App.getGson().fromJson(searchFactorJson, SearchFactor.class);
+      mLanguage = factor.language;
+      mCreateDate =
+          new Date(Formatter.date2time(factor.getCreateDate(), Formatter.FORMAT_YYYY_MM_DD));
+      mKeyword = factor.keyword;
     }
   }
 }

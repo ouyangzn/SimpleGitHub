@@ -17,6 +17,7 @@ package com.ouyangzn.github.module.main;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.bean.apibean.SearchResult;
@@ -89,10 +90,12 @@ public class MainPresenter extends IMainPresenter {
     addSubscription(mQueryDataSubscribe);
   }
 
-  @Override void saveLanguage(final String language) {
-    Observable.just(language).observeOn(Schedulers.io()).doOnNext(new Action1<String>() {
-      @Override public void call(String language) {
-        mConfigSp.edit().putString(CommonConstants.ConfigSP.KEY_LANGUAGE, language).apply();
+  @Override void saveSearchFactor(SearchFactor factor) {
+    Observable.just(factor).observeOn(Schedulers.io()).doOnNext(new Action1<SearchFactor>() {
+      @Override public void call(SearchFactor factor) {
+        mConfigSp.edit()
+            .putString(CommonConstants.ConfigSP.KEY_LANGUAGE, App.getGson().toJson(factor))
+            .apply();
       }
     }).subscribe();
   }
