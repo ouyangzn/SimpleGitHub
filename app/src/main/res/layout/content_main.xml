@@ -22,16 +22,16 @@
         android:focusableInTouchMode="true"
         android:orientation="vertical"
         >
-      <EditText
-          android:id="@+id/et_search"
+      <com.ouyangzn.github.view.InputEdit
+          android:id="@+id/view_search"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_margin="@dimen/spacing_normal"
-          android:background="@drawable/bg_border_corners5_light_blue"
-          android:hint="@string/hint_input_keyword"
-          android:imeOptions="actionSearch"
-          android:inputType="text"
-          android:singleLine="true"
+          android:layout_marginBottom="@dimen/spacing_tiny"
+          android:layout_marginLeft="@dimen/spacing_normal"
+          android:layout_marginRight="@dimen/spacing_normal"
+          android:layout_marginTop="@dimen/spacing_tiny"
+          app:input_hint="@string/hint_input_keyword"
+          app:input_imeOptions="actionSearch"
           />
       <android.support.v7.widget.RecyclerView
           android:id="@+id/recycler"

@@ -13,26 +13,27 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layout_loading"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
+    android:layout_height="wrap_content"
     >
-  <ProgressBar
-      android:id="@+id/progress"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerInParent="true"
-      style="?android:attr/progressBarStyleSmall"
+  <EditText
+      android:id="@+id/et_input"
+      android:layout_width="match_parent"
+      android:layout_height="44dp"
+      android:background="@drawable/bg_border_corners5_light_blue"
+      android:gravity="center_vertical"
+      android:inputType="text"
+      android:paddingRight="40dp"
+      android:singleLine="true"
       />
-  <TextView
+  <ImageView
+      android:id="@+id/img_delete_input"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_below="@id/progress"
-      android:layout_centerHorizontal="true"
-      android:text="@string/loading"
-      android:textColor="#000"
+      android:layout_alignParentRight="true"
+      android:layout_centerVertical="true"
+      android:layout_marginRight="@dimen/spacing_tiny"
+      android:src="@drawable/ic_input_delete"
       />
 </RelativeLayout>
