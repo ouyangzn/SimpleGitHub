@@ -49,7 +49,6 @@ import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.common.SearchResultAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
-import com.ouyangzn.github.utils.Formatter;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtils;
@@ -67,15 +66,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     BaseRecyclerViewAdapter.OnLoadingMoreListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener {
 
+  private final int DATA_PER_PAGE = LIMIT_20;
+
   private View mLoadingView;
   private SwipeRefreshLayout mRefreshLayout;
   private SearchResultAdapter mAdapter;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
-  private String mKeyword;
-  private String mLanguage;
-  private Date mCreateDate;
-  /** 上一次选择的语言item */
+  private SearchFactor mSearchFactor;
+  /** 上一次选择的语言item的id */
   private int mPreSelectedId = 0;
   // 重新加载或者加载下一页
   private boolean mIsRefresh = true;
@@ -87,12 +86,11 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    SearchFactor factor = new SearchFactor();
-    factor.language = mLanguage;
-    if (GitHub.LANG_ALL.equals(mLanguage)) {
-      factor.setCreateDate(mCreateDate);
+    // 非all语言，不保存创建时间的搜索条件
+    if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
+      mSearchFactor.setCreateDate(null);
     }
-    mPresenter.saveSearchFactor(factor);
+    mPresenter.saveSearchFactor(mSearchFactor);
   }
 
   @Override protected void initData() {
@@ -100,12 +98,14 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
+    // fixme 如果上一次选的语言是all，退出重进，搜索到的数据不正确，可能是接口的问题，同一个接口，多次调用返回数据不一定相同
     search(false);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
     setContentView(R.layout.activity_main);
-    setTitle(GitHub.LANG_ALL.equals(mLanguage) ? getString(R.string.app_name) : mLanguage);
+    setTitle(GitHub.LANG_ALL.equals(mSearchFactor.language) ? getString(R.string.app_name)
+        : mSearchFactor.language);
 
     mLoadingView = ButterKnife.findById(this, R.id.main_loading);
     mLoadingView.setVisibility(View.VISIBLE);
@@ -135,16 +135,23 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     });
 
     final InputEdit inputEdit = ButterKnife.findById(this, R.id.view_search);
+    inputEdit.setOnClearTextListener(new InputEdit.OnClearTextListener() {
+      @Override public void onClearText() {
+        mSearchFactor.keyword = null;
+      }
+    });
     inputEdit.setOnEditorActionListener(new Action1<TextViewEditorActionEvent>() {
       @Override public void call(TextViewEditorActionEvent actionEvent) {
         if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
           String keyword = inputEdit.getInputText().trim();
           ScreenUtils.hideKeyBoard(inputEdit);
           inputEdit.clearFocus();
-          // 关键字不为空 或者 之前搜过，现在清空搜索条件
-          if (!TextUtils.isEmpty(keyword) || !TextUtils.isEmpty(mKeyword)) {
-            mKeyword = keyword;
-            mCreateDate = null;
+          // 关键字不为空 或者 之前搜过,现在清空搜索条件
+          if (!TextUtils.isEmpty(keyword) || !TextUtils.isEmpty(mSearchFactor.keyword)) {
+            mSearchFactor.keyword = keyword;
+            if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
+              mSearchFactor.setCreateDate(null);
+            }
             search(true);
           }
         }
@@ -175,57 +182,57 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override public boolean onNavigationItemSelected(MenuItem item) {
-    mCreateDate = null;
+    mSearchFactor.setCreateDate(null);
     int id = item.getItemId();
     boolean isAllLanguage = false;
     switch (id) {
       case R.id.nav_all: {
-        mLanguage = GitHub.LANG_ALL;
+        mSearchFactor.language = GitHub.LANG_ALL;
         isAllLanguage = true;
         break;
       }
       case R.id.nav_java: {
-        mLanguage = GitHub.LANG_JAVA;
+        mSearchFactor.language = GitHub.LANG_JAVA;
         break;
       }
       case R.id.nav_oc: {
-        mLanguage = GitHub.LANG_OC;
+        mSearchFactor.language = GitHub.LANG_OC;
         break;
       }
       case R.id.nav_swift: {
-        mLanguage = GitHub.LANG_SWIFT;
+        mSearchFactor.language = GitHub.LANG_SWIFT;
         break;
       }
       case R.id.nav_c: {
-        mLanguage = GitHub.LANG_C;
+        mSearchFactor.language = GitHub.LANG_C;
         break;
       }
       case R.id.nav_cpp: {
-        mLanguage = GitHub.LANG_CPP;
+        mSearchFactor.language = GitHub.LANG_CPP;
         break;
       }
       case R.id.nav_php: {
-        mLanguage = GitHub.LANG_PHP;
+        mSearchFactor.language = GitHub.LANG_PHP;
         break;
       }
       case R.id.nav_js: {
-        mLanguage = GitHub.LANG_JS;
+        mSearchFactor.language = GitHub.LANG_JS;
         break;
       }
       case R.id.nav_python: {
-        mLanguage = GitHub.LANG_PYTHON;
+        mSearchFactor.language = GitHub.LANG_PYTHON;
         break;
       }
       case R.id.nav_ruby: {
-        mLanguage = GitHub.LANG_RUBY;
+        mSearchFactor.language = GitHub.LANG_RUBY;
         break;
       }
       case R.id.nav_c_sharp: {
-        mLanguage = GitHub.LANG_C_SHARP;
+        mSearchFactor.language = GitHub.LANG_C_SHARP;
         break;
       }
       case R.id.nav_shell: {
-        mLanguage = GitHub.LANG_SHELL;
+        mSearchFactor.language = GitHub.LANG_SHELL;
         break;
       }
     }
@@ -247,14 +254,14 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         @Override public void onTimeSelect(Date date) {
           setTitle(getString(R.string.app_name));
           // 搜索，加入createDate限制
-          mCreateDate = date;
+          mSearchFactor.setCreateDate(date);
           search(true);
         }
       });
       pickerView.show();
       return true;
     }
-    setTitle(mLanguage);
+    setTitle(mSearchFactor.language);
     search(true);
     mPreSelectedId = item.getItemId();
     return true;
@@ -277,14 +284,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     Log.d(TAG, result.toString());
     mLoadingView.setVisibility(View.GONE);
     mCurrPage++;
-    mAdapter.setHasMore(result.getRepositories().size() == LIMIT_20);
+    boolean hasMore = result.getRepositories().size() == DATA_PER_PAGE;
+    mAdapter.setHasMore(hasMore);
+    mAdapter.setLanguageVisible(GitHub.LANG_ALL.equals(mSearchFactor.language));
     if (mIsRefresh) {
       mRefreshLayout.setRefreshing(false);
       mAdapter.resetData(result.getRepositories());
     } else {
       if (mAdapter.isLoadingMore()) {
-        mAdapter.loadMoreFinish(result.getRepositories().size() == LIMIT_20,
-            result.getRepositories());
+        mAdapter.loadMoreFinish(hasMore, result.getRepositories());
       } else {
         mAdapter.addData(result.getRepositories());
       }
@@ -296,12 +304,8 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       mCurrPage = 1;
       mRefreshLayout.setRefreshing(true);
     }
-    SearchFactor factor = new SearchFactor();
-    factor.keyword = mKeyword;
-    factor.language = mLanguage;
-    factor.setCreateDate(mCreateDate);
-    Log.d(TAG, "----------搜索数据:" + factor);
-    mPresenter.queryData(factor, mCurrPage);
+    Log.d(TAG, "----------搜索数据:" + mSearchFactor);
+    mPresenter.queryData(mSearchFactor, DATA_PER_PAGE, mCurrPage);
     mIsRefresh = isRefresh;
   }
 
@@ -317,37 +321,37 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   private void initNavView() {
-    if (GitHub.LANG_ALL.equals(mLanguage)) {
+    if (GitHub.LANG_ALL.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_all);
       mPreSelectedId = R.id.nav_all;
-    } else if (GitHub.LANG_JAVA.equals(mLanguage)) {
+    } else if (GitHub.LANG_JAVA.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_java);
       mPreSelectedId = R.id.nav_java;
-    } else if (GitHub.LANG_OC.equals(mLanguage)) {
+    } else if (GitHub.LANG_OC.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_oc);
       mPreSelectedId = R.id.nav_oc;
-    } else if (GitHub.LANG_SWIFT.equals(mLanguage)) {
+    } else if (GitHub.LANG_SWIFT.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_swift);
       mPreSelectedId = R.id.nav_swift;
-    } else if (GitHub.LANG_C.equals(mLanguage)) {
+    } else if (GitHub.LANG_C.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_c);
       mPreSelectedId = R.id.nav_c;
-    } else if (GitHub.LANG_CPP.equals(mLanguage)) {
+    } else if (GitHub.LANG_CPP.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_cpp);
       mPreSelectedId = R.id.nav_cpp;
-    } else if (GitHub.LANG_PHP.equals(mLanguage)) {
+    } else if (GitHub.LANG_PHP.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_php);
       mPreSelectedId = R.id.nav_php;
-    } else if (GitHub.LANG_JS.equals(mLanguage)) {
+    } else if (GitHub.LANG_JS.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_js);
       mPreSelectedId = R.id.nav_js;
-    } else if (GitHub.LANG_PYTHON.equals(mLanguage)) {
+    } else if (GitHub.LANG_PYTHON.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_ruby);
       mPreSelectedId = R.id.nav_ruby;
-    } else if (GitHub.LANG_C_SHARP.equals(mLanguage)) {
+    } else if (GitHub.LANG_C_SHARP.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_c_sharp);
       mPreSelectedId = R.id.nav_c_sharp;
-    } else if (GitHub.LANG_SHELL.equals(mLanguage)) {
+    } else if (GitHub.LANG_SHELL.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_shell);
       mPreSelectedId = R.id.nav_shell;
     }
@@ -357,13 +361,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     SharedPreferences configSp = getSharedPreferences(ConfigSP.SP_NAME, MODE_PRIVATE);
     String searchFactorJson = configSp.getString(ConfigSP.KEY_LANGUAGE, "");
     if (TextUtils.isEmpty(searchFactorJson)) {
-      mLanguage = GitHub.LANG_JAVA;
+      mSearchFactor = new SearchFactor();
+      mSearchFactor.language = GitHub.LANG_JAVA;
     } else {
-      SearchFactor factor = App.getGson().fromJson(searchFactorJson, SearchFactor.class);
-      mLanguage = factor.language;
-      mCreateDate =
-          new Date(Formatter.date2time(factor.getCreateDate(), Formatter.FORMAT_YYYY_MM_DD));
-      mKeyword = factor.keyword;
+      mSearchFactor = App.getGson().fromJson(searchFactorJson, SearchFactor.class);
     }
   }
 }

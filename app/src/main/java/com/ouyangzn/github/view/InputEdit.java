@@ -44,6 +44,8 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
   private EditText mEditText;
   private ImageView mDelete;
 
+  private OnClearTextListener mClearTextListener;
+
   public InputEdit(Context context) {
     this(context, null);
   }
@@ -63,34 +65,12 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
     init(context, attrs);
   }
 
-  private void init(Context context, AttributeSet attrs) {
-    View view = LayoutInflater.from(context).inflate(R.layout.view_input_edit, this, true);
-    mEditText = ButterKnife.findById(view, R.id.et_input);
-    mEditText.addTextChangedListener(this);
-    mDelete = ButterKnife.findById(view, R.id.img_delete_input);
-    mDelete.setOnClickListener(this);
-    if (getInputText().length() == 0) {
-      mDelete.setVisibility(GONE);
-    }
-    TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.InputEdit);
-    String hint = ta.getString(R.styleable.InputEdit_input_hint);
-    setHint(hint);
-    int imeOptions = ta.getInt(R.styleable.InputEdit_input_imeOptions, 1);
-    switch (imeOptions) {
-      case 1:
-        setImeOptions(EditorInfo.IME_ACTION_DONE);
-        break;
-      case 2:
-        setImeOptions(EditorInfo.IME_ACTION_NEXT);
-        break;
-      case 3:
-        setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        break;
-      case 4:
-        setImeOptions(EditorInfo.IME_ACTION_SEND);
-        break;
-    }
-    ta.recycle();
+  public OnClearTextListener getOnClearTextListener() {
+    return mClearTextListener;
+  }
+
+  public void setOnClearTextListener(OnClearTextListener clearTextListener) {
+    mClearTextListener = clearTextListener;
   }
 
   public EditText getEditText() {
@@ -129,6 +109,9 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
     switch (v.getId()) {
       case R.id.img_delete_input:
         mEditText.setText(null);
+        if (mClearTextListener != null) {
+          mClearTextListener.onClearText();
+        }
         break;
     }
   }
@@ -145,5 +128,52 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
     } else {
       mDelete.setVisibility(VISIBLE);
     }
+  }
+
+  private void init(Context context, AttributeSet attrs) {
+    View view = LayoutInflater.from(context).inflate(R.layout.view_input_edit, this, true);
+    mEditText = ButterKnife.findById(view, R.id.et_input);
+    mEditText.addTextChangedListener(this);
+    mEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+      @Override public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+          if (getInputText().length() == 0) {
+            mDelete.setVisibility(GONE);
+          } else {
+            mDelete.setVisibility(VISIBLE);
+          }
+        } else {
+          mDelete.setVisibility(GONE);
+        }
+      }
+    });
+    mDelete = ButterKnife.findById(view, R.id.img_delete_input);
+    mDelete.setOnClickListener(this);
+    if (getInputText().length() == 0) {
+      mDelete.setVisibility(GONE);
+    }
+    TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.InputEdit);
+    String hint = ta.getString(R.styleable.InputEdit_input_hint);
+    setHint(hint);
+    int imeOptions = ta.getInt(R.styleable.InputEdit_input_imeOptions, 1);
+    switch (imeOptions) {
+      case 1:
+        setImeOptions(EditorInfo.IME_ACTION_DONE);
+        break;
+      case 2:
+        setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        break;
+      case 3:
+        setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        break;
+      case 4:
+        setImeOptions(EditorInfo.IME_ACTION_SEND);
+        break;
+    }
+    ta.recycle();
+  }
+
+  public interface OnClearTextListener {
+    void onClearText();
   }
 }

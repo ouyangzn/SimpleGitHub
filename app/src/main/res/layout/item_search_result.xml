@@ -30,10 +30,21 @@
       android:background="?android:selectableItemBackground"
       android:orientation="vertical"
       >
+    <com.ouyangzn.github.view.CornerMarkText
+        android:id="@+id/tv_language"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        app:bg_color="@color/colorPrimary"
+        app:text="java"
+        app:text_color="@color/white"
+        app:text_size="10sp"
+        />
     <TextView
         android:id="@+id/tv_project_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/tv_language"
         android:ellipsize="end"
         android:padding="@dimen/padding_normal"
         android:singleLine="true"

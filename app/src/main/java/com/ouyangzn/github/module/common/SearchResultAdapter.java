@@ -20,6 +20,7 @@ import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.utils.ImageLoader;
+import com.ouyangzn.github.view.CornerMarkText;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.ouyangzn.recyclerview.BaseViewHolder;
 import java.util.List;
@@ -30,8 +31,14 @@ import java.util.List;
  */
 public class SearchResultAdapter extends BaseRecyclerViewAdapter<Repository> {
 
+  private boolean mLanguageVisible = false;
+
   public SearchResultAdapter(int layoutResId, List<Repository> data) {
     super(layoutResId, data);
+  }
+
+  public void setLanguageVisible(boolean languageVisible) {
+    mLanguageVisible = languageVisible;
   }
 
   @Override protected void convert(BaseViewHolder holder, Repository item) {
@@ -42,6 +49,10 @@ public class SearchResultAdapter extends BaseRecyclerViewAdapter<Repository> {
         App.getContext().getString(R.string.stars, item.getStargazersCount()));
     ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
     ImageLoader.load(photo, item.getOwner().getAvatarUrl());
-
+    holder.setVisible(R.id.tv_language, mLanguageVisible);
+    if (mLanguageVisible) {
+      CornerMarkText text = (CornerMarkText) holder.getConvertView().findViewById(R.id.tv_language);
+      text.setText(item.getLanguage());
+    }
   }
 }

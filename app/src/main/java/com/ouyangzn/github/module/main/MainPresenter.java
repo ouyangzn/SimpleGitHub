@@ -58,11 +58,11 @@ public class MainPresenter extends IMainPresenter {
     mContext = null;
   }
 
-  @Override void queryData(SearchFactor factor, int page) {
+  @Override void queryData(SearchFactor factor, int perPage, int page) {
     if (mQueryDataSubscribe != null && !mQueryDataSubscribe.isUnsubscribed()) {
       mQueryDataSubscribe.unsubscribe();
     }
-    mQueryDataSubscribe = mDataSource.queryByKeyword(factor, page)
+    mQueryDataSubscribe = mDataSource.queryByKeyword(factor, perPage, page)
         .subscribeOn(Schedulers.io())
         .doOnSubscribe(new Action0() {
           @Override public void call() {
