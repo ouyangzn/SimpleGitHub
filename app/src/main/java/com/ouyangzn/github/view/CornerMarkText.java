@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -30,8 +31,8 @@ import com.ouyangzn.github.utils.ScreenUtils;
 
 /**
  * Created by ouyangzn on 2016/9/14.<br/>
- * Description：角标textView
- * eg:
+ * Description：角标text
+ * e.g.:
  * **********************
  * *            *  n    *
  * *              *  e  *
@@ -73,10 +74,29 @@ public class CornerMarkText extends View {
     init(context, attrs);
   }
 
+  private void init(Context context, AttributeSet attrs) {
+    mMinSize = ScreenUtils.dp2px(context, 20);
+
+    TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CornerMarkText);
+    mTextBgColor = ta.getColor(R.styleable.CornerMarkText_bg_color, 0x8000ff00);
+    mText = ta.getString(R.styleable.CornerMarkText_text);
+    mTextSize = ta.getDimensionPixelSize(R.styleable.CornerMarkText_text_size,
+        ScreenUtils.sp2px(context, 10));
+    mTextColor = ta.getColor(R.styleable.CornerMarkText_text_color,
+        getResources().getColor(R.color.colorAccent));
+    mMinSize = ta.getDimensionPixelOffset(R.styleable.CornerMarkText_min_size,
+        ScreenUtils.dp2px(context, 20));
+    mMaxSize = ta.getDimensionPixelOffset(R.styleable.CornerMarkText_max_size,
+        ScreenUtils.dp2px(context, 40));
+    ta.recycle();
+    initTextPaint();
+    initTextBgPaint();
+  }
+
   public void setText(String text) {
     mText = text;
     // 固定大小不需要重新测量,否则要重新根据文字测量大小
-    if (mLayoutParams != null && ((mLayoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT
+    if (mLayoutParams == null || ((mLayoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT
         || mLayoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT) || (mLayoutParams.width
         == ViewGroup.LayoutParams.WRAP_CONTENT
         || mLayoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT))) {
@@ -103,27 +123,6 @@ public class CornerMarkText extends View {
 
   public void setMinSize(int minSize) {
     this.mMinSize = minSize;
-  }
-
-  private void init(Context context, AttributeSet attrs) {
-    mMinSize = ScreenUtils.dp2px(context, 20);
-
-    TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CornerMarkText);
-    mTextBgColor = ta.getColor(R.styleable.CornerMarkText_bg_color, 0x8000ff00);
-    mText = ta.getString(R.styleable.CornerMarkText_text);
-    mTextSize = ta.getDimensionPixelSize(R.styleable.CornerMarkText_text_size,
-        ScreenUtils.sp2px(context, 10));
-    mTextColor = ta.getColor(R.styleable.CornerMarkText_text_color,
-        getResources().getColor(R.color.colorAccent));
-    mMinSize = ta.getDimensionPixelOffset(R.styleable.CornerMarkText_min_size,
-        ScreenUtils.dp2px(context, 20));
-    mMaxSize = ta.getDimensionPixelOffset(R.styleable.CornerMarkText_max_size,
-        ScreenUtils.dp2px(context, 40));
-    ta.recycle();
-    int padding = ScreenUtils.dp2px(context, 5);
-    setPadding(padding, padding, padding, padding);
-    initTextPaint();
-    initTextBgPaint();
   }
 
   private void initTextBgPaint() {
@@ -173,7 +172,10 @@ public class CornerMarkText extends View {
       // Parent has told us how big to be. So be it.
       width = widthSize;
     } else {
-      width = (int) mTextPaint.measureText(mText) * 2 / 3 + getPaddingRight() + getPaddingLeft();
+      // 以正方形的对角线来写字，需把字的宽高 / 1.5 ，字写在对角线上，宽高要增加（1.5个字母）的宽度
+      width = (int) (mTextPaint.measureText(mText) * 2 / 3 + mTextPaint.measureText("M") * 1.5 + (
+          getPaddingRight()
+              + getPaddingLeft()));
       if (widthMode == MeasureSpec.AT_MOST) {
         width = Math.min(widthSize, width);
       }
@@ -210,21 +212,27 @@ public class CornerMarkText extends View {
   }
 
   private void drawTextBg(Canvas canvas) {
-    //canvas.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, mTextBgPaint);
-    // 对角线
-    canvas.drawLine(0, 0, getWidth(), getHeight(), mTextBgPaint);
-    // 对角线上方
-    // x坐标 从正中间往右上移动mTextSize的距离 == 往右移动 mTextSize / 1.5 的距离
-    // y坐标
-    //canvas.drawLine(0 + mTextSize * 2 / 3, 0, getWidth() + mTextSize * 2 / 3, getHeight(), mTextBgPaint);
+    int width = getWidth();
+    int height = getHeight();
+    // 画一个梯形，即正方形对角线上方包含文字大小的区域
+    Path path = new Path();
+    path.moveTo(0, 0);
+    path.lineTo(mTextSize * 1.5f, 0);
+    path.lineTo(width, height - mTextSize * 1.5f);
+    path.lineTo(width, height);
+    path.lineTo(0, 0);
+    path.close();
+    canvas.drawPath(path, mTextBgPaint);
   }
 
   private void drawText(Canvas canvas) {
+    // 画布的旋转为逆时针旋转，旋转完，再往下平移，最后drawText在整个控件的中心位置，完工后画布还原，文字就到了正方形对角线之上了
     canvas.save();
     // 从正中间旋转45°
     canvas.rotate(45, getMeasuredWidth() / 2, getMeasuredHeight() / 2);
+    // 画布往下移文字高度的一半
+    canvas.translate(0, -mTextSize / 2);
     // 旋转到正方形的对角线上方
-    //canvas.rotate(45, getMeasuredWidth() / 2 + mTextSize / 2, getMeasuredHeight() / 2 + mTextSize / 2);
     // 文字画在正中间
     int width = getMeasuredWidth();
     width -= mTextPaint.measureText(mText);

@@ -36,6 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         app:bg_color="@color/colorPrimary"
+        app:max_size="50dp"
         app:text="java"
         app:text_color="@color/white"
         app:text_size="10sp"
