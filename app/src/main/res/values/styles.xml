@@ -20,4 +20,20 @@
   <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
   <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+  <style name="BaseAlertDialog" parent="AlertDialog.AppCompat.Light">
+    <item name="android:windowFrame">@null</item>
+    <item name="android:windowIsFloating">true</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:backgroundDimEnabled">true</item>
+    <item name="android:backgroundDimAmount">0.6</item>
+    <item name="android:windowCloseOnTouchOutside">true</item>
+    <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+  </style>
+
+  <style name="DialogAnimation" parent="android:Animation">
+    <item name="android:windowEnterAnimation">@anim/anim_scale_in_dialog</item>
+    <item name="android:windowExitAnimation">@anim/anim_scale_out_dialog</item>
+  </style>
 </resources>

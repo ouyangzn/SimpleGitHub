@@ -15,6 +15,10 @@
 
 package com.ouyangzn.github.module.main;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -24,6 +28,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -49,6 +54,7 @@ import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.common.SearchResultAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
+import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtils;
@@ -64,7 +70,8 @@ import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
 public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     implements IMainView, NavigationView.OnNavigationItemSelectedListener,
     BaseRecyclerViewAdapter.OnLoadingMoreListener,
-    BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener {
+    BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
+    BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener {
 
   private final int DATA_PER_PAGE = LIMIT_20;
 
@@ -97,6 +104,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     initSearchFactor();
     mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
+    mAdapter.setOnRecyclerViewItemLongClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
     // fixme 如果上一次选的语言是all，退出重进，搜索到的数据不正确，可能是接口的问题，同一个接口，多次调用返回数据不一定相同
     search(false);
@@ -318,6 +326,38 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.setData(Uri.parse(repository.getHtmlUrl()));
     startActivity(intent);
+  }
+
+  @Override public boolean onItemLongClick(View view, final int position) {
+    AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
+    builder.setItems(R.array.long_click_project_dialog_item, new DialogInterface.OnClickListener() {
+      @Override public void onClick(DialogInterface dialog, int which) {
+        Repository item = mAdapter.getItem(position);
+        switch (which) {
+          case 0:
+            copyUrl(item.getHtmlUrl());
+            break;
+          case 1:
+            collectProject(item);
+            break;
+        }
+        dialog.dismiss();
+      }
+    }).show();
+    return true;
+  }
+
+  private void copyUrl(String url) {
+    ClipboardManager clip = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    ClipData data = ClipData.newPlainText(url, url);
+    clip.setPrimaryClip(data);
+    toast(R.string.copy_success);
+  }
+
+  private void collectProject(Repository item) {
+    // todo 收藏
+
+    toast(R.string.collect_success);
   }
 
   private void initNavView() {

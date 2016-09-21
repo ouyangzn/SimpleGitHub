@@ -15,9 +15,10 @@
 
 package com.ouyangzn.github.utils;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
+import com.ouyangzn.github.R;
 
 /**
  * dialog工具类
@@ -74,6 +75,6 @@ public class DialogUtil {
    * @param context
    */
   public static synchronized AlertDialog.Builder getAlertDialog(Context context) {
-    return new AlertDialog.Builder(context/*, R.style.BaseAlertDialog*/);
+    return new AlertDialog.Builder(context, R.style.BaseAlertDialog);
   }
 }

@@ -20,4 +20,6 @@
   <string name="hint_input_keyword">输入关键字搜索</string>
   <string name="error_search_github">查询数据失败,请重试</string>
   <string name="no_data">暂无数据</string>
+  <string name="copy_success">已复制</string>
+  <string name="collect_success">已收藏</string>
 </resources>
