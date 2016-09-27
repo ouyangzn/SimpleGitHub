@@ -1,1 +1,1 @@
-include ':app', ':PickViewLibrary'
+include ':app'
