@@ -50,6 +50,7 @@ import com.ouyangzn.github.base.CommonConstants.GitHub;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
+import com.ouyangzn.github.module.collect.CollectActivity;
 import com.ouyangzn.github.module.common.SearchResultAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
@@ -87,6 +88,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   private boolean mIsRefresh = true;
   private int mCurrPage = 1;
 
+  @Override protected int getContentView() {
+    return R.layout.activity_main;
+  }
+
   @Override public IMainPresenter initPresenter() {
     return new MainPresenter(this);
   }
@@ -102,7 +107,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void initData() {
     initSearchFactor();
-    mAdapter = new SearchResultAdapter(R.layout.item_search_result, new ArrayList<Repository>(0));
+    mAdapter = new SearchResultAdapter(mContext, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnRecyclerViewItemLongClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
@@ -111,7 +116,6 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
-    setContentView(R.layout.activity_main);
     setTitle(GitHub.LANG_ALL.equals(mSearchFactor.language) ? getString(R.string.app_name)
         : mSearchFactor.language);
 
@@ -256,6 +260,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         @Override public void onCancel() {
           // 点取消，回到原来的状态
           mNavView.setCheckedItem(mPreSelectedId);
+          openActivity(CollectActivity.class);
         }
       });
       pickerView.setOnTimeSelectListener(new TimePickerView.OnTimeSelectListener() {
@@ -351,13 +356,11 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     ClipboardManager clip = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
     ClipData data = ClipData.newPlainText(url, url);
     clip.setPrimaryClip(data);
-    toast(R.string.copy_success);
+    toast(R.string.tip_copy_success);
   }
 
-  private void collectProject(Repository item) {
-    // todo 收藏
-
-    toast(R.string.collect_success);
+  private void collectProject(Repository repo) {
+    mPresenter.collectRepo(repo);
   }
 
   private void initNavView() {
@@ -404,7 +407,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       mSearchFactor = new SearchFactor();
       mSearchFactor.language = GitHub.LANG_JAVA;
     } else {
-      mSearchFactor = App.getGson().fromJson(searchFactorJson, SearchFactor.class);
+      mSearchFactor = App.getApp().getGson().fromJson(searchFactorJson, SearchFactor.class);
     }
+  }
+
+  @Override public void showNormalTips(String tips) {
+    toast(tips);
+  }
+
+  @Override public void showErrorTips(String tips) {
+    toast(tips);
   }
 }

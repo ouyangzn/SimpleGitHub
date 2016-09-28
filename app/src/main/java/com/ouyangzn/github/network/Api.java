@@ -37,7 +37,7 @@ public class Api {
   private static Retrofit.Builder getRetrofitBuilder() {
     return new Retrofit.Builder().baseUrl("https://api.github.com")
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .addConverterFactory(GsonConverterFactory.create(App.getGson()))
+        .addConverterFactory(GsonConverterFactory.create(App.getApp().getGson()))
         .client(HttpClient.getDefaultHttpClient());
   }
 }

@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import butterknife.ButterKnife;
+import com.ouyangzn.github.App;
 
 /**
  * @author Ouyang
@@ -31,14 +32,17 @@ import butterknife.ButterKnife;
 public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCompatActivity {
 
   protected String TAG = "BaseActivity";
+  protected App mApp;
   protected Context mContext;
   protected T mPresenter;
   private com.ouyangzn.github.utils.Toast mToast;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setContentView(getContentView());
     ButterKnife.bind(this);
     TAG = this.getClass().getSimpleName();
+    mApp = (App) getApplication();
     mContext = this;
     mToast = com.ouyangzn.github.utils.Toast.getInstance(mContext);
     mPresenter = initPresenter();
@@ -48,6 +52,8 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
     initData();
     initView(savedInstanceState);
   }
+
+  protected abstract int getContentView();
 
   @Override protected void onDestroy() {
     super.onDestroy();

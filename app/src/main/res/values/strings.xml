@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">GitHub</string>
+  <string name="app_name">open source</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>
@@ -16,10 +16,13 @@
   <string name="language_c_sharp">c#</string>
   <string name="language_shell">shell</string>
   <string name="loading">加载中…</string>
-  <string name="stars">%s·stars</string>
+  <string name="stars">%d·stars</string>
   <string name="hint_input_keyword">输入关键字搜索</string>
   <string name="error_search_github">查询数据失败,请重试</string>
   <string name="no_data">暂无数据</string>
-  <string name="copy_success">已复制</string>
-  <string name="collect_success">已收藏</string>
+  <string name="tip_copy_success">已复制</string>
+  <string name="tip_collect_success">已收藏</string>
+  <string name="tip_collect_cancel_success">已取消收藏</string>
+  <string name="error_collect_failure">收藏失败,请重新收藏</string>
+  <string name="error_collect_cancel_failure">取消收藏失败,请重新取消</string>
 </resources>

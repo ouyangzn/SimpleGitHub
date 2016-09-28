@@ -24,5 +24,7 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+    <activity android:name=".module.collect.CollectActivity">
+    </activity>
   </application>
 </manifest>

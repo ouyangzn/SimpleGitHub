@@ -15,6 +15,7 @@
 
 package com.ouyangzn.github.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
@@ -26,12 +27,12 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  */
 public class ImageLoader {
 
-  private static Context sContext;
+  @SuppressLint("StaticFieldLeak") private static Context sContext;
 
   private ImageLoader() {}
 
   public static void init(Context context) {
-    sContext = context;
+    sContext = context.getApplicationContext();
   }
 
   public static void loadAsCircle(ImageView target, int resId) {

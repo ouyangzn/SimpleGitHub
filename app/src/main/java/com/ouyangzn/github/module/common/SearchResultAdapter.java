@@ -15,8 +15,8 @@
 
 package com.ouyangzn.github.module.common;
 
+import android.content.Context;
 import android.widget.ImageView;
-import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.utils.ImageLoader;
@@ -31,10 +31,12 @@ import java.util.List;
  */
 public class SearchResultAdapter extends BaseRecyclerViewAdapter<Repository> {
 
+  private Context mContext;
   private boolean mLanguageVisible = false;
 
-  public SearchResultAdapter(int layoutResId, List<Repository> data) {
-    super(layoutResId, data);
+  public SearchResultAdapter(Context context, List<Repository> data) {
+    super(R.layout.item_search_result, data);
+    this.mContext = context;
   }
 
   public void setLanguageVisible(boolean languageVisible) {
@@ -45,8 +47,7 @@ public class SearchResultAdapter extends BaseRecyclerViewAdapter<Repository> {
     holder.setText(R.id.tv_project_name, item.getFullName());
     holder.setText(R.id.tv_project_desc, item.getDescription());
     holder.setText(R.id.tv_author, item.getOwner().getLogin());
-    holder.setText(R.id.tv_stars,
-        App.getContext().getString(R.string.stars, item.getStargazersCount()));
+    holder.setText(R.id.tv_stars, mContext.getString(R.string.stars, item.getStargazersCount()));
     ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
     ImageLoader.load(photo, item.getOwner().getAvatarUrl());
     holder.setVisible(R.id.tv_language, mLanguageVisible);

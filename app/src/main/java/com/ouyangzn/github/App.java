@@ -16,14 +16,18 @@
 package com.ouyangzn.github;
 
 import android.app.Application;
-import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.TypeAdapters;
+import com.ouyangzn.github.db.GlobalRealmMigration;
 import com.ouyangzn.github.json.DoubleAdapter;
 import com.ouyangzn.github.json.IntegerAdapter;
 import com.ouyangzn.github.json.LongAdapter;
 import com.ouyangzn.github.utils.ImageLoader;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
+import static com.ouyangzn.github.db.GlobalRealmMigration.DB_VERSION;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
@@ -31,18 +35,29 @@ import com.ouyangzn.github.utils.ImageLoader;
  */
 public class App extends Application {
 
-  private static Context sContext;
+  private static App sApp;
 
-  private static Gson sGson;
+  private Gson mGson;
 
-  public static Context getContext() {
-    return sContext;
+  public static App getApp() {
+    return sApp;
   }
 
-  public static Gson getGson() {
-    if (sGson == null) {
-      sGson = new Gson();
-      sGson = new GsonBuilder().registerTypeAdapterFactory(
+  public Realm getGlobalRealm() {
+    return Realm.getInstance(new RealmConfiguration.Builder(sApp).name("globaldb.realm")
+        // 密码必须64个字节
+        .encryptionKey(
+            "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789".getBytes())
+        .schemaVersion(DB_VERSION)
+        .migration(new GlobalRealmMigration())
+        //.deleteRealmIfMigrationNeeded()
+        .build());
+  }
+
+  public Gson getGson() {
+    if (mGson == null) {
+      mGson = new Gson();
+      mGson = new GsonBuilder().registerTypeAdapterFactory(
           TypeAdapters.newFactory(int.class, Integer.class, new IntegerAdapter()))
           .registerTypeAdapterFactory(
               TypeAdapters.newFactory(double.class, Double.class, new DoubleAdapter()))
@@ -50,12 +65,12 @@ public class App extends Application {
               TypeAdapters.newFactory(long.class, Long.class, new LongAdapter()))
           .create();
     }
-    return sGson;
+    return mGson;
   }
 
   @Override public void onCreate() {
     super.onCreate();
-    sContext = this;
-    ImageLoader.init(sContext);
+    sApp = this;
+    ImageLoader.init(sApp);
   }
 }

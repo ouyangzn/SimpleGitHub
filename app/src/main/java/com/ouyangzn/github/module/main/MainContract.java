@@ -17,6 +17,7 @@ package com.ouyangzn.github.module.main;
 
 import com.ouyangzn.github.base.BasePresenter;
 import com.ouyangzn.github.base.BaseView;
+import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 
@@ -31,12 +32,15 @@ public interface MainContract {
     void showErrorOnQueryData(String tips);
 
     void showQueryDataResult(SearchResult result);
+
+    void showNormalTips(String tips);
+
+    void showErrorTips(String tips);
   }
 
   abstract class IMainPresenter extends BasePresenter<IMainView> {
     /**
      * 搜索github上的数据
-     *
      * @param factor 搜索因子（即各种搜索条件）
      * @param perPage 每页的数据量
      * @param page 搜索第几页
@@ -45,9 +49,21 @@ public interface MainContract {
 
     /**
      * 保存搜索因子
-     *
      * @param factor 搜索因子
      */
     abstract void saveSearchFactor(SearchFactor factor);
+
+    /**
+     * 收藏项目
+     *
+     * @param repo
+     */
+    abstract void collectRepo(Repository repo);
+
+    ///**
+    // * 取消收藏项目
+    // * @param repo
+    // */
+    //abstract void cancelCollectRepo(LocalRepo repo);
   }
 }
