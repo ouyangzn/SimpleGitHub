@@ -29,13 +29,13 @@ import java.util.List;
  * Created by ouyangzn on 2016/9/6.<br/>
  * Description：
  */
-public class SearchResultAdapter extends BaseRecyclerViewAdapter<Repository> {
+public class RepositoryAdapter extends BaseRecyclerViewAdapter<Repository> {
 
   private Context mContext;
   private boolean mLanguageVisible = false;
 
-  public SearchResultAdapter(Context context, List<Repository> data) {
-    super(R.layout.item_search_result, data);
+  public RepositoryAdapter(Context context, List<Repository> data) {
+    super(R.layout.item_repo, data);
     this.mContext = context;
   }
 

@@ -33,6 +33,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -51,7 +52,7 @@ import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.collect.CollectActivity;
-import com.ouyangzn.github.module.common.SearchResultAdapter;
+import com.ouyangzn.github.module.common.RepositoryAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
 import com.ouyangzn.github.utils.DialogUtil;
@@ -69,7 +70,7 @@ import rx.functions.Func1;
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
 
 public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
-    implements IMainView, NavigationView.OnNavigationItemSelectedListener,
+    implements IMainView, NavigationView.OnNavigationItemSelectedListener, View.OnClickListener,
     BaseRecyclerViewAdapter.OnLoadingMoreListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener {
@@ -78,7 +79,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   private View mLoadingView;
   private SwipeRefreshLayout mRefreshLayout;
-  private SearchResultAdapter mAdapter;
+  private RepositoryAdapter mAdapter;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
   private SearchFactor mSearchFactor;
@@ -97,17 +98,17 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override protected void onDestroy() {
-    super.onDestroy();
     // 非all语言，不保存创建时间的搜索条件
     if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
       mSearchFactor.setCreateDate(null);
     }
     mPresenter.saveSearchFactor(mSearchFactor);
+    super.onDestroy();
   }
 
   @Override protected void initData() {
     initSearchFactor();
-    mAdapter = new SearchResultAdapter(mContext, new ArrayList<Repository>(0));
+    mAdapter = new RepositoryAdapter(mContext, new ArrayList<Repository>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnRecyclerViewItemLongClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
@@ -118,12 +119,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override protected void initView(Bundle savedInstanceState) {
     setTitle(GitHub.LANG_ALL.equals(mSearchFactor.language) ? getString(R.string.app_name)
         : mSearchFactor.language);
-
     mLoadingView = ButterKnife.findById(this, R.id.main_loading);
     mLoadingView.setVisibility(View.VISIBLE);
 
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
+    ImageView collectImg = addImage2Toolbar(toolbar, R.drawable.ic_menu_share, Gravity.END,
+        new int[] { 0, 0, ScreenUtils.dp2px(mContext, 15), 0 });
+    collectImg.setId(R.id.id_toolbar_right_img);
+    collectImg.setOnClickListener(this);
 
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
@@ -183,6 +187,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       }
     }).subscribe();
 
+  }
+
+  @Override public void onClick(View v) {
+    switch (v.getId()) {
+      case R.id.id_toolbar_right_img: {
+        openActivity(CollectActivity.class);
+        break;
+      }
+    }
   }
 
   @Override public void onBackPressed() {
@@ -260,7 +273,6 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         @Override public void onCancel() {
           // 点取消，回到原来的状态
           mNavView.setCheckedItem(mPreSelectedId);
-          openActivity(CollectActivity.class);
         }
       });
       pickerView.setOnTimeSelectListener(new TimePickerView.OnTimeSelectListener() {
@@ -417,5 +429,33 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override public void showErrorTips(String tips) {
     toast(tips);
+  }
+
+  /**
+   * 给toolbar添加一张图片
+   *
+   * @param toolbar toolbar
+   * @param resId 图片资源id
+   * @param gravity 添加的位置，对应{@link Gravity#LEFT}、{@link Gravity#RIGHT}
+   * @param margin 图片的四周边距{@link Toolbar.LayoutParams#setMargins(int, int, int, int)}
+   * @return 被添加的ImageView
+   */
+  private ImageView addImage2Toolbar(Toolbar toolbar, int resId, int gravity, int[] margin) {
+    Context context = toolbar.getContext();
+    ImageView img = new ImageView(context);
+    img.setImageResource(resId);
+    img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+    Toolbar.LayoutParams params = new Toolbar.LayoutParams(Toolbar.LayoutParams.WRAP_CONTENT,
+        Toolbar.LayoutParams.WRAP_CONTENT);
+    params.gravity = gravity | Gravity.CENTER;
+    try {
+      params.setMargins(margin[0], margin[1], margin[2], margin[3]);
+    } catch (Exception e) {
+      int margin_15 = ScreenUtils.dp2px(context, 15);
+      params.setMargins(margin_15, 0, margin_15, 0);
+    }
+    img.setLayoutParams(params);
+    toolbar.addView(img);
+    return img;
   }
 }
