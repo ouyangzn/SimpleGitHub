@@ -56,4 +56,8 @@ dependencies {
   // butterknife系列
   compile "com.jakewharton:butterknife:${BUTTERKNIFE_VERSION}"
   apt "com.jakewharton:butterknife-compiler:${BUTTERKNIFE_COMPILER_VERSION}"
+  // chrome调试与realm的调试
+  debugCompile "com.facebook.stetho:stetho:${STETHO_VERSION}"
+  debugCompile "com.facebook.stetho:stetho-okhttp3:${STETHO_OKHTTP_VERSION}"
+  debugCompile "com.uphyca:stetho_realm:${STETHO_REALM_VERSION}"
 }

@@ -27,6 +27,7 @@ import io.realm.RealmSchema;
 public class GlobalRealmMigration implements RealmMigration {
 
   public static final long DB_VERSION = 2;
+  public static final String DB_NAME = "globaldb.realm";
 
   @Override public void migrate(DynamicRealm realm, long oldVersion, long newVersion) {
     RealmSchema schema = realm.getSchema();

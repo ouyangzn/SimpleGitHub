@@ -27,6 +27,7 @@ import com.ouyangzn.github.utils.ImageLoader;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
+import static com.ouyangzn.github.db.GlobalRealmMigration.DB_NAME;
 import static com.ouyangzn.github.db.GlobalRealmMigration.DB_VERSION;
 
 /**
@@ -44,10 +45,9 @@ public class App extends Application {
   }
 
   public Realm getGlobalRealm() {
-    return Realm.getInstance(new RealmConfiguration.Builder(sApp).name("globaldb.realm")
+    return Realm.getInstance(new RealmConfiguration.Builder(sApp).name(DB_NAME)
         // 密码必须64个字节
-        .encryptionKey(
-            "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789".getBytes())
+        .encryptionKey(getGlobalRealmKey())
         .schemaVersion(DB_VERSION)
         .migration(new GlobalRealmMigration())
         //.deleteRealmIfMigrationNeeded()
@@ -72,5 +72,9 @@ public class App extends Application {
     super.onCreate();
     sApp = this;
     ImageLoader.init(sApp);
+  }
+
+  protected byte[] getGlobalRealmKey() {
+    return "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789".getBytes();
   }
 }

@@ -14,6 +14,7 @@
  */
 package com.ouyangzn.github.network;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.ouyangzn.github.BuildConfig;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +39,7 @@ public class HttpClient {
     builder.writeTimeout(30, TimeUnit.SECONDS);
     builder.readTimeout(30, TimeUnit.SECONDS);
     if (BuildConfig.LOG_DEBUG) {
+      builder.addNetworkInterceptor(new StethoInterceptor());
       HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
       logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
       builder.interceptors().add(logging);

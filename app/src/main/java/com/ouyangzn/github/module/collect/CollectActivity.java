@@ -16,10 +16,15 @@
 package com.ouyangzn.github.module.collect;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import butterknife.BindView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.bean.localbean.LocalRepo;
 import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.view.InputEdit;
 import java.util.List;
 
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
@@ -27,6 +32,11 @@ import static com.ouyangzn.github.module.collect.CollectContract.ICollectView;
 
 public class CollectActivity extends BaseActivity<ICollectView, ICollectPresenter>
     implements ICollectView {
+
+  @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
+  @BindView(R.id.view_search) InputEdit mSearchEdit;
+  @BindView(R.id.recycler_collect) RecyclerView mRecyclerView;
+  @BindView(R.id.layout_loading) View mLoadingView;
 
   @Override protected int getContentView() {
     return R.layout.activity_collect;
@@ -41,14 +51,17 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
-
+    mLoadingView.setVisibility(View.VISIBLE);
   }
 
   @Override public void showCollect(List<LocalRepo> repoList) {
     Log.d(TAG, "----------repoList = " + repoList);
+    mLoadingView.setVisibility(View.GONE);
+
   }
 
   @Override public void showErrorOnQueryFailure() {
+    mLoadingView.setVisibility(View.GONE);
 
   }
 
