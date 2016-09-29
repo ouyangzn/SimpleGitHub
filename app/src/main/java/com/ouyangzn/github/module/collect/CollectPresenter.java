@@ -94,7 +94,6 @@ public class CollectPresenter extends ICollectPresenter {
   }
 
   @Override protected void onDestroy() {
-    mApp = null;
     mCollectList.removeChangeListener(mCollectChangeListener);
     mCollectList = null;
   }

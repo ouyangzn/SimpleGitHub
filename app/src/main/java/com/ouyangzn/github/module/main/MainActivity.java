@@ -124,7 +124,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
-    ImageView collectImg = addImage2Toolbar(toolbar, R.drawable.ic_menu_share, Gravity.END,
+    ImageView collectImg = addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
         new int[] { 0, 0, ScreenUtils.dp2px(mContext, 15), 0 });
     collectImg.setId(R.id.id_toolbar_right_img);
     collectImg.setOnClickListener(this);

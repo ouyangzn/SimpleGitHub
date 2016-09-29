@@ -57,10 +57,7 @@ public class MainPresenter extends IMainPresenter {
   }
 
   @Override protected void onDestroy() {
-    mDataSource = null;
-    mApp = null;
-    mConfigSp = null;
-    mQueryDataSubscribe = null;
+
   }
 
   @Override void queryData(SearchFactor factor, int perPage, int page) {
