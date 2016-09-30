@@ -15,8 +15,6 @@
 
 package com.ouyangzn.github.module.main;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -55,6 +53,7 @@ import com.ouyangzn.github.module.collect.CollectActivity;
 import com.ouyangzn.github.module.common.RepositoryAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
+import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.Log;
@@ -347,7 +346,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override public boolean onItemLongClick(View view, final int position) {
     AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
-    builder.setItems(R.array.long_click_project_dialog_item, new DialogInterface.OnClickListener() {
+    builder.setItems(R.array.long_click_main_dialog_item, new DialogInterface.OnClickListener() {
       @Override public void onClick(DialogInterface dialog, int which) {
         Repository item = mAdapter.getItem(position);
         switch (which) {
@@ -365,9 +364,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   private void copyUrl(String url) {
-    ClipboardManager clip = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-    ClipData data = ClipData.newPlainText(url, url);
-    clip.setPrimaryClip(data);
+    CommonUtil.copy(mContext, url);
     toast(R.string.tip_copy_success);
   }
 

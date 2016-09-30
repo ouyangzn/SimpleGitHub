@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016.  ouyangzn   <ouyangzn@163.com>
+ * Copyright (c) 2016.  ouyangzn   <email : ouyangzn@163.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,20 +23,20 @@ import io.realm.annotations.PrimaryKey;
  * Created by ouyangzn on 2016/9/27.<br/>
  * Description：
  */
-public class LocalUser extends RealmObject {
+public class CollectedUser extends RealmObject {
 
   @PrimaryKey public Integer id;
   public String avatarUrl;
   public String login;
 
-  public void convert2Local(User owner) {
+  public void convert(User owner) {
     this.id = owner.getId();
     this.login = owner.getLogin();
     this.avatarUrl = owner.getAvatarUrl();
   }
 
   @Override public String toString() {
-    return "LocalUser{" +
+    return "CollectedUser{" +
         "id=" + id +
         ", avatarUrl='" + avatarUrl + '\'' +
         ", login='" + login + '\'' +

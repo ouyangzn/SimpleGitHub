@@ -15,7 +15,8 @@
 
 package com.ouyangzn.github.db;
 
-import com.ouyangzn.github.bean.localbean.LocalRepo;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
+import com.ouyangzn.github.bean.localbean.CollectedUser;
 import io.realm.DynamicRealm;
 import io.realm.RealmMigration;
 import io.realm.RealmSchema;
@@ -26,7 +27,7 @@ import io.realm.RealmSchema;
  */
 public class GlobalRealmMigration implements RealmMigration {
 
-  public static final long DB_VERSION = 2;
+  public static final long DB_VERSION = 3;
   public static final String DB_NAME = "globaldb.realm";
 
   @Override public void migrate(DynamicRealm realm, long oldVersion, long newVersion) {
@@ -36,16 +37,27 @@ public class GlobalRealmMigration implements RealmMigration {
       oldVersion++;
     }
     if (oldVersion == 2) {
-
+      updateVersionTo3(schema);
+      oldVersion++;
     }
   }
 
+  /**
+   * 修改LocalRepo类名为CollectedRepo、修改LocalUser类名为CollectedUser，对应的表名、列名修改
+   *
+   * @param schema RealmSchema
+   */
   private void updateVersionTo3(RealmSchema schema) {
-
+    schema.rename("LocalRepo", CollectedRepo.class.getSimpleName());
+    schema.rename("LocalUser", CollectedUser.class.getSimpleName());
   }
 
+  /**
+   * 收藏的repo增加收藏时间一列
+   * @param schema RealmSchema
+   */
   private void updateVersionTo2(RealmSchema schema) {
-    schema.get(LocalRepo.class.getSimpleName()).addField("collectTime", long.class);
+    schema.get("LocalRepo").addField("collectTime", long.class);
   }
 
   @Override public int hashCode() {

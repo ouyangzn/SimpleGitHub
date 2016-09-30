@@ -24,7 +24,7 @@ import rx.Observable;
  * Created by ouyangzn on 2016/9/6.<br/>
  * Description：
  */
-public interface IGitHubDataSource {
+public interface IGitHubData {
   /**
    * 查询GitHub的数据
    *

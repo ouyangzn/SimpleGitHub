@@ -14,8 +14,12 @@
   ~ limitations under the License.
   -->
 <resources>
-  <array name="long_click_project_dialog_item">
+  <array name="long_click_main_dialog_item">
     <item>复制网址</item>
     <item>收藏</item>
+  </array>
+  <array name="long_click_collect_dialog_item">
+    <item>复制网址</item>
+    <item>取消收藏</item>
   </array>
 </resources>

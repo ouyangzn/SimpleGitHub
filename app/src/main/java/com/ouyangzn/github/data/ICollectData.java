@@ -13,34 +13,16 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.module.collect;
+package com.ouyangzn.github.data;
 
-import com.ouyangzn.github.base.BasePresenter;
-import com.ouyangzn.github.base.BaseView;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import java.util.List;
 
 /**
- * Created by ouyangzn on 2016/9/27.<br/>
+ * Created by ouyangzn on 2016/9/30.<br/>
  * Description：
  */
-public class CollectContract {
+public interface ICollectData {
 
-  interface ICollectView extends BaseView<ICollectPresenter> {
-
-    void showCollect(List<CollectedRepo> repoList);
-
-    void showErrorOnQueryFailure();
-
-    void showNormalTips(String tips);
-
-    void showErrorTips(String tips);
-  }
-
-  abstract static class ICollectPresenter extends BasePresenter<ICollectView> {
-
-    abstract void queryAllCollect();
-
-    abstract void cancelCollectRepo(CollectedRepo repo);
-  }
+  List<CollectedRepo> queryCollectRepo();
 }

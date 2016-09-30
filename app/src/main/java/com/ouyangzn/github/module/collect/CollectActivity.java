@@ -15,10 +15,12 @@
 
 package com.ouyangzn.github.module.collect;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -31,8 +33,10 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
-import com.ouyangzn.github.bean.localbean.LocalRepo;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.module.common.CollectAdapter;
+import com.ouyangzn.github.utils.CommonUtil;
+import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.view.InputEdit;
@@ -46,7 +50,8 @@ import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresent
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectView;
 
 public class CollectActivity extends BaseActivity<ICollectView, ICollectPresenter>
-    implements ICollectView, BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener {
+    implements ICollectView, BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
+    BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener {
 
   @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
   @BindView(R.id.view_search) InputEdit mSearchEdit;
@@ -66,8 +71,9 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override protected void initData() {
-    mCollectAdapter = new CollectAdapter(mContext, new ArrayList<LocalRepo>(0));
+    mCollectAdapter = new CollectAdapter(mContext, new ArrayList<CollectedRepo>(0));
     mCollectAdapter.setOnRecyclerViewItemClickListener(this);
+    mCollectAdapter.setOnRecyclerViewItemLongClickListener(this);
     queryAllCollect(true);
   }
 
@@ -121,7 +127,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mPresenter.queryAllCollect();
   }
 
-  @Override public void showCollect(List<LocalRepo> repoList) {
+  @Override public void showCollect(List<CollectedRepo> repoList) {
     Log.d(TAG, "----------repoList = " + repoList);
     mLoadingView.setVisibility(View.GONE);
     if (mIsRefresh) {
@@ -155,9 +161,37 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override public void onItemClick(View view, int position) {
-    LocalRepo repo = mCollectAdapter.getItem(position);
+    CollectedRepo repo = mCollectAdapter.getItem(position);
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.setData(Uri.parse(repo.htmlUrl));
     startActivity(intent);
+  }
+
+  @Override public boolean onItemLongClick(View view, final int position) {
+    AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
+    builder.setItems(R.array.long_click_collect_dialog_item, new DialogInterface.OnClickListener() {
+      @Override public void onClick(DialogInterface dialog, int which) {
+        CollectedRepo item = mCollectAdapter.getItem(position);
+        switch (which) {
+          case 0:
+            copyUrl(item.htmlUrl);
+            break;
+          case 1:
+            cancelCollectRepo(item);
+            break;
+        }
+        dialog.dismiss();
+      }
+    }).show();
+    return true;
+  }
+
+  private void copyUrl(String url) {
+    CommonUtil.copy(mContext, url);
+    toast(R.string.tip_copy_success);
+  }
+
+  private void cancelCollectRepo(CollectedRepo repo) {
+    mPresenter.cancelCollectRepo(repo);
   }
 }

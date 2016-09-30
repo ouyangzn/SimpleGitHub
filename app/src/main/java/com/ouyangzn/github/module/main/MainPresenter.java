@@ -22,15 +22,14 @@ import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.SearchResult;
-import com.ouyangzn.github.bean.localbean.LocalRepo;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
-import com.ouyangzn.github.data.IGitHubDataSource;
+import com.ouyangzn.github.data.IGitHubData;
 import com.ouyangzn.github.data.remote.RemoteGitHubData;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
 import io.realm.Realm;
 import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -45,19 +44,24 @@ public class MainPresenter extends IMainPresenter {
 
   private final String TAG = MainPresenter.class.getSimpleName();
 
-  private IGitHubDataSource mDataSource;
+  private IGitHubData mDataSource;
   private App mApp;
+  private Realm mRealm;
   private SharedPreferences mConfigSp;
   private Subscription mQueryDataSubscribe;
 
   public MainPresenter(Context context) {
     mApp = (App) context.getApplicationContext();
+    mRealm = mApp.getGlobalRealm();
     mDataSource = new RemoteGitHubData();
     mConfigSp = mApp.getSharedPreferences(CommonConstants.ConfigSP.SP_NAME, Context.MODE_PRIVATE);
   }
 
   @Override protected void onDestroy() {
-
+    if (mRealm != null) {
+      mRealm.close();
+      mRealm = null;
+    }
   }
 
   @Override void queryData(SearchFactor factor, int perPage, int page) {
@@ -103,75 +107,57 @@ public class MainPresenter extends IMainPresenter {
   }
 
   @Override void collectRepo(final Repository repo) {
-    // reaml原生态写法
-    //Realm realm = mApp.getGlobalRealm();
-    //realm.executeTransactionAsync(new Realm.Transaction() {
-    //  @Override public void execute(Realm realm) {
-    //    LocalRepo localRepo = new LocalRepo();
-    //    localRepo.convert2Local(repo);
-    //    realm.copyToRealmOrUpdate(localRepo);
-    //  }
-    //}, new Realm.Transaction.OnSuccess() {
-    //  @Override public void onSuccess() {
-    //    if (mView != null) {
-    //      mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
-    //    }
-    //  }
-    //}, new Realm.Transaction.OnError() {
-    //  @Override public void onError(Throwable error) {
-    //    Log.d(TAG, "----------收藏失败：", error);
-    //    if (mView != null) {
-    //      mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
-    //    }
-    //  }
-    //});
-    // rxJava写法
-    Observable.create(new Observable.OnSubscribe<Void>() {
-      @Override public void call(final Subscriber<? super Void> subscriber) {
-        Realm realm = mApp.getGlobalRealm();
-        try {
-          realm.beginTransaction();
-          LocalRepo localRepo = new LocalRepo();
-          localRepo.collectTime = System.currentTimeMillis();
-          localRepo.convert2Local(repo);
-          realm.copyToRealmOrUpdate(localRepo);
-          realm.commitTransaction();
-          subscriber.onNext(null);
-        } catch (Exception e) {
-          if (realm.isInTransaction()) realm.cancelTransaction();
-          subscriber.onError(e);
-        }
+    // realm原生态写法
+    mRealm.executeTransactionAsync(new Realm.Transaction() {
+      @Override public void execute(Realm realm) {
+        CollectedRepo collectedRepo = new CollectedRepo();
+        collectedRepo.convert(repo);
+        collectedRepo.collectTime = System.currentTimeMillis();
+        realm.copyToRealmOrUpdate(collectedRepo);
       }
-    }).subscribeOn(Schedulers.io()).subscribe(new Action1<Void>() {
-      @Override public void call(Void aVoid) {
+    }, new Realm.Transaction.OnSuccess() {
+      @Override public void onSuccess() {
         if (mView != null) {
           mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
         }
       }
-    }, new Action1<Throwable>() {
-      @Override public void call(Throwable throwable) {
-        Log.d(TAG, "----------收藏失败：", throwable);
-        if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
+    }, new Realm.Transaction.OnError() {
+      @Override public void onError(Throwable error) {
+        Log.d(TAG, "----------收藏失败：", error);
+        if (mView != null) {
+          mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
+        }
       }
     });
+    //// rxJava写法
+    //Observable.create(new Observable.OnSubscribe<Void>() {
+    //  @Override public void call(final Subscriber<? super Void> subscriber) {
+    //    Realm realm = mApp.getGlobalRealm();
+    //    try {
+    //      realm.beginTransaction();
+    //      CollectedRepo collectedRepo = new CollectedRepo();
+    //      collectedRepo.collectTime = System.currentTimeMillis();
+    //      collectedRepo.convert(repo);
+    //      realm.copyToRealmOrUpdate(collectedRepo);
+    //      realm.commitTransaction();
+    //      subscriber.onNext(null);
+    //    } catch (Exception e) {
+    //      if (realm.isInTransaction()) realm.cancelTransaction();
+    //      subscriber.onError(e);
+    //    }
+    //  }
+    //}).subscribeOn(Schedulers.io()).subscribe(new Action1<Void>() {
+    //  @Override public void call(Void aVoid) {
+    //    if (mView != null) {
+    //      mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
+    //    }
+    //  }
+    //}, new Action1<Throwable>() {
+    //  @Override public void call(Throwable throwable) {
+    //    Log.d(TAG, "----------收藏失败：", throwable);
+    //    if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
+    //  }
+    //});
   }
 
-  //@Override void cancelCollectRepo(final LocalRepo repo) {
-  //  Observable.create(new Observable.OnSubscribe<Void>() {
-  //    @Override public void call(Subscriber<? super Void> subscriber) {
-  //      mApp.getGlobalRealm().where(LocalRepo.class).equalTo("id", repo.id).findAll().deleteAllFromRealm();
-  //    }
-  //  }).subscribeOn(Schedulers.io()).subscribe(new Action1<Void>() {
-  //    @Override public void call(Void aVoid) {
-  //      if (mView != null) {
-  //        mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
-  //      }
-  //    }
-  //  }, new Action1<Throwable>() {
-  //    @Override public void call(Throwable throwable) {
-  //      if (mView != null)
-  //        mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
-  //    }
-  //  });
-  //}
 }

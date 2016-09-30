@@ -59,11 +59,5 @@ public interface MainContract {
      * @param repo
      */
     abstract void collectRepo(Repository repo);
-
-    ///**
-    // * 取消收藏项目
-    // * @param repo
-    // */
-    //abstract void cancelCollectRepo(LocalRepo repo);
   }
 }
