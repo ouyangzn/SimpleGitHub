@@ -15,8 +15,6 @@
 
 package com.ouyangzn.github.module.main;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -34,13 +32,11 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import butterknife.ButterKnife;
 import com.jakewharton.rxbinding.view.RxView;
-import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
@@ -57,14 +53,13 @@ import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.ScreenUtil;
+import com.ouyangzn.github.utils.UIUtil;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.lib.pickview.TimePickerView;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.Date;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
 
@@ -107,7 +102,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void initData() {
     initSearchFactor();
-    mAdapter = new RepositoryAdapter(mContext, new ArrayList<Repository>(0));
+    mAdapter = new RepositoryAdapter(mContext, new ArrayList<>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnRecyclerViewItemLongClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
@@ -123,8 +118,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
-    ImageView collectImg = addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
-        new int[] { 0, 0, ScreenUtils.dp2px(mContext, 15), 0 });
+    ImageView collectImg =
+        UIUtil.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
+            new int[] { 0, 0, ScreenUtil.dp2px(mContext, 15), 0 });
     collectImg.setId(R.id.id_toolbar_right_img);
     collectImg.setOnClickListener(this);
 
@@ -143,32 +139,22 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     toggle.syncState();
 
     mRefreshLayout = ButterKnife.findById(this, R.id.refreshLayout);
-    mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-      @Override public void onRefresh() {
-        search(true);
-      }
-    });
+    mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     final InputEdit inputEdit = ButterKnife.findById(this, R.id.view_search);
-    inputEdit.setOnClearTextListener(new InputEdit.OnClearTextListener() {
-      @Override public void onClearText() {
-        mSearchFactor.keyword = null;
-      }
-    });
-    inputEdit.setOnEditorActionListener(new Action1<TextViewEditorActionEvent>() {
-      @Override public void call(TextViewEditorActionEvent actionEvent) {
-        if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
-          String keyword = inputEdit.getInputText().trim();
-          ScreenUtils.hideKeyBoard(inputEdit);
-          inputEdit.clearFocus();
-          // 关键字不为空 或者 之前搜过,现在清空搜索条件
-          if (!TextUtils.isEmpty(keyword) || !TextUtils.isEmpty(mSearchFactor.keyword)) {
-            mSearchFactor.keyword = keyword;
-            if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
-              mSearchFactor.setCreateDate(null);
-            }
-            search(true);
+    inputEdit.setOnClearTextListener(() -> mSearchFactor.keyword = null);
+    inputEdit.setOnEditorActionListener(actionEvent -> {
+      if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
+        String keyword = inputEdit.getInputText().trim();
+        ScreenUtil.hideKeyBoard(inputEdit);
+        inputEdit.clearFocus();
+        // 关键字不为空 或者 之前搜过,现在清空搜索条件
+        if (!TextUtils.isEmpty(keyword) || !TextUtils.isEmpty(mSearchFactor.keyword)) {
+          mSearchFactor.keyword = keyword;
+          if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
+            mSearchFactor.setCreateDate(null);
           }
+          search(true);
         }
       }
     });
@@ -178,12 +164,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, recyclerView, false));
     mAdapter.setEmptyView(inflater.inflate(R.layout.item_no_data, recyclerView, false));
     recyclerView.setAdapter(mAdapter);
-    RxView.touches(recyclerView, new Func1<MotionEvent, Boolean>() {
-      @Override public Boolean call(MotionEvent event) {
-        ScreenUtils.hideKeyBoard(inputEdit);
-        inputEdit.clearFocus();
-        return false;
-      }
+    RxView.touches(recyclerView, event -> {
+      ScreenUtil.hideKeyBoard(inputEdit);
+      inputEdit.clearFocus();
+      return false;
     }).subscribe();
 
   }
@@ -191,7 +175,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.id_toolbar_right_img: {
-        openActivity(CollectActivity.class);
+        UIUtil.openActivity(this, CollectActivity.class);
         break;
       }
     }
@@ -268,19 +252,15 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       pickerView.setRange(2006, 2016);
       pickerView.setCyclic(true);
       pickerView.setTime(new Date());
-      pickerView.setOnCancelListener(new TimePickerView.OnCancelListener() {
-        @Override public void onCancel() {
-          // 点取消，回到原来的状态
-          mNavView.setCheckedItem(mPreSelectedId);
-        }
+      pickerView.setOnCancelListener(() -> {
+        // 点取消，回到原来的状态
+        mNavView.setCheckedItem(mPreSelectedId);
       });
-      pickerView.setOnTimeSelectListener(new TimePickerView.OnTimeSelectListener() {
-        @Override public void onTimeSelect(Date date) {
-          setTitle(getString(R.string.app_name));
-          // 搜索，加入createDate限制
-          mSearchFactor.setCreateDate(date);
-          search(true);
-        }
+      pickerView.setOnTimeSelectListener(date -> {
+        setTitle(getString(R.string.app_name));
+        // 搜索，加入createDate限制
+        mSearchFactor.setCreateDate(date);
+        search(true);
       });
       pickerView.show();
       return true;
@@ -346,19 +326,17 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override public boolean onItemLongClick(View view, final int position) {
     AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
-    builder.setItems(R.array.long_click_main_dialog_item, new DialogInterface.OnClickListener() {
-      @Override public void onClick(DialogInterface dialog, int which) {
-        Repository item = mAdapter.getItem(position);
-        switch (which) {
-          case 0:
-            copyUrl(item.getHtmlUrl());
-            break;
-          case 1:
-            collectProject(item);
-            break;
-        }
-        dialog.dismiss();
+    builder.setItems(R.array.long_click_main_dialog_item, (dialog, which) -> {
+      Repository item = mAdapter.getItem(position);
+      switch (which) {
+        case 0:
+          copyUrl(item.getHtmlUrl());
+          break;
+        case 1:
+          collectProject(item);
+          break;
       }
+      dialog.dismiss();
     }).show();
     return true;
   }
@@ -428,31 +406,4 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     toast(tips);
   }
 
-  /**
-   * 给toolbar添加一张图片
-   *
-   * @param toolbar toolbar
-   * @param resId 图片资源id
-   * @param gravity 添加的位置，对应{@link Gravity#LEFT}、{@link Gravity#RIGHT}
-   * @param margin 图片的四周边距{@link Toolbar.LayoutParams#setMargins(int, int, int, int)}
-   * @return 被添加的ImageView
-   */
-  private ImageView addImage2Toolbar(Toolbar toolbar, int resId, int gravity, int[] margin) {
-    Context context = toolbar.getContext();
-    ImageView img = new ImageView(context);
-    img.setImageResource(resId);
-    img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-    Toolbar.LayoutParams params = new Toolbar.LayoutParams(Toolbar.LayoutParams.WRAP_CONTENT,
-        Toolbar.LayoutParams.WRAP_CONTENT);
-    params.gravity = gravity | Gravity.CENTER;
-    try {
-      params.setMargins(margin[0], margin[1], margin[2], margin[3]);
-    } catch (Exception e) {
-      int margin_15 = ScreenUtils.dp2px(context, 15);
-      params.setMargins(margin_15, 0, margin_15, 0);
-    }
-    img.setLayoutParams(params);
-    toolbar.addView(img);
-    return img;
-  }
 }

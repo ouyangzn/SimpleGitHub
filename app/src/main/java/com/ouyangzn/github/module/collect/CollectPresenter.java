@@ -39,7 +39,6 @@ public class CollectPresenter extends ICollectPresenter {
 
   private App mApp;
   private Realm mRealm;
-  //private Subscription mQueryCollectSub;
   private RealmResults<CollectedRepo> mCollectList;
   private RealmChangeListener<RealmResults<CollectedRepo>> mCollectChangeListener;
 
@@ -61,38 +60,13 @@ public class CollectPresenter extends ICollectPresenter {
     mCollectList =
         mRealm.where(CollectedRepo.class).findAllSortedAsync("collectTime", Sort.DESCENDING);
     mCollectList.addChangeListener(mCollectChangeListener);
-    // ----->mCollectList.addChangeListener(mCollectChangeListener);不能在rxJava的io线程调用，暂时不知道怎么解决
-    //if (mQueryCollectSub != null && mQueryCollectSub.isUnsubscribed()) mQueryCollectSub.unsubscribe();
-    //mQueryCollectSub = Observable.create(new Observable.OnSubscribe<Void>() {
-    //  @Override public void call(Subscriber<? super Void> subscriber) {
-    //    Log.d(TAG, "------------------queryAllCollect--------------------------");
-    //    Realm realm = mApp.getGlobalRealm();
-    //    try {
-    //      realm.beginTransaction();
-    //      mCollectList = realm.where(CollectedRepo.class).findAllSorted("collectTime", Sort.DESCENDING);
-    //      mCollectList.addChangeListener(mCollectChangeListener);
-    //      Log.d(TAG, "------------------queryAllCollect.mCollectList = " + mCollectList);
-    //      realm.commitTransaction();
-    //      subscriber.onNext(null);
-    //    } catch (Exception e) {
-    //      subscriber.onError(e);
-    //      if (realm.isInTransaction()) realm.cancelTransaction();
-    //    }
-    //  }
-    //})
-    //    .subscribeOn(Schedulers.io())
-    //    .observeOn(AndroidSchedulers.mainThread())
-    //    .subscribe(RxJavaUtil.<Void>discardResult(), new Action1<Throwable>() {
-    //      @Override public void call(Throwable throwable) {
-    //        Log.e(TAG, "----------查询已收藏repo出错：", throwable);
-    //        if (mView != null) mView.showErrorOnQueryFailure();
-    //      }
-    //    });
   }
 
   @Override void cancelCollectRepo(final CollectedRepo repo) {
-    // -------------------错误的方式，会抛异常,下面rxJava方式可以，很奇怪-----------------------
-    // --------this is OK，but i don't know why---------
+    // ---> reason: repo is bound to the UI thread, and repo.id is translated to database access (repo.realmGet$id()) by
+    //              Realm's transformer. This method call can be done only from the bound thread.
+    // 实际上repo是由realm管理的代理对象CollectedRepoRealmProxy，而不是真正的CollectedRepo，因此repo的访问需要在原来绑定repo的线程
+    // repo被绑定在main线程，所以不能在其他线程访问
     final int id = repo.id;
     mApp.getGlobalRealm().executeTransactionAsync(bgRealm -> {
       // 此操作也不行，会抛异常：Realm access from incorrect thread

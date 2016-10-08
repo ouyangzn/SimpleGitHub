@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -38,7 +39,7 @@ import com.ouyangzn.github.module.common.CollectAdapter;
 import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.ScreenUtil;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mRecyclerView.setAdapter(mCollectAdapter);
     RxView.touches(mRecyclerView, new Func1<MotionEvent, Boolean>() {
       @Override public Boolean call(MotionEvent event) {
-        ScreenUtils.hideKeyBoard(mSearchEdit);
+        ScreenUtil.hideKeyBoard(mSearchEdit);
         mSearchEdit.clearFocus();
         return false;
       }
@@ -107,7 +108,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
       @Override public void call(TextViewEditorActionEvent actionEvent) {
         if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
           String keyword = mSearchEdit.getInputText().trim();
-          ScreenUtils.hideKeyBoard(mSearchEdit);
+          ScreenUtil.hideKeyBoard(mSearchEdit);
           mSearchEdit.clearFocus();
           if (!TextUtils.isEmpty(keyword)) {
             // todo 从收藏中搜索
@@ -132,12 +133,27 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mLoadingView.setVisibility(View.GONE);
     if (mIsRefresh) {
       mRefreshLayout.setRefreshing(false);
+      // ------------很大几率crash,暂未解决,exception：Inconsistency detected. Invalid view holder adapter positionViewHolder---------------
+      //// 使用DiffUtil计算有变化的数据进行局部刷新
+      //List<CollectedRepo> oldData = mCollectAdapter.getData();
+      //DiffUtil.DiffResult diffResult =
+      //    DiffUtil.calculateDiff(new CollectDiffCallback(repoList, oldData));
+      ///*
+      //需要先替换adapter中的数据但不刷新，刷新通知交由diffResult.dispatchUpdatesTo()来做
+      //<pre>
+      //     List oldList = mAdapter.getData();
+      //     DiffResult result = DiffUtil.calculateDiff(new MyCallback(oldList, newList));
+      //     mAdapter.setData(newList);
+      //     result.dispatchUpdatesTo(mAdapter);
+      //</pre>
+      //*/
+      //oldData.clear();
+      //oldData.addAll(repoList);
+      //diffResult.dispatchUpdatesTo(mCollectAdapter);
       mCollectAdapter.resetData(repoList);
     } else {
       mCollectAdapter.addData(repoList);
     }
-
-
   }
 
   @Override public void showErrorOnQueryFailure() {
@@ -193,5 +209,37 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
 
   private void cancelCollectRepo(CollectedRepo repo) {
     mPresenter.cancelCollectRepo(repo);
+  }
+
+  public static class CollectDiffCallback extends DiffUtil.Callback {
+
+    private List<CollectedRepo> mNewRepoList;
+    private List<CollectedRepo> mOldRepoList;
+
+    public CollectDiffCallback(List<CollectedRepo> newRepoList, List<CollectedRepo> oldRepoList) {
+      if (newRepoList == null) newRepoList = new ArrayList<>(0);
+      if (oldRepoList == null) oldRepoList = new ArrayList<>(0);
+      this.mNewRepoList = newRepoList;
+      this.mOldRepoList = oldRepoList;
+    }
+
+    @Override public int getOldListSize() {
+      return mOldRepoList.size();
+    }
+
+    @Override public int getNewListSize() {
+      return mNewRepoList.size();
+    }
+
+    @Override public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+      return mOldRepoList.get(oldItemPosition).id.equals(mNewRepoList.get(newItemPosition).id);
+    }
+
+    @Override public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+      CollectedRepo oldRepo = mOldRepoList.get(oldItemPosition);
+      CollectedRepo newRepo = mNewRepoList.get(newItemPosition);
+      return oldRepo.collectTime == newRepo.collectTime
+          || oldRepo.stargazersCount == newRepo.stargazersCount;
+    }
   }
 }

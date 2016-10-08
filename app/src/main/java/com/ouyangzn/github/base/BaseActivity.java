@@ -16,7 +16,6 @@
 package com.ouyangzn.github.base;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -37,7 +36,7 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
   protected T mPresenter;
   private com.ouyangzn.github.utils.Toast mToast;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override protected final void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(getContentView());
     ButterKnife.bind(this);
@@ -52,8 +51,6 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
     initData();
     initView(savedInstanceState);
   }
-
-  protected abstract int getContentView();
 
   @Override protected void onDestroy() {
     super.onDestroy();
@@ -75,19 +72,13 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
 
   public abstract T initPresenter();
 
+  protected abstract int getContentView();
+
   /** 初始化数据 */
   protected abstract void initData();
 
-  /** 初始化界面及控件,需要在此方法setContentView */
+  /** 初始化界面及控件 */
   protected abstract void initView(Bundle savedInstanceState);
-
-  @Override public void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-  }
-
-  @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
-  }
 
   protected void toast(String content) {
     mToast.show(content, Toast.LENGTH_SHORT);
@@ -97,63 +88,7 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
     mToast.show(resId, Toast.LENGTH_SHORT);
   }
 
-  /**
-   * 打开一个activity
-   *
-   * @param clazz 要打开的activity
-   * @param <T>
-   */
-  public <T> void openActivity(Class<T> clazz) {
-    startActivity(new Intent(mContext, clazz));
-    //        overridePendingTransition(R.anim.anim_slide_in,
-    //                R.anim.anim_slide_out);
-  }
-
-  /**
-   * 打开一个activity
-   *
-   * @param clazz 要打开的activity
-   * @param data 要携带过去的数据
-   * @param <T>
-   */
-  public <T> void openActivity(Class<T> clazz, Bundle data) {
-    Intent intent = new Intent(mContext, clazz);
-    intent.putExtras(data);
-    startActivity(intent);
-    //        overridePendingTransition(R.anim.anim_slide_in,
-    //                R.anim.anim_slide_out);
-  }
-
-  /**
-   * 打开一个activity
-   *
-   * @param clazz 要打开的activity
-   * @param requestCode 请求码
-   * @param <T>
-   */
-  public <T> void openActivityForResult(Class<T> clazz, int requestCode) {
-    Intent intent = new Intent(mContext, clazz);
-    startActivityForResult(intent, requestCode);
-    //        overridePendingTransition(R.anim.anim_slide_in,
-    //                R.anim.anim_slide_out);
-  }
-
-  /**
-   * 打开一个activity
-   *
-   * @param clazz 要打开的activity
-   * @param requestCode 请求码
-   * @param data 要携带过去的数据
-   */
-  public <T> void openActivityForResult(Class<T> clazz, int requestCode, Bundle data) {
-    Intent intent = new Intent(mContext, clazz);
-    intent.putExtras(data);
-    startActivityForResult(intent, requestCode);
-    //        overridePendingTransition(R.anim.anim_slide_in,
-    //                R.anim.anim_slide_out);
-  }
-
-  public void finish() {
+  @Override public void finish() {
     super.finish();
     //        overridePendingTransition(R.anim.anim_push_in,
     //                R.anim.anim_push_out);

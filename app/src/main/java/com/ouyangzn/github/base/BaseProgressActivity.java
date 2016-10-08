@@ -15,40 +15,67 @@
 
 package com.ouyangzn.github.base;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 
 /**
  * Created by ouyangzn on 2016/9/7.<br/>
  * Description：
  */
-public abstract class BaseProgressActivity<V, T extends BasePresenter<V>> extends BaseActivity {
+public abstract class BaseProgressActivity<V, T extends BasePresenter<V>>
+    extends AppCompatActivity {
 
   public static final int STATUS_NORMAL = 1;
   public static final int STATUS_LOADING = 2;
-  //private ViewGroup mContentView;
-  //private View mLoadingView;
+  protected String TAG = "BaseProgressActivity";
+  protected App mApp;
+  protected Context mContext;
   protected T mPresenter;
-  @BindView(R.id.layout_content) ViewGroup mContentView;
-  @BindView(R.id.layout_loading) View mLoadingView;
+  private ViewGroup mContentView;
+  private View mLoadingView;
+  private com.ouyangzn.github.utils.Toast mToast;
 
-  @Override public void onCreate(Bundle savedInstanceState) {
+  @Override public final void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_base_content);
+    mContentView = ButterKnife.findById(this, R.id.layout_content);
+    mLoadingView = ButterKnife.findById(this, R.id.layout_loading);
+    getLayoutInflater().inflate(getContentView(), mContentView, true);
     ButterKnife.bind(this);
-    getLayoutInflater().inflate(setContentView(), mContentView, true);
-
+    TAG = this.getClass().getSimpleName();
+    mApp = (App) getApplication();
+    mContext = this;
+    mToast = com.ouyangzn.github.utils.Toast.getInstance(mContext);
     mPresenter = initPresenter();
     if (mPresenter != null) {
       mPresenter.onAttach((V) this);
     }
-    super.onCreate(savedInstanceState);
+    initData();
+    initView(savedInstanceState);
+
+    setContentView(R.layout.activity_base_content);
+    mContentView = ButterKnife.findById(this, R.id.layout_content);
+    mLoadingView = ButterKnife.findById(this, R.id.layout_loading);
+    getLayoutInflater().inflate(getContentView(), mContentView, true);
+    ButterKnife.bind(this);
   }
 
   public abstract T initPresenter();
+
+  protected abstract int getContentView();
+
+  /** 初始化数据 */
+  protected abstract void initData();
+
+  /** 初始化界面及控件 */
+  protected abstract void initView(Bundle savedInstanceState);
 
   /**
    * 切换当前显示的contentView
@@ -68,10 +95,18 @@ public abstract class BaseProgressActivity<V, T extends BasePresenter<V>> extend
     }
   }
 
-  /**
-   * 设置自身的内容View
-   *
-   * @return layoutResId viewId
-   */
-  protected abstract int setContentView();
+  protected void toast(String content) {
+    mToast.show(content, Toast.LENGTH_SHORT);
+  }
+
+  protected void toast(int resId) {
+    mToast.show(resId, Toast.LENGTH_SHORT);
+  }
+
+  @Override public void finish() {
+    super.finish();
+    //        overridePendingTransition(R.anim.anim_push_in,
+    //                R.anim.anim_push_out);
+  }
+
 }

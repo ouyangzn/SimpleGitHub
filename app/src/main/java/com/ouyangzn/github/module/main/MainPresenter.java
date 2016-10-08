@@ -21,7 +21,6 @@ import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.bean.apibean.Repository;
-import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.data.IGitHubData;
@@ -32,8 +31,6 @@ import io.realm.Realm;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -70,94 +67,75 @@ public class MainPresenter extends IMainPresenter {
     }
     mQueryDataSubscribe = mDataSource.queryByKeyword(factor, perPage, page)
         .subscribeOn(Schedulers.io())
-        .doOnSubscribe(new Action0() {
-          @Override public void call() {
-            if (mView != null) mView.showProgressDialog();
-          }
+        .doOnSubscribe(() -> {
+          if (mView != null) mView.showProgressDialog();
         })
         .subscribeOn(AndroidSchedulers.mainThread())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<SearchResult>() {
-          @Override public void call(SearchResult searchResult) {
-            if (mView != null) {
-              mView.dismissProgressDialog();
-              mView.showQueryDataResult(searchResult);
-            }
+        .subscribe(searchResult -> {
+          if (mView != null) {
+            mView.dismissProgressDialog();
+            mView.showQueryDataResult(searchResult);
           }
-        }, new Action1<Throwable>() {
-          @Override public void call(Throwable throwable) {
-            Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
-            if (mView != null) {
-              mView.dismissProgressDialog();
-              mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
-            }
+        }, throwable -> {
+          Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
+          if (mView != null) {
+            mView.dismissProgressDialog();
+            mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
           }
         });
     addSubscription(mQueryDataSubscribe);
   }
 
   @Override void saveSearchFactor(SearchFactor factor) {
-    Observable.just(factor).observeOn(Schedulers.io()).doOnNext(new Action1<SearchFactor>() {
-      @Override public void call(SearchFactor factor) {
-        mConfigSp.edit()
-            .putString(CommonConstants.ConfigSP.KEY_LANGUAGE, App.getApp().getGson().toJson(factor))
-            .apply();
-      }
-    }).subscribe();
+    Observable.just(factor)
+        .observeOn(Schedulers.io())
+        .doOnNext(factor1 -> mConfigSp.edit()
+            .putString(CommonConstants.ConfigSP.KEY_LANGUAGE,
+                App.getApp().getGson().toJson(factor1))
+            .apply())
+        .subscribe();
   }
 
   @Override void collectRepo(final Repository repo) {
     // realm原生态写法
-    mRealm.executeTransactionAsync(new Realm.Transaction() {
-      @Override public void execute(Realm realm) {
-        CollectedRepo collectedRepo = new CollectedRepo();
-        collectedRepo.convert(repo);
-        collectedRepo.collectTime = System.currentTimeMillis();
-        realm.copyToRealmOrUpdate(collectedRepo);
+    mRealm.executeTransactionAsync(bgRealm -> {
+      CollectedRepo collectedRepo = new CollectedRepo();
+      collectedRepo.convert(repo);
+      collectedRepo.collectTime = System.currentTimeMillis();
+      bgRealm.copyToRealmOrUpdate(collectedRepo);
+    }, () -> {
+      if (mView != null) {
+        mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
       }
-    }, new Realm.Transaction.OnSuccess() {
-      @Override public void onSuccess() {
-        if (mView != null) {
-          mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
-        }
-      }
-    }, new Realm.Transaction.OnError() {
-      @Override public void onError(Throwable error) {
-        Log.d(TAG, "----------收藏失败：", error);
-        if (mView != null) {
-          mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
-        }
+    }, error -> {
+      Log.d(TAG, "----------收藏失败：", error);
+      if (mView != null) {
+        mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
       }
     });
-    //// rxJava写法
-    //Observable.create(new Observable.OnSubscribe<Void>() {
-    //  @Override public void call(final Subscriber<? super Void> subscriber) {
-    //    Realm realm = mApp.getGlobalRealm();
-    //    try {
-    //      realm.beginTransaction();
-    //      CollectedRepo collectedRepo = new CollectedRepo();
-    //      collectedRepo.collectTime = System.currentTimeMillis();
-    //      collectedRepo.convert(repo);
-    //      realm.copyToRealmOrUpdate(collectedRepo);
-    //      realm.commitTransaction();
-    //      subscriber.onNext(null);
-    //    } catch (Exception e) {
-    //      if (realm.isInTransaction()) realm.cancelTransaction();
-    //      subscriber.onError(e);
-    //    }
-    //  }
-    //}).subscribeOn(Schedulers.io()).subscribe(new Action1<Void>() {
-    //  @Override public void call(Void aVoid) {
-    //    if (mView != null) {
-    //      mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
-    //    }
-    //  }
-    //}, new Action1<Throwable>() {
-    //  @Override public void call(Throwable throwable) {
-    //    Log.d(TAG, "----------收藏失败：", throwable);
-    //    if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
-    //  }
-    //});
+    // rxJava写法
+    Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
+      try {
+        mRealm.beginTransaction();
+        CollectedRepo collectedRepo = new CollectedRepo();
+        collectedRepo.collectTime = System.currentTimeMillis();
+        collectedRepo.convert(repo);
+        mRealm.copyToRealmOrUpdate(collectedRepo);
+        mRealm.commitTransaction();
+        subscriber.onNext(null);
+      } catch (Exception e) {
+        if (mRealm.isInTransaction()) mRealm.cancelTransaction();
+        subscriber.onError(e);
+      }
+    }).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
+      if (mView != null) {
+        mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
+      }
+    }, throwable -> {
+      Log.d(TAG, "----------收藏失败：", throwable);
+      if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
+    });
   }
 
 }
