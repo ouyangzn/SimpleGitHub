@@ -26,18 +26,11 @@ public class RxJavaUtil {
   private static final String TAG = RxJavaUtil.class.getSimpleName();
 
   public static <T> Action1<T> discardResult() {
-    return new Action1<T>() {
-      @Override public void call(T t) {
-        Log.w(TAG, "----------discardResult, result = " + t.toString());
-      }
-    };
+    return t -> Log.w(TAG,
+        "----------discardResult, result = " + (t == null ? "null" : t.toString()));
   }
 
   public static Action1<Throwable> discardError() {
-    return new Action1<Throwable>() {
-      @Override public void call(Throwable throwable) {
-        Log.w(TAG, "----------discardError: ", throwable);
-      }
-    };
+    return e -> Log.w(TAG, "----------discardError: ", e);
   }
 }

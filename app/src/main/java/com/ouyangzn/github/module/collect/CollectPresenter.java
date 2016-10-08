@@ -25,7 +25,9 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import java.util.ArrayList;
-import rx.Subscription;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.MainThreadSubscription;
 
 /**
  * Created by ouyangzn on 2016/9/27.<br/>
@@ -37,22 +39,20 @@ public class CollectPresenter extends ICollectPresenter {
 
   private App mApp;
   private Realm mRealm;
-  private Subscription mQueryCollectSub;
+  //private Subscription mQueryCollectSub;
   private RealmResults<CollectedRepo> mCollectList;
   private RealmChangeListener<RealmResults<CollectedRepo>> mCollectChangeListener;
 
   public CollectPresenter(Context context) {
     mApp = (App) context.getApplicationContext();
     mRealm = mApp.getGlobalRealm();
-    mCollectChangeListener = new RealmChangeListener<RealmResults<CollectedRepo>>() {
-      @Override public void onChange(RealmResults<CollectedRepo> element) {
-        if (mView != null) {
-          // todo 加上分页
-          //element.subList()
-          ArrayList<CollectedRepo> list = new ArrayList<>();
-          list.addAll(element);
-          mView.showCollect(list);
-        }
+    mCollectChangeListener = element -> {
+      if (mView != null) {
+        // todo 加上分页
+        //element.subList()
+        ArrayList<CollectedRepo> list = new ArrayList<>();
+        list.addAll(element);
+        mView.showCollect(list);
       }
     };
   }
@@ -91,80 +91,42 @@ public class CollectPresenter extends ICollectPresenter {
   }
 
   @Override void cancelCollectRepo(final CollectedRepo repo) {
-    try {
-      // 由于realm在主线程创建，所以只能在主线程操作
-      mRealm.executeTransaction(new Realm.Transaction() {
-        @Override public void execute(Realm realm) {
-          realm.where(CollectedRepo.class).equalTo("id", repo.id).findAll().deleteAllFromRealm();
-          if (mView != null) {
-            mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
-          }
-        }
-      });
-    } catch (Exception e) {
-      Log.e(TAG, "---------取消收藏失败:", e);
+    // -------------------错误的方式，会抛异常,下面rxJava方式可以，很奇怪-----------------------
+    // --------this is OK，but i don't know why---------
+    final int id = repo.id;
+    mApp.getGlobalRealm().executeTransactionAsync(bgRealm -> {
+      // 此操作也不行，会抛异常：Realm access from incorrect thread
+      //repo.collectTime = 0;
+      // 此操作不会抛异常
+      //CollectedRepo collectedRepo = new CollectedRepo();
+      //collectedRepo.id = 1;
+      //bgRealm.copyToRealm(collectedRepo);
+      // 此操作却会抛异常：Realm access from incorrect thread
+      //bgRealm.where(CollectedRepo.class).equalTo("id", repo.id).findAll().deleteAllFromRealm();
+      bgRealm.where(CollectedRepo.class).equalTo("id", id).findAll().deleteAllFromRealm();
+    }, () -> {
+      if (mView != null) {
+        mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
+      }
+    }, error -> {
+      Log.e(TAG, "---------取消收藏失败:", error);
       if (mView != null) {
         mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
       }
-    }
-    // -------------------错误的方式，会抛异常-----------------------
-    //mRealm.executeTransactionAsync(new Realm.Transaction() {
-    //  @Override public void execute(Realm realm) {
-    //    Log.d(TAG, "---------------------------------------------");
-    //    // 此操作也不行，会抛异常：Realm access from incorrect thread
-    //    repo.collectTime = 0;
-    //    // 此操作不会抛异常
-    //    CollectedRepo collectedRepo = new CollectedRepo();
-    //    collectedRepo.id = 1;
-    //    realm.copyToRealm(collectedRepo);
-    //    Log.d(TAG, "---------------------------------------------");
-    //    // 此操作却会抛异常：Realm access from incorrect thread
-    //    realm.where(CollectedRepo.class).equalTo("id", repo.id).findAll().deleteAllFromRealm();
-    //  }
-    //}, new Realm.Transaction.OnSuccess() {
-    //  @Override public void onSuccess() {
-    //    if (mView != null) {
-    //      mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
-    //    }
-    //  }
-    //}, new Realm.Transaction.OnError() {
-    //  @Override public void onError(Throwable error) {
-    //    Log.e(TAG, "---------取消收藏失败:", error);
-    //    if (mView != null) {
-    //      mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
-    //    }
-    //  }
-    //});
+    });
     // ----------rxJava方式----------
-    //Observable.create(new Observable.OnSubscribe<Void>() {
-    //  @Override public void call(Subscriber<? super Void> subscriber) {
-    //    Realm realm = mApp.getGlobalRealm();
-    //    try {
-    //      realm.beginTransaction();
-    //      realm.where(CollectedRepo.class).equalTo("id", repo.id).findAll().deleteAllFromRealm();
-    //      realm.commitTransaction();
-    //      subscriber.onNext(null);
-    //    } catch (Exception e) {
-    //      if (realm.isInTransaction()) realm.cancelTransaction();
-    //      subscriber.onError(e);
-    //    }
-    //  }
-    //})
-    //    // 因为realm在main线程获取，所以只能在main线程
-    //    .subscribeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
-    //  @Override public void call(Void aVoid) {
-    //    if (mView != null) {
-    //      mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
-    //    }
-    //  }
-    //}, new Action1<Throwable>() {
-    //  @Override public void call(Throwable throwable) {
-    //    Log.e(TAG, "---------取消收藏失败:", throwable);
-    //    if (mView != null) {
-    //      mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
-    //    }
-    //  }
-    //});
+    //Observable.create(new DeleteCollectedObservable(repo.id))
+    //    .subscribeOn(AndroidSchedulers.mainThread())
+    //    .subscribe( Void -> {
+    //      if (mView != null) {
+    //        mView.showErrorTips(mApp.getString(R.string.tip_collect_cancel_success));
+    //      }
+    //    }, error -> {
+    //      Log.e(TAG, "---------取消收藏失败:", error);
+    //      if (mView != null) {
+    //        mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
+    //      }
+    //    });
   }
 
   @Override protected void onDestroy() {
@@ -175,6 +137,36 @@ public class CollectPresenter extends ICollectPresenter {
     if (mRealm != null) {
       mRealm.close();
       mRealm = null;
+    }
+  }
+
+  public final class DeleteCollectedObservable implements Observable.OnSubscribe<Void> {
+
+    private int mId;
+
+    public DeleteCollectedObservable(int id) {
+      this.mId = id;
+    }
+
+    @Override public void call(final Subscriber<? super Void> subscriber) {
+      MainThreadSubscription.verifyMainThread();
+      mRealm.executeTransactionAsync(bgRealm -> {
+        bgRealm.where(CollectedRepo.class).equalTo("id", mId).findAll().deleteAllFromRealm();
+      }, () -> {
+        if (!subscriber.isUnsubscribed()) {
+          subscriber.onNext(null);
+        }
+      }, error -> {
+        if (!subscriber.isUnsubscribed()) {
+          subscriber.onError(error);
+        }
+      });
+
+      //subscriber.add(new MainThreadSubscription() {
+      //  @Override
+      //  protected void onUnsubscribe() {
+      //   }
+      //});
     }
   }
 }

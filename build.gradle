@@ -13,6 +13,8 @@ buildscript {
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     // realm
     classpath "io.realm:realm-gradle-plugin:${REALM_VERSION}"
+    // retrolambda (https://github.com/evant/gradle-retrolambda)
+    classpath 'me.tatarka:gradle-retrolambda:+' //3.2.4
   }
 }
 
