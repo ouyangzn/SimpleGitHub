@@ -21,13 +21,15 @@ import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
 import com.ouyangzn.github.utils.Log;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
+import io.realm.RealmModel;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import java.util.ArrayList;
+import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by ouyangzn on 2016/9/27.<br/>
@@ -39,30 +41,81 @@ public class CollectPresenter extends ICollectPresenter {
 
   private App mApp;
   private Realm mRealm;
-  private RealmResults<CollectedRepo> mCollectList;
-  private RealmChangeListener<RealmResults<CollectedRepo>> mCollectChangeListener;
+  //private RealmResults<CollectedRepo> mCollectList;
+  //private RealmChangeListener<RealmResults<CollectedRepo>> mCollectChangeListener;
 
   public CollectPresenter(Context context) {
     mApp = (App) context.getApplicationContext();
     mRealm = mApp.getGlobalRealm();
-    mCollectChangeListener = element -> {
-      if (mView != null) {
-        // todo 加上分页
-        //element.subList()
-        ArrayList<CollectedRepo> list = new ArrayList<>();
-        list.addAll(element);
-        mView.showCollect(list);
-      }
-    };
+    //mCollectChangeListener = element -> {
+    //  if (mView != null) {
+    //    // todo 加上分页
+    //    //element.subList()
+    //    ArrayList<CollectedRepo> list = new ArrayList<>();
+    //    list.addAll(element);
+    //    mView.showCollect(list);
+    //  }
+    //};
   }
 
-  @Override void queryAllCollect() {
-    mCollectList =
-        mRealm.where(CollectedRepo.class).findAllSortedAsync("collectTime", Sort.DESCENDING);
-    mCollectList.addChangeListener(mCollectChangeListener);
+  public static <T extends RealmModel> List<T> subList(RealmResults<T> list, int start, int end) {
+    if (start >= list.size()) start = list.size() - 1;
+    if (start < 0) start = 0;
+    if (end > list.size()) end = list.size();
+    if (start > end) {
+      int temp = start;
+      start = end;
+      end = temp;
+    }
+    // 转换成普通的List，realm的RealmResults很多API不能用
+    return new ArrayList<>(list.subList(start, end));
   }
 
-  @Override void cancelCollectRepo(final CollectedRepo repo) {
+  //@Override public void queryAllCollect() {
+  //  mCollectList =
+  //      mRealm.where(CollectedRepo.class).findAllSortedAsync("collectTime", Sort.DESCENDING);
+  //  mCollectList.addChangeListener(mCollectChangeListener);
+  //}
+
+  @Override public void queryCollect(int page, int countEachPage) {
+    // ----------方式1：因realm在main线程获取，只能在main线程查询----------
+    //mRealm.asObservable()
+    //    .map(realm -> realm.where(CollectedRepo.class)
+    //        .findAllSorted("collectTime", Sort.DESCENDING))
+    //    // realm在main线程创建，必须在main线程使用
+    //    .subscribeOn(AndroidSchedulers.mainThread())
+    //    .map(results -> subList(results, page * numOfPage, (page + 1) * numOfPage))
+    //    .subscribe(repoList -> {
+    //      if (mView != null) {
+    //        mView.showCollect(repoList);
+    //      }
+    //    }, error -> {
+    //      Log.e(TAG, "---------查询收藏项目出错：", error);
+    //      if (mView != null) {
+    //        mView.showErrorOnQueryFailure();
+    //      }
+    //    });
+    // ----------方式2：间接通过异步查询----------
+    mRealm.where(CollectedRepo.class)
+        .findAllSortedAsync("collectTime", Sort.DESCENDING)
+        .asObservable()
+        .filter(results -> results.size() != 0)
+        // realm在main线程创建,不能指定为io线程
+        //.subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(repoList -> {
+          if (mView != null) {
+            mView.showCollect(subList(repoList, page * countEachPage, (page + 1) * countEachPage));
+          }
+        }, error -> {
+          Log.e(TAG, "---------查询收藏项目出错：", error);
+          if (mView != null) {
+            mView.showErrorOnQueryFailure();
+          }
+        });
+  }
+
+  @Override public void cancelCollectRepo(final CollectedRepo repo) {
     // ---> reason: repo is bound to the UI thread, and repo.id is translated to database access (repo.realmGet$id()) by
     //              Realm's transformer. This method call can be done only from the bound thread.
     // 实际上repo是由realm管理的代理对象CollectedRepoRealmProxy，而不是真正的CollectedRepo，因此repo的访问需要在原来绑定repo的线程
@@ -104,10 +157,10 @@ public class CollectPresenter extends ICollectPresenter {
   }
 
   @Override protected void onDestroy() {
-    if (mCollectList != null) {
-      mCollectList.removeChangeListener(mCollectChangeListener);
-      mCollectList = null;
-    }
+    //if (mCollectList != null) {
+    //mCollectList.removeChangeListener(mCollectChangeListener);
+    //  mCollectList = null;
+    //}
     if (mRealm != null) {
       mRealm.close();
       mRealm = null;

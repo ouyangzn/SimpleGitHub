@@ -69,7 +69,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener {
 
-  private final int DATA_PER_PAGE = LIMIT_20;
+  private final int DATA_EACH_PAGE = LIMIT_20;
 
   private View mLoadingView;
   private SwipeRefreshLayout mRefreshLayout;
@@ -288,7 +288,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     Log.d(TAG, result.toString());
     mLoadingView.setVisibility(View.GONE);
     mCurrPage++;
-    boolean hasMore = result.getRepositories().size() == DATA_PER_PAGE;
+    boolean hasMore = result.getRepositories().size() == DATA_EACH_PAGE;
     mAdapter.setHasMore(hasMore);
     mAdapter.setLanguageVisible(GitHub.LANG_ALL.equals(mSearchFactor.language));
     if (mIsRefresh) {
@@ -309,7 +309,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       mRefreshLayout.setRefreshing(true);
     }
     Log.d(TAG, "----------搜索数据:" + mSearchFactor);
-    mPresenter.queryData(mSearchFactor, DATA_PER_PAGE, mCurrPage);
+    mPresenter.queryData(mSearchFactor, DATA_EACH_PAGE, mCurrPage);
     mIsRefresh = isRefresh;
   }
 

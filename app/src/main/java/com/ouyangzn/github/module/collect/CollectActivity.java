@@ -26,12 +26,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import butterknife.BindView;
 import com.jakewharton.rxbinding.view.RxView;
-import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
@@ -44,15 +42,17 @@ import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.List;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
+import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectView;
 
 public class CollectActivity extends BaseActivity<ICollectView, ICollectPresenter>
     implements ICollectView, BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
-    BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener {
+    BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener,
+    BaseRecyclerViewAdapter.OnLoadingMoreListener {
+
+  private final int COUNT_EACH_PAGE = LIMIT_10;
 
   @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
   @BindView(R.id.view_search) InputEdit mSearchEdit;
@@ -62,6 +62,8 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   private CollectAdapter mCollectAdapter;
   // 重新加载或者加载下一页
   private boolean mIsRefresh = true;
+  // 当前分页页数
+  private int mCurrPage = 0;
 
   @Override protected int getContentView() {
     return R.layout.activity_collect;
@@ -72,65 +74,63 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override protected void initData() {
-    mCollectAdapter = new CollectAdapter(mContext, new ArrayList<CollectedRepo>(0));
+    mCollectAdapter = new CollectAdapter(mContext, new ArrayList<>(0));
     mCollectAdapter.setOnRecyclerViewItemClickListener(this);
     mCollectAdapter.setOnRecyclerViewItemLongClickListener(this);
-    queryAllCollect(true);
+    mCollectAdapter.setOnLoadingMoreListener(this);
+    queryCollect(true);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
     setTitle(R.string.title_collect);
     mLoadingView.setVisibility(View.VISIBLE);
-    LayoutInflater inflater = getLayoutInflater();
     mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+    LayoutInflater inflater = getLayoutInflater();
     mCollectAdapter.setEmptyView(inflater.inflate(R.layout.item_no_data, mRecyclerView, false));
+    mCollectAdapter.setLoadMoreView(
+        inflater.inflate(R.layout.item_load_more, mRecyclerView, false));
     mRecyclerView.setAdapter(mCollectAdapter);
-    RxView.touches(mRecyclerView, new Func1<MotionEvent, Boolean>() {
-      @Override public Boolean call(MotionEvent event) {
-        ScreenUtil.hideKeyBoard(mSearchEdit);
-        mSearchEdit.clearFocus();
-        return false;
-      }
+    RxView.touches(mRecyclerView, event -> {
+      ScreenUtil.hideKeyBoard(mSearchEdit);
+      mSearchEdit.clearFocus();
+      return false;
     }).subscribe();
 
-    mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-      @Override public void onRefresh() {
-        queryAllCollect(true);
-      }
+    mRefreshLayout.setOnRefreshListener(() -> queryCollect(true));
+
+    mSearchEdit.setOnClearTextListener(() -> {
+
     });
 
-    mSearchEdit.setOnClearTextListener(new InputEdit.OnClearTextListener() {
-      @Override public void onClearText() {
+    mSearchEdit.setOnEditorActionListener(actionEvent -> {
+      if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
+        String keyword = mSearchEdit.getInputText().trim();
+        ScreenUtil.hideKeyBoard(mSearchEdit);
+        mSearchEdit.clearFocus();
+        if (!TextUtils.isEmpty(keyword)) {
+          // todo 从收藏中搜索
 
-      }
-    });
-    mSearchEdit.setOnEditorActionListener(new Action1<TextViewEditorActionEvent>() {
-      @Override public void call(TextViewEditorActionEvent actionEvent) {
-        if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
-          String keyword = mSearchEdit.getInputText().trim();
-          ScreenUtil.hideKeyBoard(mSearchEdit);
-          mSearchEdit.clearFocus();
-          if (!TextUtils.isEmpty(keyword)) {
-            // todo 从收藏中搜索
-
-          }
         }
       }
     });
-
   }
 
-  private void queryAllCollect(boolean isRefresh) {
+  private void queryCollect(boolean isRefresh) {
     if (isRefresh) {
       mRefreshLayout.setRefreshing(true);
+      mCurrPage = 0;
     }
     mIsRefresh = isRefresh;
-    mPresenter.queryAllCollect();
+    //mPresenter.queryAllCollect();
+    mPresenter.queryCollect(mCurrPage, COUNT_EACH_PAGE);
   }
 
   @Override public void showCollect(List<CollectedRepo> repoList) {
-    Log.d(TAG, "----------repoList = " + repoList);
+    Log.d(TAG, "----------repoList.size = " + repoList.size());
     mLoadingView.setVisibility(View.GONE);
+    boolean hasMore = repoList.size() == COUNT_EACH_PAGE;
+    mCollectAdapter.setHasMore(hasMore);
+    mCurrPage++;
     if (mIsRefresh) {
       mRefreshLayout.setRefreshing(false);
       // ------------很大几率crash,暂未解决,exception：Inconsistency detected. Invalid view holder adapter positionViewHolder---------------
@@ -152,7 +152,11 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
       //diffResult.dispatchUpdatesTo(mCollectAdapter);
       mCollectAdapter.resetData(repoList);
     } else {
-      mCollectAdapter.addData(repoList);
+      if (mCollectAdapter.isLoadingMore()) {
+        mCollectAdapter.loadMoreFinish(hasMore, repoList);
+      } else {
+        mCollectAdapter.addData(repoList);
+      }
     }
   }
 
@@ -209,6 +213,10 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
 
   private void cancelCollectRepo(CollectedRepo repo) {
     mPresenter.cancelCollectRepo(repo);
+  }
+
+  @Override public void requestMoreData() {
+    queryCollect(false);
   }
 
   public static class CollectDiffCallback extends DiffUtil.Callback {

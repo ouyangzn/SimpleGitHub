@@ -55,5 +55,7 @@ public class CommonConstants {
   public static class NormalCons {
     /** 分页--每页20条数据 */
     public static final int LIMIT_20 = 20;
+    /** 分页--每页10条数据 */
+    public static final int LIMIT_10 = 10;
   }
 }

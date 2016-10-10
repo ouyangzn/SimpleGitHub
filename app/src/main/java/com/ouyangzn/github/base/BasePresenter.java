@@ -15,9 +15,8 @@
 
 package com.ouyangzn.github.base;
 
-import java.util.ArrayList;
-import java.util.List;
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by ouyangzn on 2016/7/1.<br/>
@@ -26,7 +25,7 @@ import rx.Subscription;
 public abstract class BasePresenter<T> {
 
   protected T mView;
-  private List<Subscription> mSubscriptionList = new ArrayList<>(2);
+  private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
   public void onAttach(T view) {
     this.mView = view;
@@ -34,16 +33,7 @@ public abstract class BasePresenter<T> {
 
   public void onDetach() {
     this.mView = null;
-    int size = mSubscriptionList.size();
-    if (size > 0) {
-      Subscription subscription;
-      for (int i = 0; i < size; i++) {
-        subscription = mSubscriptionList.get(i);
-        if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
-      }
-    }
-    this.mSubscriptionList.clear();
-    this.mSubscriptionList = null;
+    mSubscriptions.clear();
     this.onDestroy();
   }
 
@@ -53,6 +43,6 @@ public abstract class BasePresenter<T> {
   protected abstract void onDestroy();
 
   protected void addSubscription(Subscription subscription) {
-    this.mSubscriptionList.add(subscription);
+    this.mSubscriptions.add(subscription);
   }
 }

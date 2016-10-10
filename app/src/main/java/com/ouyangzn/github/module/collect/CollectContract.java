@@ -39,8 +39,8 @@ public class CollectContract {
 
   abstract static class ICollectPresenter extends BasePresenter<ICollectView> {
 
-    abstract void queryAllCollect();
+    public abstract void queryCollect(int page, int countEachPage);
 
-    abstract void cancelCollectRepo(CollectedRepo repo);
+    public abstract void cancelCollectRepo(CollectedRepo repo);
   }
 }
