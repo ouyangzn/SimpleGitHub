@@ -41,21 +41,11 @@ public class CollectPresenter extends ICollectPresenter {
 
   private App mApp;
   private Realm mRealm;
-  //private RealmResults<CollectedRepo> mCollectList;
-  //private RealmChangeListener<RealmResults<CollectedRepo>> mCollectChangeListener;
+  private RealmResults<CollectedRepo> mCollectList;
 
   public CollectPresenter(Context context) {
     mApp = (App) context.getApplicationContext();
     mRealm = mApp.getGlobalRealm();
-    //mCollectChangeListener = element -> {
-    //  if (mView != null) {
-    //    // todo 加上分页
-    //    //element.subList()
-    //    ArrayList<CollectedRepo> list = new ArrayList<>();
-    //    list.addAll(element);
-    //    mView.showCollect(list);
-    //  }
-    //};
   }
 
   public static <T extends RealmModel> List<T> subList(RealmResults<T> list, int start, int end) {
@@ -71,20 +61,22 @@ public class CollectPresenter extends ICollectPresenter {
     return new ArrayList<>(list.subList(start, end));
   }
 
-  //@Override public void queryAllCollect() {
-  //  mCollectList =
-  //      mRealm.where(CollectedRepo.class).findAllSortedAsync("collectTime", Sort.DESCENDING);
-  //  mCollectList.addChangeListener(mCollectChangeListener);
-  //}
-
   @Override public void queryCollect(int page, int countEachPage) {
-    // ----------方式1：因realm在main线程获取，只能在main线程查询----------
-    //mRealm.asObservable()
-    //    .map(realm -> realm.where(CollectedRepo.class)
-    //        .findAllSorted("collectTime", Sort.DESCENDING))
+    //// ----------方式1：因realm在main线程获取，只能在main线程查询----------
+    //// 优先从缓存查
+    //Observable.concat(Observable.just(mCollectList), mRealm.asObservable()
+    //    .concatMap(realm -> Observable.just(
+    //        realm.where(CollectedRepo.class).findAllSorted("collectTime", Sort.DESCENDING))))
+    //    .filter(results -> results != null)
+    //    // 取第一个有数据的结果
+    //    .first()
     //    // realm在main线程创建，必须在main线程使用
     //    .subscribeOn(AndroidSchedulers.mainThread())
-    //    .map(results -> subList(results, page * numOfPage, (page + 1) * numOfPage))
+    //    .map(results -> {
+    //      // 缓存查询到的结果
+    //      mCollectList = results;
+    //      return subList(results, page * countEachPage, (page + 1) * countEachPage);
+    //    })
     //    .subscribe(repoList -> {
     //      if (mView != null) {
     //        mView.showCollect(repoList);
@@ -96,6 +88,11 @@ public class CollectPresenter extends ICollectPresenter {
     //      }
     //    });
     // ----------方式2：间接通过异步查询----------
+    // 缓存优先
+    if (mCollectList != null && mCollectList.isLoaded()) {
+      mView.showCollect(subList(mCollectList, page * countEachPage, (page + 1) * countEachPage));
+      return;
+    }
     mRealm.where(CollectedRepo.class)
         .findAllSortedAsync("collectTime", Sort.DESCENDING)
         .asObservable()
@@ -104,6 +101,7 @@ public class CollectPresenter extends ICollectPresenter {
         //.subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(repoList -> {
+          mCollectList = repoList;
           if (mView != null) {
             mView.showCollect(subList(repoList, page * countEachPage, (page + 1) * countEachPage));
           }
@@ -142,25 +140,25 @@ public class CollectPresenter extends ICollectPresenter {
       }
     });
     // ----------rxJava方式----------
-    //Observable.create(new DeleteCollectedObservable(repo.id))
-    //    .subscribeOn(AndroidSchedulers.mainThread())
-    //    .subscribe( Void -> {
-    //      if (mView != null) {
-    //        mView.showErrorTips(mApp.getString(R.string.tip_collect_cancel_success));
-    //      }
-    //    }, error -> {
-    //      Log.e(TAG, "---------取消收藏失败:", error);
-    //      if (mView != null) {
-    //        mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
-    //      }
-    //    });
+    Observable.create(new DeleteCollectedObservable(repo.id))
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .subscribe(Void -> {
+          if (mView != null) {
+            mView.showErrorTips(mApp.getString(R.string.tip_collect_cancel_success));
+          }
+        }, error -> {
+          Log.e(TAG, "---------取消收藏失败:", error);
+          if (mView != null) {
+            mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
+          }
+        });
   }
 
   @Override protected void onDestroy() {
-    //if (mCollectList != null) {
-    //mCollectList.removeChangeListener(mCollectChangeListener);
-    //  mCollectList = null;
-    //}
+    if (mCollectList != null) {
+      mCollectList.removeChangeListeners();
+      mCollectList = null;
+    }
     if (mRealm != null) {
       mRealm.close();
       mRealm = null;
@@ -182,6 +180,7 @@ public class CollectPresenter extends ICollectPresenter {
       }, () -> {
         if (!subscriber.isUnsubscribed()) {
           subscriber.onNext(null);
+          subscriber.onCompleted();
         }
       }, error -> {
         if (!subscriber.isUnsubscribed()) {

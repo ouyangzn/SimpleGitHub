@@ -153,7 +153,9 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
       mCollectAdapter.resetData(repoList);
     } else {
       if (mCollectAdapter.isLoadingMore()) {
-        mCollectAdapter.loadMoreFinish(hasMore, repoList);
+        // loadMore获取数据速度太快了的时候，会crash：Cannot call this method(-->notifyDataSetChanged())
+        // while RecyclerView is computing a layout or scrolling
+        mRecyclerView.post(() -> mCollectAdapter.loadMoreFinish(hasMore, repoList));
       } else {
         mCollectAdapter.addData(repoList);
       }

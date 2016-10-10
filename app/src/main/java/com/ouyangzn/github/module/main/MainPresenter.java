@@ -115,27 +115,28 @@ public class MainPresenter extends IMainPresenter {
       }
     });
     // rxJava写法
-    Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
-      try {
-        mRealm.beginTransaction();
-        CollectedRepo collectedRepo = new CollectedRepo();
-        collectedRepo.collectTime = System.currentTimeMillis();
-        collectedRepo.convert(repo);
-        mRealm.copyToRealmOrUpdate(collectedRepo);
-        mRealm.commitTransaction();
-        subscriber.onNext(null);
-      } catch (Exception e) {
-        if (mRealm.isInTransaction()) mRealm.cancelTransaction();
-        subscriber.onError(e);
-      }
-    }).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
-      if (mView != null) {
-        mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
-      }
-    }, throwable -> {
-      Log.d(TAG, "----------收藏失败：", throwable);
-      if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
-    });
+    //Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
+    //  try {
+    //    mRealm.beginTransaction();
+    //    CollectedRepo collectedRepo = new CollectedRepo();
+    //    collectedRepo.collectTime = System.currentTimeMillis();
+    //    collectedRepo.convert(repo);
+    //    mRealm.copyToRealmOrUpdate(collectedRepo);
+    //    mRealm.commitTransaction();
+    //    subscriber.onNext(null);
+    //    subscriber.onCompleted();
+    //  } catch (Exception e) {
+    //    if (mRealm.isInTransaction()) mRealm.cancelTransaction();
+    //    subscriber.onError(e);
+    //  }
+    //}).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
+    //  if (mView != null) {
+    //    mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
+    //  }
+    //}, throwable -> {
+    //  Log.d(TAG, "----------收藏失败：", throwable);
+    //  if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
+    //});
   }
 
 }

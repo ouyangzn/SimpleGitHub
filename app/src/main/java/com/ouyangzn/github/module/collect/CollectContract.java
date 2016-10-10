@@ -39,6 +39,12 @@ public class CollectContract {
 
   abstract static class ICollectPresenter extends BasePresenter<ICollectView> {
 
+    /**
+     * 查询收藏的项目
+     *
+     * @param page 当前页
+     * @param countEachPage 每页的数量
+     */
     public abstract void queryCollect(int page, int countEachPage);
 
     public abstract void cancelCollectRepo(CollectedRepo repo);
