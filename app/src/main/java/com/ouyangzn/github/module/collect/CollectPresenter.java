@@ -18,6 +18,7 @@ import android.content.Context;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
+import com.ouyangzn.github.db.DBConstans.CollectedRepoFields;
 import com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
 import com.ouyangzn.github.utils.Log;
 import io.realm.Realm;
@@ -61,12 +62,16 @@ public class CollectPresenter extends ICollectPresenter {
     return new ArrayList<>(list.subList(start, end));
   }
 
+  @Override public void queryByKey(String key) {
+
+  }
+
   @Override public void queryCollect(int page, int countEachPage) {
     //// ----------方式1：因realm在main线程获取，只能在main线程查询----------
     //// 优先从缓存查
     //Observable.concat(Observable.just(mCollectList), mRealm.asObservable()
     //    .concatMap(realm -> Observable.just(
-    //        realm.where(CollectedRepo.class).findAllSorted("collectTime", Sort.DESCENDING))))
+    //        realm.where(CollectedRepo.class).findAllSorted(CollectedRepoFields.FIELD_COLLECT_TIME, Sort.DESCENDING))))
     //    .filter(results -> results != null)
     //    // 取第一个有数据的结果
     //    .first()
@@ -94,7 +99,7 @@ public class CollectPresenter extends ICollectPresenter {
       return;
     }
     mRealm.where(CollectedRepo.class)
-        .findAllSortedAsync("collectTime", Sort.DESCENDING)
+        .findAllSortedAsync(CollectedRepoFields.FIELD_COLLECT_TIME, Sort.DESCENDING)
         .asObservable()
         .filter(results -> results.size() != 0)
         // realm在main线程创建,不能指定为io线程
@@ -128,7 +133,10 @@ public class CollectPresenter extends ICollectPresenter {
       //bgRealm.copyToRealm(collectedRepo);
       // 此操作却会抛异常：Realm access from incorrect thread
       //bgRealm.where(CollectedRepo.class).equalTo("id", repo.id).findAll().deleteAllFromRealm();
-      bgRealm.where(CollectedRepo.class).equalTo("id", id).findAll().deleteAllFromRealm();
+      bgRealm.where(CollectedRepo.class)
+          .equalTo(CollectedRepoFields.FIELD_ID, id)
+          .findAll()
+          .deleteAllFromRealm();
     }, () -> {
       if (mView != null) {
         mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
@@ -176,7 +184,10 @@ public class CollectPresenter extends ICollectPresenter {
     @Override public void call(final Subscriber<? super Void> subscriber) {
       MainThreadSubscription.verifyMainThread();
       mRealm.executeTransactionAsync(bgRealm -> {
-        bgRealm.where(CollectedRepo.class).equalTo("id", mId).findAll().deleteAllFromRealm();
+        bgRealm.where(CollectedRepo.class)
+            .equalTo(CollectedRepoFields.FIELD_ID, mId)
+            .findAll()
+            .deleteAllFromRealm();
       }, () -> {
         if (!subscriber.isUnsubscribed()) {
           subscriber.onNext(null);

@@ -45,7 +45,7 @@ public class App extends Application {
   }
 
   public Realm getGlobalRealm() {
-    return Realm.getInstance(new RealmConfiguration.Builder(sApp).name(DB_NAME)
+    return Realm.getInstance(new RealmConfiguration.Builder().name(DB_NAME)
         // 密码必须64个字节
         .encryptionKey(getGlobalRealmKey())
         .schemaVersion(DB_VERSION)
@@ -72,6 +72,7 @@ public class App extends Application {
     super.onCreate();
     sApp = this;
     ImageLoader.init(sApp);
+    Realm.init(sApp);
   }
 
   protected byte[] getGlobalRealmKey() {

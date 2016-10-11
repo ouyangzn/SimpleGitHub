@@ -15,7 +15,6 @@
 
 package com.ouyangzn.github.module.collect;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -191,19 +190,17 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
 
   @Override public boolean onItemLongClick(View view, final int position) {
     AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
-    builder.setItems(R.array.long_click_collect_dialog_item, new DialogInterface.OnClickListener() {
-      @Override public void onClick(DialogInterface dialog, int which) {
-        CollectedRepo item = mCollectAdapter.getItem(position);
-        switch (which) {
-          case 0:
-            copyUrl(item.htmlUrl);
-            break;
-          case 1:
-            cancelCollectRepo(item);
-            break;
-        }
-        dialog.dismiss();
+    builder.setItems(R.array.long_click_collect_dialog_item, (dialog, which) -> {
+      CollectedRepo item = mCollectAdapter.getItem(position);
+      switch (which) {
+        case 0:
+          copyUrl(item.htmlUrl);
+          break;
+        case 1:
+          cancelCollectRepo(item);
+          break;
       }
+      dialog.dismiss();
     }).show();
     return true;
   }

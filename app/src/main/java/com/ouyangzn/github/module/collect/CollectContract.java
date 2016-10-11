@@ -47,6 +47,8 @@ public class CollectContract {
      */
     public abstract void queryCollect(int page, int countEachPage);
 
+    public abstract void queryByKey(String key);
+
     public abstract void cancelCollectRepo(CollectedRepo repo);
   }
 }

@@ -17,6 +17,7 @@ package com.ouyangzn.github.db;
 
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.CollectedUser;
+import com.ouyangzn.github.db.DBConstans.CollectedRepoFields;
 import io.realm.DynamicRealm;
 import io.realm.RealmMigration;
 import io.realm.RealmSchema;
@@ -43,6 +44,14 @@ public class GlobalRealmMigration implements RealmMigration {
   }
 
   /**
+   * 收藏的repo增加收藏时间一列
+   * @param schema RealmSchema
+   */
+  private void updateVersionTo2(RealmSchema schema) {
+    schema.get("LocalRepo").addField(CollectedRepoFields.FIELD_COLLECT_TIME, long.class);
+  }
+
+  /**
    * 修改LocalRepo类名为CollectedRepo、修改LocalUser类名为CollectedUser，对应的表名、列名修改
    *
    * @param schema RealmSchema
@@ -50,14 +59,6 @@ public class GlobalRealmMigration implements RealmMigration {
   private void updateVersionTo3(RealmSchema schema) {
     schema.rename("LocalRepo", CollectedRepo.class.getSimpleName());
     schema.rename("LocalUser", CollectedUser.class.getSimpleName());
-  }
-
-  /**
-   * 收藏的repo增加收藏时间一列
-   * @param schema RealmSchema
-   */
-  private void updateVersionTo2(RealmSchema schema) {
-    schema.get("LocalRepo").addField("collectTime", long.class);
   }
 
   @Override public int hashCode() {
