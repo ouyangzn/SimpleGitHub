@@ -20,7 +20,7 @@ import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by ouyangzn on 2016/7/1.<br/>
- * Description：
+ * Description：Presenter的基类，如果有使用rxJava进行耗时操作，需调用{@link #addSubscription(Subscription)}
  */
 public abstract class BasePresenter<T> {
 

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.MainThreadSubscription;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -42,6 +43,9 @@ public class CollectPresenter extends ICollectPresenter {
   private App mApp;
   private Realm mRealm;
   private RealmResults<CollectedRepo> mCollectList;
+
+  private Subscription mQueryByKeySub;
+  private Subscription mQueryAllSub;
 
   public CollectPresenter(Context context) {
     mApp = (App) context.getApplicationContext();
@@ -62,8 +66,9 @@ public class CollectPresenter extends ICollectPresenter {
   }
 
   @Override public void queryByKey(String key) {
+    if (mQueryByKeySub != null) mQueryByKeySub.unsubscribe();
     // 收藏的项目一般不会太多，暂时不做分页处理
-    mRealm.where(CollectedRepo.class)
+    mQueryByKeySub = mRealm.where(CollectedRepo.class)
         .contains(CollectedRepoFields.FIELD_DESCRIPTION, key)
         .or()
         .contains(CollectedRepoFields.FIELD_FULL_NAME, key)
@@ -77,6 +82,7 @@ public class CollectPresenter extends ICollectPresenter {
           Log.e(TAG, "----------查询收藏,queryByKey出错：", error);
           if (mView != null) mView.showQueryByKeyFailure();
         });
+    addSubscription(mQueryByKeySub);
   }
 
   @Override public void queryCollect(int page, int countEachPage) {

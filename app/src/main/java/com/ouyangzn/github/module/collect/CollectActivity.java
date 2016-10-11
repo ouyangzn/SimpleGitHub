@@ -26,9 +26,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import butterknife.BindView;
 import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
@@ -41,6 +41,7 @@ import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.List;
+import rx.functions.Action1;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
@@ -52,6 +53,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     BaseRecyclerViewAdapter.OnLoadingMoreListener {
 
   private final int COUNT_EACH_PAGE = LIMIT_10;
+  private final int FIRST_PAGE = 0;
 
   @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
   @BindView(R.id.view_search) InputEdit mSearchEdit;
@@ -61,8 +63,9 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   private CollectAdapter mCollectAdapter;
   // 重新加载或者加载下一页
   private boolean mIsRefresh = true;
+  private boolean mIsQuerying = false;
   // 当前分页页数
-  private int mCurrPage = 0;
+  private int mCurrPage = FIRST_PAGE;
 
   @Override protected int getContentView() {
     return R.layout.activity_collect;
@@ -97,24 +100,26 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
 
     mRefreshLayout.setOnRefreshListener(() -> queryCollect(true));
 
-    mSearchEdit.setOnClearTextListener(() -> {
-
-    });
-
-    mSearchEdit.setOnEditorActionListener(actionEvent -> {
-      if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
-        String keyword = mSearchEdit.getInputText().trim();
-        ScreenUtil.hideKeyBoard(mSearchEdit);
-        mSearchEdit.clearFocus();
-        if (!TextUtils.isEmpty(keyword)) {
-          // todo 从收藏中搜索
-          //queryByKey(keyword);
+    mSearchEdit.setOnClearTextListener(this::onClearKeyword);
+    RxTextView.textChanges(mSearchEdit.getEditText()).subscribe(new Action1<CharSequence>() {
+      @Override public void call(CharSequence text) {
+        String keyword = text.toString();
+        // 清空搜索条件，为搜索全部收藏
+        if (TextUtils.isEmpty(keyword)) {
+          onClearKeyword();
         } else {
-          // 不搜索，显示原来的数据
-
+          keyword = keyword.trim();
+          if (!TextUtils.isEmpty(keyword)) {
+            queryByKey(keyword);
+          }
         }
       }
     });
+  }
+
+  private void onClearKeyword() {
+    mCurrPage = FIRST_PAGE;
+    queryCollect(true);
   }
 
   private void queryByKey(String keyword) {
@@ -122,22 +127,25 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   private void queryCollect(boolean isRefresh) {
+    if (mIsQuerying) return;
+    mIsQuerying = true;
     if (isRefresh) {
       mRefreshLayout.setRefreshing(true);
-      mCurrPage = 0;
+      mCurrPage = FIRST_PAGE;
     }
     mIsRefresh = isRefresh;
     mPresenter.queryCollect(mCurrPage, COUNT_EACH_PAGE);
   }
 
   @Override public void showCollect(List<CollectedRepo> repoList) {
+    mIsQuerying = false;
     int listSize = repoList.size();
     Log.d(TAG, "----------repoList.size = " + listSize);
     mLoadingView.setVisibility(View.GONE);
     boolean hasMore = listSize == COUNT_EACH_PAGE;
     mCollectAdapter.setHasMore(hasMore);
     // 没有数据的话，没必要增加当前页数,其实是为了解决realm.findAllAsync时会先返回一个空集合的问题
-    if (listSize >= 0) {
+    if (listSize > 0) {
       mCurrPage++;
     }
     if (mIsRefresh) {
@@ -182,11 +190,11 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override public void showCollectQueryByKey(List<CollectedRepo> repoList) {
-
+    mCollectAdapter.resetData(repoList);
   }
 
   @Override public void showQueryByKeyFailure() {
-
+    mCollectAdapter.resetData(new ArrayList<>(0));
   }
 
   @Override public void showCollectionCanceled() {
