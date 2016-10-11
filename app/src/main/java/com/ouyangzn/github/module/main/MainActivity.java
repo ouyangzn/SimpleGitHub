@@ -271,10 +271,8 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     return true;
   }
 
-  @Override public void showProgressDialog() {
-  }
-
-  @Override public void dismissProgressDialog() {
+  @Override public void setLoadingIndicator(boolean isActive) {
+    //mRefreshLayout.setRefreshing(isActive);
   }
 
   @Override public void showErrorOnQueryData(String tips) {
@@ -350,6 +348,14 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     mPresenter.collectRepo(repo);
   }
 
+  @Override public void showCollected() {
+    toast(R.string.tip_collect_success);
+  }
+
+  @Override public void showCollectedFailure() {
+    toast(R.string.error_collect_failure);
+  }
+
   private void initNavView() {
     if (GitHub.LANG_ALL.equals(mSearchFactor.language)) {
       mNavView.setCheckedItem(R.id.nav_all);
@@ -396,14 +402,6 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     } else {
       mSearchFactor = App.getApp().getGson().fromJson(searchFactorJson, SearchFactor.class);
     }
-  }
-
-  @Override public void showNormalTips(String tips) {
-    toast(tips);
-  }
-
-  @Override public void showErrorTips(String tips) {
-    toast(tips);
   }
 
 }

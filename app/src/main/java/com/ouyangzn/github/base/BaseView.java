@@ -20,7 +20,11 @@ package com.ouyangzn.github.base;
  */
 public interface BaseView<T> {
 
-  void showProgressDialog();
+  /**
+   * 数据等加载指示器
+   *
+   * @param isActive 是否正在处理
+   */
+  void setLoadingIndicator(boolean isActive);
 
-  void dismissProgressDialog();
 }

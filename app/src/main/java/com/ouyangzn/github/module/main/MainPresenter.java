@@ -61,33 +61,33 @@ public class MainPresenter extends IMainPresenter {
     }
   }
 
-  @Override void queryData(SearchFactor factor, int perPage, int page) {
+  @Override public void queryData(SearchFactor factor, int perPage, int page) {
     if (mQueryDataSubscribe != null && !mQueryDataSubscribe.isUnsubscribed()) {
       mQueryDataSubscribe.unsubscribe();
     }
     mQueryDataSubscribe = mDataSource.queryByKeyword(factor, perPage, page)
         .subscribeOn(Schedulers.io())
         .doOnSubscribe(() -> {
-          if (mView != null) mView.showProgressDialog();
+          if (mView != null) mView.setLoadingIndicator(true);
         })
         .subscribeOn(AndroidSchedulers.mainThread())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(searchResult -> {
           if (mView != null) {
-            mView.dismissProgressDialog();
+            mView.setLoadingIndicator(false);
             mView.showQueryDataResult(searchResult);
           }
         }, throwable -> {
           Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
           if (mView != null) {
-            mView.dismissProgressDialog();
+            mView.setLoadingIndicator(false);
             mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
           }
         });
     addSubscription(mQueryDataSubscribe);
   }
 
-  @Override void saveSearchFactor(SearchFactor factor) {
+  @Override public void saveSearchFactor(SearchFactor factor) {
     Observable.just(factor)
         .observeOn(Schedulers.io())
         .doOnNext(factor1 -> mConfigSp.edit()
@@ -97,7 +97,7 @@ public class MainPresenter extends IMainPresenter {
         .subscribe();
   }
 
-  @Override void collectRepo(final Repository repo) {
+  @Override public void collectRepo(final Repository repo) {
     // realm原生态写法
     mRealm.executeTransactionAsync(bgRealm -> {
       CollectedRepo collectedRepo = new CollectedRepo();
@@ -105,14 +105,10 @@ public class MainPresenter extends IMainPresenter {
       collectedRepo.collectTime = System.currentTimeMillis();
       bgRealm.copyToRealmOrUpdate(collectedRepo);
     }, () -> {
-      if (mView != null) {
-        mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
-      }
+      if (mView != null) mView.showCollected();
     }, error -> {
       Log.d(TAG, "----------收藏失败：", error);
-      if (mView != null) {
-        mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
-      }
+      if (mView != null) mView.showCollectedFailure();
     });
     // rxJava写法
     //Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
@@ -131,11 +127,11 @@ public class MainPresenter extends IMainPresenter {
     //  }
     //}).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
     //  if (mView != null) {
-    //    mView.showNormalTips(mApp.getString(R.string.tip_collect_success));
+    //    mView.showCollected();
     //  }
     //}, throwable -> {
     //  Log.d(TAG, "----------收藏失败：", throwable);
-    //  if (mView != null) mView.showErrorTips(mApp.getString(R.string.error_collect_failure));
+    //  if (mView != null) mView.showCollectedFailure();
     //});
   }
 

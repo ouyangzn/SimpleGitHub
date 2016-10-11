@@ -32,9 +32,14 @@ public class CollectContract {
 
     void showErrorOnQueryFailure();
 
-    void showNormalTips(String tips);
+    void showCollectQueryByKey(List<CollectedRepo> repoList);
 
-    void showErrorTips(String tips);
+    void showQueryByKeyFailure();
+
+    void showCollectionCanceled();
+
+    void showCollectionCancelFailure();
+
   }
 
   abstract static class ICollectPresenter extends BasePresenter<ICollectView> {

@@ -16,7 +16,6 @@ package com.ouyangzn.github.module.collect;
 
 import android.content.Context;
 import com.ouyangzn.github.App;
-import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.db.DBConstans.CollectedRepoFields;
 import com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
@@ -63,12 +62,26 @@ public class CollectPresenter extends ICollectPresenter {
   }
 
   @Override public void queryByKey(String key) {
-
+    // 收藏的项目一般不会太多，暂时不做分页处理
+    mRealm.where(CollectedRepo.class)
+        .contains(CollectedRepoFields.FIELD_DESCRIPTION, key)
+        .or()
+        .contains(CollectedRepoFields.FIELD_FULL_NAME, key)
+        .findAllSortedAsync(CollectedRepoFields.FIELD_COLLECT_TIME, Sort.DESCENDING)
+        .asObservable()
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(results -> {
+          if (mView != null) mView.showCollectQueryByKey(new ArrayList<>(results));
+        }, error -> {
+          Log.e(TAG, "----------查询收藏,queryByKey出错：", error);
+          if (mView != null) mView.showQueryByKeyFailure();
+        });
   }
 
   @Override public void queryCollect(int page, int countEachPage) {
-    //// ----------方式1：因realm在main线程获取，只能在main线程查询----------
-    //// 优先从缓存查
+    // ----------方式1：因realm在main线程获取，只能在main线程查询----------
+    // 优先从缓存查
     //Observable.concat(Observable.just(mCollectList), mRealm.asObservable()
     //    .concatMap(realm -> Observable.just(
     //        realm.where(CollectedRepo.class).findAllSorted(CollectedRepoFields.FIELD_COLLECT_TIME, Sort.DESCENDING))))
@@ -101,7 +114,6 @@ public class CollectPresenter extends ICollectPresenter {
     mRealm.where(CollectedRepo.class)
         .findAllSortedAsync(CollectedRepoFields.FIELD_COLLECT_TIME, Sort.DESCENDING)
         .asObservable()
-        .filter(results -> results.size() != 0)
         // realm在main线程创建,不能指定为io线程
         //.subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -112,9 +124,7 @@ public class CollectPresenter extends ICollectPresenter {
           }
         }, error -> {
           Log.e(TAG, "---------查询收藏项目出错：", error);
-          if (mView != null) {
-            mView.showErrorOnQueryFailure();
-          }
+          if (mView != null) mView.showErrorOnQueryFailure();
         });
   }
 
@@ -138,28 +148,20 @@ public class CollectPresenter extends ICollectPresenter {
           .findAll()
           .deleteAllFromRealm();
     }, () -> {
-      if (mView != null) {
-        mView.showNormalTips(mApp.getString(R.string.tip_collect_cancel_success));
-      }
+      if (mView != null) mView.showCollectionCanceled();
     }, error -> {
       Log.e(TAG, "---------取消收藏失败:", error);
-      if (mView != null) {
-        mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
-      }
+      if (mView != null) mView.showCollectionCancelFailure();
     });
     // ----------rxJava方式----------
-    Observable.create(new DeleteCollectedObservable(repo.id))
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .subscribe(Void -> {
-          if (mView != null) {
-            mView.showErrorTips(mApp.getString(R.string.tip_collect_cancel_success));
-          }
-        }, error -> {
-          Log.e(TAG, "---------取消收藏失败:", error);
-          if (mView != null) {
-            mView.showErrorTips(mApp.getString(R.string.error_collect_cancel_failure));
-          }
-        });
+    //Observable.create(new DeleteCollectedObservable(repo.id))
+    //    .subscribeOn(AndroidSchedulers.mainThread())
+    //    .subscribe(Void -> {
+    //      if (mView != null) mView.showCollectionCanceled();
+    //    }, error -> {
+    //      Log.e(TAG, "---------取消收藏失败:", error);
+    //      if (mView != null) mView.showCollectionCancelFailure();
+    //    });
   }
 
   @Override protected void onDestroy() {

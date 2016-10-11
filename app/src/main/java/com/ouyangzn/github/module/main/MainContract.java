@@ -33,9 +33,9 @@ public interface MainContract {
 
     void showQueryDataResult(SearchResult result);
 
-    void showNormalTips(String tips);
+    void showCollected();
 
-    void showErrorTips(String tips);
+    void showCollectedFailure();
   }
 
   abstract class IMainPresenter extends BasePresenter<IMainView> {
@@ -45,19 +45,19 @@ public interface MainContract {
      * @param perPage 每页的数据量
      * @param page 搜索第几页
      */
-    abstract void queryData(SearchFactor factor, int perPage, int page);
+    public abstract void queryData(SearchFactor factor, int perPage, int page);
 
     /**
      * 保存搜索因子
      * @param factor 搜索因子
      */
-    abstract void saveSearchFactor(SearchFactor factor);
+    public abstract void saveSearchFactor(SearchFactor factor);
 
     /**
      * 收藏项目
      *
      * @param repo
      */
-    abstract void collectRepo(Repository repo);
+    public abstract void collectRepo(Repository repo);
   }
 }

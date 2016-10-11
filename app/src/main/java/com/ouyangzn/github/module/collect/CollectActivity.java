@@ -108,10 +108,17 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
         mSearchEdit.clearFocus();
         if (!TextUtils.isEmpty(keyword)) {
           // todo 从收藏中搜索
+          //queryByKey(keyword);
+        } else {
+          // 不搜索，显示原来的数据
 
         }
       }
     });
+  }
+
+  private void queryByKey(String keyword) {
+    mPresenter.queryByKey(keyword);
   }
 
   private void queryCollect(boolean isRefresh) {
@@ -120,35 +127,22 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
       mCurrPage = 0;
     }
     mIsRefresh = isRefresh;
-    //mPresenter.queryAllCollect();
     mPresenter.queryCollect(mCurrPage, COUNT_EACH_PAGE);
   }
 
   @Override public void showCollect(List<CollectedRepo> repoList) {
-    Log.d(TAG, "----------repoList.size = " + repoList.size());
+    int listSize = repoList.size();
+    Log.d(TAG, "----------repoList.size = " + listSize);
     mLoadingView.setVisibility(View.GONE);
-    boolean hasMore = repoList.size() == COUNT_EACH_PAGE;
+    boolean hasMore = listSize == COUNT_EACH_PAGE;
     mCollectAdapter.setHasMore(hasMore);
-    mCurrPage++;
+    // 没有数据的话，没必要增加当前页数,其实是为了解决realm.findAllAsync时会先返回一个空集合的问题
+    if (listSize >= 0) {
+      mCurrPage++;
+    }
     if (mIsRefresh) {
       mRefreshLayout.setRefreshing(false);
-      // ------------很大几率crash,暂未解决,exception：Inconsistency detected. Invalid view holder adapter positionViewHolder---------------
-      //// 使用DiffUtil计算有变化的数据进行局部刷新
-      //List<CollectedRepo> oldData = mCollectAdapter.getData();
-      //DiffUtil.DiffResult diffResult =
-      //    DiffUtil.calculateDiff(new CollectDiffCallback(repoList, oldData));
-      ///*
-      //需要先替换adapter中的数据但不刷新，刷新通知交由diffResult.dispatchUpdatesTo()来做
-      //<pre>
-      //     List oldList = mAdapter.getData();
-      //     DiffResult result = DiffUtil.calculateDiff(new MyCallback(oldList, newList));
-      //     mAdapter.setData(newList);
-      //     result.dispatchUpdatesTo(mAdapter);
-      //</pre>
-      //*/
-      //oldData.clear();
-      //oldData.addAll(repoList);
-      //diffResult.dispatchUpdatesTo(mCollectAdapter);
+      //calculateDiffAndRefresh(mCollectAdapter, repoList);
       mCollectAdapter.resetData(repoList);
     } else {
       if (mCollectAdapter.isLoadingMore()) {
@@ -161,24 +155,50 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     }
   }
 
+  private void calculateDiffAndRefresh(BaseRecyclerViewAdapter<CollectedRepo> adapter,
+      List<CollectedRepo> repoList) {
+    // ------------很大几率crash,暂未解决,exception：Inconsistency detected. Invalid view holder adapter positionViewHolder---------------
+    // 使用DiffUtil计算有变化的数据进行局部刷新
+    List<CollectedRepo> oldData = adapter.getData();
+    DiffUtil.DiffResult diffResult =
+        DiffUtil.calculateDiff(new CollectDiffCallback(repoList, oldData));
+    /*
+    需要先替换adapter中的数据但不刷新，刷新通知交由diffResult.dispatchUpdatesTo()来做
+    <pre>
+         List oldList = mAdapter.getData();
+         DiffResult result = DiffUtil.calculateDiff(new MyCallback(oldList, newList));
+         mAdapter.setData(newList);
+         result.dispatchUpdatesTo(mAdapter);
+    </pre>
+    */
+    oldData.clear();
+    oldData.addAll(repoList);
+    diffResult.dispatchUpdatesTo(adapter);
+  }
+
   @Override public void showErrorOnQueryFailure() {
     mLoadingView.setVisibility(View.GONE);
     if (mIsRefresh) mRefreshLayout.setRefreshing(false);
+  }
+
+  @Override public void showCollectQueryByKey(List<CollectedRepo> repoList) {
 
   }
 
-  @Override public void showNormalTips(String tips) {
-    toast(tips);
+  @Override public void showQueryByKeyFailure() {
+
   }
 
-  @Override public void showErrorTips(String tips) {
-    toast(tips);
+  @Override public void showCollectionCanceled() {
+    toast(R.string.tip_collect_cancel_success);
   }
 
-  @Override public void showProgressDialog() {
+  @Override public void showCollectionCancelFailure() {
+    toast(R.string.error_collect_cancel_failure);
   }
 
-  @Override public void dismissProgressDialog() {
+  @Override public void setLoadingIndicator(boolean isActive) {
+    //mRefreshLayout.setRefreshing(isActive);
   }
 
   @Override public void onItemClick(View view, int position) {
