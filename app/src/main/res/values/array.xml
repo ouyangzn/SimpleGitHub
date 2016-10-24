@@ -14,6 +14,20 @@
   ~ limitations under the License.
   -->
 <resources>
+  <array name="array_language">
+    <!--<item>all</item>-->
+    <item>java</item>
+    <item>Object-C</item>
+    <item>swift</item>
+    <item>C</item>
+    <item>C++</item>
+    <item>php</item>
+    <item>js</item>
+    <item>python</item>
+    <item>ruby</item>
+    <item>c#</item>
+    <item>shell</item>
+  </array>
   <array name="long_click_main_dialog_item">
     <item>复制网址</item>
     <item>收藏</item>

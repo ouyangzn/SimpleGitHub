@@ -41,7 +41,6 @@ import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.List;
-import rx.functions.Action1;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
@@ -101,17 +100,16 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mRefreshLayout.setOnRefreshListener(() -> queryCollect(true));
 
     mSearchEdit.setOnClearTextListener(this::onClearKeyword);
-    RxTextView.textChanges(mSearchEdit.getEditText()).subscribe(new Action1<CharSequence>() {
-      @Override public void call(CharSequence text) {
-        String keyword = text.toString();
-        // 清空搜索条件，为搜索全部收藏
-        if (TextUtils.isEmpty(keyword)) {
-          onClearKeyword();
-        } else {
-          keyword = keyword.trim();
-          if (!TextUtils.isEmpty(keyword)) {
-            queryByKey(keyword);
-          }
+    RxTextView.textChanges(mSearchEdit.getEditText()).subscribe(text -> {
+      // 初始化时，rxView会先调用一次textChanged事件，有点小坑
+      String keyword = text.toString();
+      // 清空搜索条件，为搜索全部收藏
+      if (TextUtils.isEmpty(keyword)) {
+        onClearKeyword();
+      } else {
+        keyword = keyword.trim();
+        if (!TextUtils.isEmpty(keyword)) {
+          queryByKey(keyword);
         }
       }
     });

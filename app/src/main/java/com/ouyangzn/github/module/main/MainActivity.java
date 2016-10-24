@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016.  ouyangzn   <ouyangzn@163.com>
+ * Copyright (c) 2016.  ouyangzn   <email : ouyangzn@163.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,24 +19,24 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ImageView;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import butterknife.ButterKnife;
-import com.jakewharton.rxbinding.view.RxView;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
@@ -51,15 +51,14 @@ import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
 import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
-import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.ScreenUtil;
 import com.ouyangzn.github.utils.UIUtil;
-import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.lib.pickview.TimePickerView;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
 
@@ -101,74 +100,88 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override protected void initData() {
-    initSearchFactor();
-    mAdapter = new RepositoryAdapter(mContext, new ArrayList<>(0));
-    mAdapter.setOnRecyclerViewItemClickListener(this);
-    mAdapter.setOnRecyclerViewItemLongClickListener(this);
-    mAdapter.setOnLoadingMoreListener(this);
-    // fixme 如果上一次选的语言是all，退出重进，搜索到的数据不正确，可能是接口的问题，同一个接口，多次调用返回数据不一定相同
-    search(false);
+    //initSearchFactor();
+    //mAdapter = new RepositoryAdapter(mContext, new ArrayList<>(0));
+    //mAdapter.setOnRecyclerViewItemClickListener(this);
+    //mAdapter.setOnRecyclerViewItemLongClickListener(this);
+    //mAdapter.setOnLoadingMoreListener(this);
+    //// fixme 如果上一次选的语言是all，退出重进，搜索到的数据不正确，可能是接口的问题，同一个接口，多次调用返回数据不一定相同
+    //search(false);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
-    setTitle(GitHub.LANG_ALL.equals(mSearchFactor.language) ? getString(R.string.app_name)
-        : mSearchFactor.language);
-    mLoadingView = ButterKnife.findById(this, R.id.main_loading);
-    mLoadingView.setVisibility(View.VISIBLE);
+    //setTitle(GitHub.LANG_ALL.equals(mSearchFactor.language) ? getString(R.string.app_name)
+    //    : mSearchFactor.language);
+    //mLoadingView = ButterKnife.findById(this, R.id.main_loading);
+    //mLoadingView.setVisibility(View.VISIBLE);
 
-    Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
-    setSupportActionBar(toolbar);
-    ImageView collectImg =
-        UIUtil.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
-            new int[] { 0, 0, ScreenUtil.dp2px(mContext, 15), 0 });
-    collectImg.setId(R.id.id_toolbar_right_img);
-    collectImg.setOnClickListener(this);
+    //Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
+    //setSupportActionBar(toolbar);
+    //ImageView collectImg =
+    //    UIUtil.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
+    //        new int[] { 0, 0, ScreenUtil.dp2px(mContext, 15), 0 });
+    //collectImg.setId(R.id.id_toolbar_right_img);
+    //collectImg.setOnClickListener(this);
+    //
+    //// @BindView 找不到，NavigationView下的view直接find也找不到
+    //mNavView = ButterKnife.findById(this, R.id.nav_view);
+    //mNavView.setNavigationItemSelectedListener(this);
+    //initNavView();
+    //ImageView img_photo = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.img_photo);
+    //ImageLoader.loadAsCircle(img_photo, R.drawable.ic_photo);
+    //
+    //// @BindView 找不到
+    //mDrawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
+    //ActionBarDrawerToggle toggle =
+    //    new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+    //mDrawerLayout.addDrawerListener(toggle);
+    //toggle.syncState();
+    //
+    //mRefreshLayout = ButterKnife.findById(this, R.id.refreshLayout);
+    //mRefreshLayout.setOnRefreshListener(() -> search(true));
+    //
+    //final InputEdit inputEdit = ButterKnife.findById(this, R.id.view_search);
+    //inputEdit.setOnClearTextListener(() -> mSearchFactor.keyword = null);
+    //inputEdit.setOnEditorActionListener(actionEvent -> {
+    //  if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
+    //    String keyword = inputEdit.getInputText().trim();
+    //    ScreenUtil.hideKeyBoard(inputEdit);
+    //    inputEdit.clearFocus();
+    //    // 关键字不为空 或者 之前搜过,现在清空搜索条件
+    //    if (!TextUtils.isEmpty(keyword) || !TextUtils.isEmpty(mSearchFactor.keyword)) {
+    //      mSearchFactor.keyword = keyword;
+    //      if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
+    //        mSearchFactor.setCreateDate(null);
+    //      }
+    //      search(true);
+    //    }
+    //  }
+    //});
+    //RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler);
+    //recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+    //LayoutInflater inflater = getLayoutInflater();
+    //mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, recyclerView, false));
+    //mAdapter.setEmptyView(inflater.inflate(R.layout.item_no_data, recyclerView, false));
+    //recyclerView.setAdapter(mAdapter);
+    //RxView.touches(recyclerView, event -> {
+    //  ScreenUtil.hideKeyBoard(inputEdit);
+    //  inputEdit.clearFocus();
+    //  return false;
+    //}).subscribe();
 
-    // @BindView 找不到，NavigationView下的view直接find也找不到
-    mNavView = ButterKnife.findById(this, R.id.nav_view);
-    mNavView.setNavigationItemSelectedListener(this);
-    initNavView();
-    ImageView img_photo = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.img_photo);
-    ImageLoader.loadAsCircle(img_photo, R.drawable.ic_photo);
-
-    // @BindView 找不到
-    mDrawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
-    ActionBarDrawerToggle toggle =
-        new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-    mDrawerLayout.addDrawerListener(toggle);
-    toggle.syncState();
-
-    mRefreshLayout = ButterKnife.findById(this, R.id.refreshLayout);
-    mRefreshLayout.setOnRefreshListener(() -> search(true));
-
-    final InputEdit inputEdit = ButterKnife.findById(this, R.id.view_search);
-    inputEdit.setOnClearTextListener(() -> mSearchFactor.keyword = null);
-    inputEdit.setOnEditorActionListener(actionEvent -> {
-      if (EditorInfo.IME_ACTION_SEARCH == actionEvent.actionId()) {
-        String keyword = inputEdit.getInputText().trim();
-        ScreenUtil.hideKeyBoard(inputEdit);
-        inputEdit.clearFocus();
-        // 关键字不为空 或者 之前搜过,现在清空搜索条件
-        if (!TextUtils.isEmpty(keyword) || !TextUtils.isEmpty(mSearchFactor.keyword)) {
-          mSearchFactor.keyword = keyword;
-          if (!GitHub.LANG_ALL.equals(mSearchFactor.language)) {
-            mSearchFactor.setCreateDate(null);
-          }
-          search(true);
-        }
-      }
-    });
-    RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler);
-    recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-    LayoutInflater inflater = getLayoutInflater();
-    mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, recyclerView, false));
-    mAdapter.setEmptyView(inflater.inflate(R.layout.item_no_data, recyclerView, false));
-    recyclerView.setAdapter(mAdapter);
-    RxView.touches(recyclerView, event -> {
-      ScreenUtil.hideKeyBoard(inputEdit);
-      inputEdit.clearFocus();
-      return false;
-    }).subscribe();
+    ViewPager viewPager = ButterKnife.findById(this, R.id.view_pager_main);
+    TabLayout tabLayout = ButterKnife.findById(this, R.id.tabs);
+    tabLayout.setupWithViewPager(viewPager);
+    /** 页面list **/
+    List<Fragment> fragmentList = new ArrayList<>();
+    /** 页面title list **/
+    String[] array = getResources().getStringArray(R.array.array_language);
+    List<String> titleList = Arrays.asList(array);
+    for (String s : titleList) {
+      fragmentList.add(MainFragment.getInstance(s));
+    }
+    viewPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), fragmentList, titleList));
+    viewPager.setOffscreenPageLimit(0);
 
   }
 
@@ -401,6 +414,64 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
       mSearchFactor.language = GitHub.LANG_JAVA;
     } else {
       mSearchFactor = App.getApp().getGson().fromJson(searchFactorJson, SearchFactor.class);
+    }
+  }
+
+  public static class ViewPagerFragment extends Fragment {
+
+    private String text;
+
+    public static ViewPagerFragment getInstance(String data) {
+      ViewPagerFragment fragment = new ViewPagerFragment();
+      Bundle bundle = new Bundle();
+      bundle.putString("text", data);
+      fragment.setArguments(bundle);
+      return fragment;
+    }
+
+    @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      text = getArguments().getString("text");
+    }
+
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        Bundle savedInstanceState) {
+      TextView tv = new TextView(getContext());
+      tv.setText(text);
+      return tv;
+    }
+  }
+
+  class MyPagerAdapter extends FragmentPagerAdapter {
+
+    private List<Fragment> fragmentList;
+    private List<String> titleList;
+
+    public MyPagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> titleList) {
+      super(fm);
+      this.fragmentList = fragmentList;
+      this.titleList = titleList;
+    }
+
+    /**
+     * 得到每个页面
+     */
+    @Override public Fragment getItem(int arg0) {
+      return (fragmentList == null || fragmentList.size() == 0) ? null : fragmentList.get(arg0);
+    }
+
+    /**
+     * 每个页面的title
+     */
+    @Override public CharSequence getPageTitle(int position) {
+      return (titleList.size() > position) ? titleList.get(position) : "";
+    }
+
+    /**
+     * 页面的总个数
+     */
+    @Override public int getCount() {
+      return fragmentList == null ? 0 : fragmentList.size();
     }
   }
 
