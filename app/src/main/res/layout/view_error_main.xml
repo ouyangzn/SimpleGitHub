@@ -13,21 +13,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_main_loading_failure"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/white"
     >
-  <ViewStub
-      android:id="@+id/stub_loading"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout="@layout/content_loading"
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/progress"
+      android:layout_centerInParent="true"
+      android:gravity="center"
+      android:text="@string/error_main_load_failure"
+      android:textColor="#000"
       />
-  <ViewStub
-      android:id="@+id/stub_error"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout="@layout/content_error"
-      />
-</FrameLayout>
+</RelativeLayout>

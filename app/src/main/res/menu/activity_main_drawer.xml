@@ -1,41 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <group android:checkableBehavior="single">
+  <group android:checkableBehavior="none">
     <item
-        android:id="@+id/nav_all"
-        android:title="@string/language_all"/>
-    <item
-        android:id="@+id/nav_java"
-        android:title="@string/language_java"/>
-    <item
-        android:id="@+id/nav_oc"
-        android:title="@string/language_oc"/>
-    <item
-        android:id="@+id/nav_swift"
-        android:title="@string/language_swift"/>
-    <item
-        android:id="@+id/nav_c"
-        android:title="@string/language_c"/>
-    <item
-        android:id="@+id/nav_cpp"
-        android:title="@string/language_cpp"/>
-    <item
-        android:id="@+id/nav_php"
-        android:title="@string/language_php"/>
-    <item
-        android:id="@+id/nav_js"
-        android:title="@string/language_js"/>
-    <item
-        android:id="@+id/nav_python"
-        android:title="@string/language_python"/>
-    <item
-        android:id="@+id/nav_ruby"
-        android:title="@string/language_ruby"/>
-    <item
-        android:id="@+id/nav_c_sharp"
-        android:title="@string/language_c_sharp"/>
-    <item
-        android:id="@+id/nav_shell"
-        android:title="@string/language_shell"/>
+        android:id="@+id/nav_about"
+        android:title="@string/nav_about"/>
   </group>
 </menu>

@@ -23,8 +23,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.CommonConstants;
@@ -49,8 +49,9 @@ import static com.ouyangzn.github.module.main.MainContract.IMainView;
 public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
     implements IMainView, BaseRecyclerViewAdapter.OnLoadingMoreListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
-    BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener {
+    BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener, View.OnClickListener {
 
+  private static final String LANGUAGE = "language";
   private static final int DATA_EACH_PAGE = LIMIT_20;
   @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
   @BindView(R.id.recycler) RecyclerView mRecyclerView;
@@ -63,7 +64,7 @@ public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
   public static MainFragment getInstance(String language) {
     MainFragment fragment = new MainFragment();
     Bundle data = new Bundle();
-    data.putString("language", language);
+    data.putString(LANGUAGE, language);
     fragment.setArguments(data);
     return fragment;
   }
@@ -76,8 +77,12 @@ public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
     return R.layout.fragment_main;
   }
 
+  @Override public IMainPresenter initPresenter() {
+    return new MainPresenter(getContext());
+  }
+
   @Override protected void initData(Bundle savedInstanceState) {
-    String language = getArguments().getString("language");
+    String language = getArguments().getString(LANGUAGE);
     mSearchFactor = new SearchFactor();
     mSearchFactor.language = language;
     search(false);
@@ -88,18 +93,15 @@ public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
   }
 
   @Override protected void initView(View parent) {
-    mRefreshLayout = ButterKnife.findById(parent, R.id.refreshLayout);
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
-    mRecyclerView = ButterKnife.findById(parent, R.id.recycler);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     mAdapter.setLoadMoreView(mInflater.inflate(R.layout.item_load_more, mRecyclerView, false));
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
     mRecyclerView.setAdapter(mAdapter);
-  }
-
-  @Override public IMainPresenter initPresenter() {
-    return new MainPresenter(getContext());
+    View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
+    errorView.findViewById(R.id.layout_main_loading_failure).setOnClickListener(this);
+    setErrorView(errorView);
   }
 
   private void search(boolean isRefresh) {
@@ -110,6 +112,15 @@ public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
     Log.d(TAG, "----------搜索数据:" + mSearchFactor);
     mPresenter.queryData(mSearchFactor, DATA_EACH_PAGE, mCurrPage);
     mIsRefresh = isRefresh;
+  }
+
+  @Override public void onClick(View v) {
+    switch (v.getId()) {
+      case R.id.layout_main_loading_failure:
+        switchStatus(Status.STATUS_LOADING);
+        search(false);
+        break;
+    }
   }
 
   @Override public void onItemClick(View view, int position) {
@@ -150,10 +161,14 @@ public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
   }
 
   @Override public void showErrorOnQueryData(String tips) {
-    switchStatus(Status.STATUS_NORMAL);
     toast(tips);
     if (mIsRefresh) mRefreshLayout.setRefreshing(false);
-    if (mAdapter.isLoadingMore()) mAdapter.loadMoreFinish(true, null);
+    if (mAdapter.isLoadingMore()) {
+      switchStatus(Status.STATUS_NORMAL);
+      mAdapter.loadMoreFinish(true, null);
+    } else {
+      switchStatus(Status.STATUS_ERROR);
+    }
   }
 
   @Override public void showQueryDataResult(SearchResult result) {

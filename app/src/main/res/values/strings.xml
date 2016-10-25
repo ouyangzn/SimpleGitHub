@@ -4,6 +4,7 @@
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>
+  <string name="nav_about">关于</string>
   <string name="language_all">all</string>
   <string name="language_java">java</string>
   <string name="language_oc">Object-C</string>
@@ -17,6 +18,7 @@
   <string name="language_c_sharp">c#</string>
   <string name="language_shell">shell</string>
   <string name="loading">加载中…</string>
+  <string name="loading_failure">数据加载失败/(ㄒoㄒ)/~~</string>
   <string name="stars">%d·stars</string>
   <string name="hint_input_keyword">输入关键字搜索</string>
   <string name="error_search_github">查询数据失败,请重试</string>
@@ -26,4 +28,5 @@
   <string name="tip_collect_cancel_success">已取消收藏</string>
   <string name="error_collect_failure">收藏失败,请重新收藏</string>
   <string name="error_collect_cancel_failure">取消收藏失败,请重新取消</string>
+  <string name="error_main_load_failure">数据加载失败/(ㄒoㄒ)/~~\n点击重新加载</string>
 </resources>

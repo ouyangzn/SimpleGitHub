@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import com.ouyangzn.github.R;
 
 public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragment {
@@ -32,9 +33,12 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
   protected LayoutInflater mInflater;
   protected View mContentView;
   protected View mLoadingView;
+  protected View mErrorView;
+  private ViewGroup mRootView;
   private com.ouyangzn.github.utils.Toast mToast;
   private Status mStatus;
   private boolean isVisible;
+  private Unbinder mUnbinder;
 
   @Override public void setUserVisibleHint(boolean isVisibleToUser) {
     super.setUserVisibleHint(isVisibleToUser);
@@ -53,24 +57,39 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
   public final View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     mInflater = inflater;
-    ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_base_content, container, false);
-    mLoadingView = view.findViewById(R.id.stub_loading);
+    mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_base_content, container, false);
+    mLoadingView = mRootView.findViewById(R.id.stub_loading);
+    mErrorView = mRootView.findViewById(R.id.stub_error);
     mContentView = inflater.inflate(getContentView(), container, false);
     if (mContentView == null) throw new UnsupportedOperationException("contentView == null");
-    view.addView(mContentView);
+    mRootView.addView(mContentView);
     if (mStatus == null) {
       switchStatus(getCurrentStatus());
     } else {
       switchStatus(mStatus);
     }
-    return view;
+    mUnbinder = ButterKnife.bind(this, mContentView);
+    return mRootView;
   }
 
   @Override public final void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    ButterKnife.bind(view);
     mPresenter.onAttach((V) this);
     initView(mContentView);
+  }
+
+  protected void setLoadingView(View loadingView) {
+    loadingView.setVisibility(mLoadingView.getVisibility());
+    mRootView.removeView(mLoadingView);
+    mRootView.addView(loadingView);
+    mLoadingView = loadingView;
+  }
+
+  protected void setErrorView(View errorView) {
+    errorView.setVisibility(mErrorView.getVisibility());
+    mRootView.removeView(mErrorView);
+    mRootView.addView(errorView);
+    mErrorView = errorView;
   }
 
   /**
@@ -89,6 +108,10 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
       case STATUS_LOADING:
         hideAllView();
         mLoadingView.setVisibility(View.VISIBLE);
+        break;
+      case STATUS_ERROR:
+        hideAllView();
+        mErrorView.setVisibility(View.VISIBLE);
         break;
     }
   }
@@ -119,20 +142,21 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    if (mPresenter != null) {
-      mPresenter.onDetach();
-    }
+    if (mPresenter != null) mPresenter.onDetach();
+    mUnbinder.unbind();
   }
 
   private void hideAllView() {
-    mContentView.setVisibility(View.GONE);
-    mLoadingView.setVisibility(View.GONE);
+    int childCount = mRootView.getChildCount();
+    for (int i = 0; i < childCount; i++) {
+      mRootView.getChildAt(i).setVisibility(View.GONE);
+    }
   }
 
   /**
    * fragment的数据等加载状态
    */
   public enum Status {
-    STATUS_NORMAL, STATUS_LOADING
+    STATUS_NORMAL, STATUS_LOADING, STATUS_ERROR
   }
 }
