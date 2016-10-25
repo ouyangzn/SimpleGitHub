@@ -96,7 +96,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     }
     viewPager.setAdapter(
         new MainPagerAdapter(getSupportFragmentManager(), fragmentList, titleList));
-    viewPager.setOffscreenPageLimit(0);
+    viewPager.setOffscreenPageLimit(fragmentList.size());
 
   }
 

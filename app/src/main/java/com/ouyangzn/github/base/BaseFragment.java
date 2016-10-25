@@ -25,6 +25,7 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.ouyangzn.github.R;
+import com.ouyangzn.github.utils.Log;
 
 public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragment {
 
@@ -42,7 +43,9 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
 
   @Override public void setUserVisibleHint(boolean isVisibleToUser) {
     super.setUserVisibleHint(isVisibleToUser);
-    isVisible = getUserVisibleHint();
+    isVisible = isVisibleToUser;
+    Log.d(TAG, "-----------isVisibleToUser = " + isVisible + " ,class = " + getArguments().get(
+        "language"));
   }
 
   @Override public final void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,12 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
     super.onViewCreated(view, savedInstanceState);
     mPresenter.onAttach((V) this);
     initView(mContentView);
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    if (mPresenter != null) mPresenter.onDetach();
+    mUnbinder.unbind();
   }
 
   protected void setLoadingView(View loadingView) {
@@ -134,17 +143,17 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
 
   protected abstract int getContentView();
 
+  /**
+   * 初始化一些数据,此时view还未创建完，
+   * 如果是拿到数据马上显示的操作，应放到{@link #initView(View)}中
+   *
+   * @param savedInstanceState
+   */
   protected abstract void initData(Bundle savedInstanceState);
 
   protected abstract void initView(View parent);
 
   public abstract T initPresenter();
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    if (mPresenter != null) mPresenter.onDetach();
-    mUnbinder.unbind();
-  }
 
   private void hideAllView() {
     int childCount = mRootView.getChildCount();

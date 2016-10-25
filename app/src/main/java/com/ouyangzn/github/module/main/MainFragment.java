@@ -26,8 +26,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.CommonConstants;
+import com.ouyangzn.github.base.LazyLoadFragment;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
@@ -46,7 +46,7 @@ import static com.ouyangzn.github.module.main.MainContract.IMainView;
  * Created by ouyangzn on 2016/10/24.<br/>
  * Description：
  */
-public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
+public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     implements IMainView, BaseRecyclerViewAdapter.OnLoadingMoreListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener, View.OnClickListener {
@@ -85,14 +85,30 @@ public class MainFragment extends BaseFragment<IMainView, IMainPresenter>
     String language = getArguments().getString(LANGUAGE);
     mSearchFactor = new SearchFactor();
     mSearchFactor.language = language;
-    search(false);
+
     mAdapter = new RepositoryAdapter(getContext(), new ArrayList<>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
     mAdapter.setOnRecyclerViewItemLongClickListener(this);
     mAdapter.setOnLoadingMoreListener(this);
   }
 
-  @Override protected void initView(View parent) {
+  //@Override protected void initView(View parent) {
+  //  search(false);
+  //
+  //  mRefreshLayout.setOnRefreshListener(() -> search(true));
+  //
+  //  mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+  //  mAdapter.setLoadMoreView(mInflater.inflate(R.layout.item_load_more, mRecyclerView, false));
+  //  mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
+  //  mRecyclerView.setAdapter(mAdapter);
+  //  View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
+  //  errorView.findViewById(R.id.layout_main_loading_failure).setOnClickListener(this);
+  //  setErrorView(errorView);
+  //}
+
+  @Override protected void lazyInitView(View parent) {
+    search(false);
+
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
