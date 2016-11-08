@@ -16,24 +16,26 @@
 package com.ouyangzn.github.base;
 
 import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by ouyangzn on 2016/7/1.<br/>
  * Description：Presenter的基类，如果有使用rxJava进行耗时操作，需调用{@link #addSubscription(Subscription)}
+ * @since 2016/11/8 改为使用rxLifecycle来自由控制取消订阅
  */
 public abstract class BasePresenter<T> {
 
   protected T mView;
-  private CompositeSubscription mSubscriptions = new CompositeSubscription();
+  //private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
   public void onAttach(T view) {
     this.mView = view;
   }
 
   public void onDetach() {
+    // 使用rxLifecycle来自由进行取消订阅的控制
+    // 先取消订阅，然后再置空view，就不会出现刚好出结果但是view被置空了的情况
+    //mSubscriptions.clear();
     this.mView = null;
-    mSubscriptions.clear();
     this.onDestroy();
   }
 
@@ -42,7 +44,7 @@ public abstract class BasePresenter<T> {
    */
   protected abstract void onDestroy();
 
-  protected void addSubscription(Subscription subscription) {
-    this.mSubscriptions.add(subscription);
-  }
+  //protected void addSubscription(Subscription subscription) {
+  //  this.mSubscriptions.add(subscription);
+  //}
 }

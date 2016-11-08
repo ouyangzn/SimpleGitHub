@@ -69,6 +69,11 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     return fragment;
   }
 
+  @Override public void onPause() {
+    super.onPause();
+    Log.d(TAG, "------------------onPause----------------------");
+  }
+
   @Override protected Status getCurrentStatus() {
     return Status.STATUS_LOADING;
   }
@@ -78,7 +83,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
   }
 
   @Override public IMainPresenter initPresenter() {
-    return new MainPresenter(getContext());
+    return new MainPresenter(getContext(), mProvider);
   }
 
   @Override protected void initData(Bundle savedInstanceState) {

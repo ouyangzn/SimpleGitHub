@@ -39,6 +39,9 @@ import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtil;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
+import com.trello.rxlifecycle.LifecycleProvider;
+import com.trello.rxlifecycle.android.ActivityEvent;
+import com.trello.rxlifecycle.navi.NaviLifecycle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +53,10 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     implements ICollectView, BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener,
     BaseRecyclerViewAdapter.OnLoadingMoreListener {
+
+  // 使用rxLifecycle方便控制rxJava事件的取消订阅时机
+  protected final LifecycleProvider<ActivityEvent> mProvider =
+      NaviLifecycle.createActivityLifecycleProvider(this);
 
   private final int COUNT_EACH_PAGE = LIMIT_10;
   private final int FIRST_PAGE = 0;
@@ -71,7 +78,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override public ICollectPresenter initPresenter() {
-    return new CollectPresenter(mContext);
+    return new CollectPresenter(mContext, mProvider);
   }
 
   @Override protected void initData() {

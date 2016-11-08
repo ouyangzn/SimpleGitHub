@@ -4,8 +4,8 @@ apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-  compileSdkVersion 24
-  buildToolsVersion "24.0.1"
+  compileSdkVersion 25
+  buildToolsVersion "25"
 
   defaultConfig {
     applicationId "com.ouyangzn.github"
@@ -48,6 +48,14 @@ dependencies {
   compile "com.jakewharton.rxbinding:rxbinding:${RXBINDING_VERSION}"
   compile "com.jakewharton.rxbinding:rxbinding-recyclerview-v7:${RXBINDING_SUPPORT_VERSION}"
   compile "com.jakewharton.rxbinding:rxbinding-support-v4:${RXBINDING_SUPPORT_VERSION}"
+  compile 'com.trello:rxlifecycle:1.0'
+  // If you want to bind to Android-specific lifecycles
+  compile "com.trello:rxlifecycle-android:${RXLIFECYCLE_VERSION}"
+  // If you want pre-written Activities and Fragments you can subclass as providers
+  compile "com.trello:rxlifecycle-components:${RXLIFECYCLE_VERSION}"
+  // If you want to use Navi for providers
+  compile "com.trello:rxlifecycle-navi:${RXLIFECYCLE_VERSION}"
+
   // retrofit系列
   compile "com.squareup.retrofit2:retrofit:${RETROFIT_VERSION}"
   compile "com.squareup.retrofit2:converter-gson:${CONVERTER_GSON_VERSION}"

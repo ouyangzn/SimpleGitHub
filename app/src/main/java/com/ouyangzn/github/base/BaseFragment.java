@@ -17,7 +17,6 @@ package com.ouyangzn.github.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +24,16 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.utils.Log;
+import com.trello.navi.component.support.NaviFragment;
+import com.trello.rxlifecycle.LifecycleProvider;
+import com.trello.rxlifecycle.android.FragmentEvent;
+import com.trello.rxlifecycle.navi.NaviLifecycle;
 
-public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragment {
+public abstract class BaseFragment<V, T extends BasePresenter<V>> extends NaviFragment {
+
+  // 使用rxLifecycle方便控制rxJava事件的取消订阅时机
+  protected final LifecycleProvider<FragmentEvent> mProvider =
+      NaviLifecycle.createFragmentLifecycleProvider(this);
 
   protected String TAG = "BaseFragment";
   protected T mPresenter;
@@ -38,15 +44,7 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
   private ViewGroup mRootView;
   private com.ouyangzn.github.utils.Toast mToast;
   private Status mStatus;
-  private boolean isVisible;
   private Unbinder mUnbinder;
-
-  @Override public void setUserVisibleHint(boolean isVisibleToUser) {
-    super.setUserVisibleHint(isVisibleToUser);
-    isVisible = isVisibleToUser;
-    Log.d(TAG, "-----------isVisibleToUser = " + isVisible + " ,class = " + getArguments().get(
-        "language"));
-  }
 
   @Override public final void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -59,6 +57,7 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends Fragme
   @Nullable @Override
   public final View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    super.onCreateView(inflater, container, savedInstanceState);
     mInflater = inflater;
     mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_base_content, container, false);
     mLoadingView = mRootView.findViewById(R.id.stub_loading);

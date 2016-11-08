@@ -20,6 +20,8 @@ import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.db.DBConstans.CollectedRepoFields;
 import com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
 import com.ouyangzn.github.utils.Log;
+import com.trello.rxlifecycle.LifecycleProvider;
+import com.trello.rxlifecycle.android.ActivityEvent;
 import io.realm.Realm;
 import io.realm.RealmModel;
 import io.realm.RealmResults;
@@ -40,14 +42,15 @@ public class CollectPresenter extends ICollectPresenter {
 
   private final String TAG = CollectPresenter.class.getSimpleName();
 
+  private LifecycleProvider<ActivityEvent> mProvider;
   private App mApp;
   private Realm mRealm;
   private RealmResults<CollectedRepo> mCollectList;
 
   private Subscription mQueryByKeySub;
-  private Subscription mQueryAllSub;
 
-  public CollectPresenter(Context context) {
+  public CollectPresenter(Context context, LifecycleProvider<ActivityEvent> provider) {
+    mProvider = provider;
     mApp = (App) context.getApplicationContext();
     mRealm = mApp.getGlobalRealm();
   }
@@ -76,13 +79,15 @@ public class CollectPresenter extends ICollectPresenter {
         .asObservable()
         .subscribeOn(AndroidSchedulers.mainThread())
         .observeOn(AndroidSchedulers.mainThread())
+        // 使用rxlifecycle，自由指定取消订阅的时间点
+        .compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY))
         .subscribe(results -> {
-          if (mView != null) mView.showCollectQueryByKey(new ArrayList<>(results));
+          mView.showCollectQueryByKey(new ArrayList<>(results));
         }, error -> {
           Log.e(TAG, "----------查询收藏,queryByKey出错：", error);
-          if (mView != null) mView.showQueryByKeyFailure();
+          mView.showQueryByKeyFailure();
         });
-    addSubscription(mQueryByKeySub);
+    //addSubscription(mQueryByKeySub);
   }
 
   @Override public void queryCollect(int page, int countEachPage) {
@@ -101,15 +106,13 @@ public class CollectPresenter extends ICollectPresenter {
     //      mCollectList = results;
     //      return subList(results, page * countEachPage, (page + 1) * countEachPage);
     //    })
+    //    // 使用rxlifecycle，自由指定取消订阅的时间点
+    //    .compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY))
     //    .subscribe(repoList -> {
-    //      if (mView != null) {
-    //        mView.showCollect(repoList);
-    //      }
+    //      mView.showCollect(repoList);
     //    }, error -> {
     //      Log.e(TAG, "---------查询收藏项目出错：", error);
-    //      if (mView != null) {
-    //        mView.showErrorOnQueryFailure();
-    //      }
+    //      mView.showErrorOnQueryFailure();
     //    });
     // ----------方式2：间接通过异步查询----------
     // 缓存优先
@@ -123,14 +126,14 @@ public class CollectPresenter extends ICollectPresenter {
         // realm在main线程创建,不能指定为io线程
         //.subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+        // 使用rxlifecycle，自由指定取消订阅的时间点
+        .compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY))
         .subscribe(repoList -> {
           mCollectList = repoList;
-          if (mView != null) {
-            mView.showCollect(subList(repoList, page * countEachPage, (page + 1) * countEachPage));
-          }
+          mView.showCollect(subList(repoList, page * countEachPage, (page + 1) * countEachPage));
         }, error -> {
           Log.e(TAG, "---------查询收藏项目出错：", error);
-          if (mView != null) mView.showErrorOnQueryFailure();
+          mView.showErrorOnQueryFailure();
         });
   }
 
@@ -154,19 +157,19 @@ public class CollectPresenter extends ICollectPresenter {
           .findAll()
           .deleteAllFromRealm();
     }, () -> {
-      if (mView != null) mView.showCollectionCanceled();
+      mView.showCollectionCanceled();
     }, error -> {
       Log.e(TAG, "---------取消收藏失败:", error);
-      if (mView != null) mView.showCollectionCancelFailure();
+      mView.showCollectionCancelFailure();
     });
     // ----------rxJava方式----------
     //Observable.create(new DeleteCollectedObservable(repo.id))
     //    .subscribeOn(AndroidSchedulers.mainThread())
     //    .subscribe(Void -> {
-    //      if (mView != null) mView.showCollectionCanceled();
+    //      mView.showCollectionCanceled();
     //    }, error -> {
     //      Log.e(TAG, "---------取消收藏失败:", error);
-    //      if (mView != null) mView.showCollectionCancelFailure();
+    //      mView.showCollectionCancelFailure();
     //    });
   }
 

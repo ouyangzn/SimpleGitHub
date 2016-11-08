@@ -17,18 +17,18 @@ package com.ouyangzn.github.base;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import com.ouyangzn.github.App;
+import com.trello.navi.component.support.NaviAppCompatActivity;
 
 /**
  * @author Ouyang
  * Description：Activity基类,包含一些activity的通用操作
  */
-public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCompatActivity {
+public abstract class BaseActivity<V, T extends BasePresenter<V>> extends NaviAppCompatActivity {
 
   protected String TAG = "BaseActivity";
   protected App mApp;

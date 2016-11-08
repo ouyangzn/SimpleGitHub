@@ -27,6 +27,8 @@ import com.ouyangzn.github.data.IGitHubData;
 import com.ouyangzn.github.data.remote.RemoteGitHubData;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
+import com.trello.rxlifecycle.LifecycleProvider;
+import com.trello.rxlifecycle.android.FragmentEvent;
 import io.realm.Realm;
 import rx.Observable;
 import rx.Subscription;
@@ -41,13 +43,15 @@ public class MainPresenter extends IMainPresenter {
 
   private final String TAG = MainPresenter.class.getSimpleName();
 
+  private LifecycleProvider<FragmentEvent> mProvider;
   private IGitHubData mDataSource;
   private App mApp;
   private Realm mRealm;
   private SharedPreferences mConfigSp;
   private Subscription mQueryDataSubscribe;
 
-  public MainPresenter(Context context) {
+  public MainPresenter(Context context, LifecycleProvider<FragmentEvent> provider) {
+    mProvider = provider;
     mApp = (App) context.getApplicationContext();
     mRealm = mApp.getGlobalRealm();
     mDataSource = new RemoteGitHubData();
@@ -68,23 +72,21 @@ public class MainPresenter extends IMainPresenter {
     mQueryDataSubscribe = mDataSource.queryByKeyword(factor, perPage, page)
         .subscribeOn(Schedulers.io())
         .doOnSubscribe(() -> {
-          if (mView != null) mView.setLoadingIndicator(true);
+          mView.setLoadingIndicator(true);
         })
         .subscribeOn(AndroidSchedulers.mainThread())
         .observeOn(AndroidSchedulers.mainThread())
+        // 使用rxlifecycle，自由指定取消订阅的时间点
+        .compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW))
         .subscribe(searchResult -> {
-          if (mView != null) {
-            mView.setLoadingIndicator(false);
-            mView.showQueryDataResult(searchResult);
-          }
+          mView.setLoadingIndicator(false);
+          mView.showQueryDataResult(searchResult);
         }, throwable -> {
           Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
-          if (mView != null) {
-            mView.setLoadingIndicator(false);
-            mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
-          }
+          mView.setLoadingIndicator(false);
+          mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
         });
-    addSubscription(mQueryDataSubscribe);
+    //addSubscription(mQueryDataSubscribe);
   }
 
   @Override public void saveSearchFactor(SearchFactor factor) {
@@ -105,10 +107,10 @@ public class MainPresenter extends IMainPresenter {
       collectedRepo.collectTime = System.currentTimeMillis();
       bgRealm.copyToRealmOrUpdate(collectedRepo);
     }, () -> {
-      if (mView != null) mView.showCollected();
+      mView.showCollected();
     }, error -> {
       Log.d(TAG, "----------收藏失败：", error);
-      if (mView != null) mView.showCollectedFailure();
+      mView.showCollectedFailure();
     });
     // rxJava写法
     //Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
@@ -126,12 +128,10 @@ public class MainPresenter extends IMainPresenter {
     //    subscriber.onError(e);
     //  }
     //}).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
-    //  if (mView != null) {
-    //    mView.showCollected();
-    //  }
+    //  mView.showCollected();
     //}, throwable -> {
     //  Log.d(TAG, "----------收藏失败：", throwable);
-    //  if (mView != null) mView.showCollectedFailure();
+    //  mView.showCollectedFailure();
     //});
   }
 
