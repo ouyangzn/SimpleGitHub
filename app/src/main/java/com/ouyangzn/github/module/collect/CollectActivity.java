@@ -44,6 +44,8 @@ import com.trello.rxlifecycle.android.ActivityEvent;
 import com.trello.rxlifecycle.navi.NaviLifecycle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import rx.android.schedulers.AndroidSchedulers;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
 import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
@@ -69,7 +71,6 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   private CollectAdapter mCollectAdapter;
   // 重新加载或者加载下一页
   private boolean mIsRefresh = true;
-  private boolean mIsQuerying = false;
   // 当前分页页数
   private int mCurrPage = FIRST_PAGE;
 
@@ -102,24 +103,27 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
       ScreenUtil.hideKeyBoard(mSearchEdit);
       mSearchEdit.clearFocus();
       return false;
-    }).subscribe();
+    }).compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY)).subscribe();
 
     mRefreshLayout.setOnRefreshListener(() -> queryCollect(true));
 
-    mSearchEdit.setOnClearTextListener(this::onClearKeyword);
-    RxTextView.textChanges(mSearchEdit.getEditText()).subscribe(text -> {
-      // 初始化时，rxView会先调用一次textChanged事件，有点小坑
-      String keyword = text.toString();
-      // 清空搜索条件，为搜索全部收藏
-      if (TextUtils.isEmpty(keyword)) {
-        onClearKeyword();
-      } else {
-        keyword = keyword.trim();
-        if (!TextUtils.isEmpty(keyword)) {
-          queryByKey(keyword);
-        }
-      }
-    });
+    RxTextView.textChanges(mSearchEdit.getEditText())
+        .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+        .compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY))
+        // 初始化时，rxView会先调用一次textChanged事件
+        .skip(1)
+        .subscribe(text -> {
+          String keyword = text.toString();
+          // 清空搜索条件，为搜索全部收藏
+          if (TextUtils.isEmpty(keyword)) {
+            onClearKeyword();
+          } else {
+            keyword = keyword.trim();
+            if (!TextUtils.isEmpty(keyword)) {
+              queryByKey(keyword);
+            }
+          }
+        });
   }
 
   private void onClearKeyword() {
@@ -132,8 +136,6 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   private void queryCollect(boolean isRefresh) {
-    if (mIsQuerying) return;
-    mIsQuerying = true;
     if (isRefresh) {
       mRefreshLayout.setRefreshing(true);
       mCurrPage = FIRST_PAGE;
@@ -143,7 +145,6 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override public void showCollect(List<CollectedRepo> repoList) {
-    mIsQuerying = false;
     int listSize = repoList.size();
     Log.d(TAG, "----------repoList.size = " + listSize);
     mLoadingView.setVisibility(View.GONE);

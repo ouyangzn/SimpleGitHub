@@ -17,6 +17,10 @@
   <declare-styleable name="InputEdit">
     <!-- 对应EditText的hint -->
     <attr format="reference|string" name="input_hint"/>
+    <!-- 对应EditText的背景 -->
+    <attr format="reference" name="background"/>
+    <!-- 对应删除按钮图片 -->
+    <attr format="reference" name="deleteIcon"/>
     <!-- 对应EditText的imeOptions -->
     <attr format="enum" name="input_imeOptions">
       <enum name="actionDone" value="1"/>

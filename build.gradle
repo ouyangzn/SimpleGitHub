@@ -28,6 +28,15 @@ allprojects {
   }
 }
 
+ext {
+  minSdkVersion = MIN_SDK_VERSION.toInteger()
+  targetSdkVersion = TARGET_SDK_VERSION.toInteger()
+  compileSdkVersion = COMPILE_SDK_VERSION.toInteger()
+  buildToolsVersion = "${BUILD_TOOLS_VERSION}"
+  javaVersion = JavaVersion.VERSION_1_7
+  javaVersion_retrolambda = JavaVersion.VERSION_1_8
+}
+
 task clean(type: Delete) {
   delete rootProject.buildDir
 }

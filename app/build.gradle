@@ -4,13 +4,13 @@ apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-  compileSdkVersion 25
-  buildToolsVersion "25"
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
 
   defaultConfig {
     applicationId "com.ouyangzn.github"
-    minSdkVersion 14
-    targetSdkVersion 24
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.targetSdkVersion
     versionCode 1
     versionName "1.0"
   }

@@ -37,4 +37,9 @@
     <!--Tab字体是否为大写-->
     <item name="textAllCaps">false</item>
   </style>
+
+  <style name="Toolbar.titleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textColor">#fff</item>
+    <item name="android:textSize">18sp</item>
+  </style>
 </resources>

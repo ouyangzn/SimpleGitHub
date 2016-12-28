@@ -19,9 +19,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+import com.ouyangzn.github.R;
 
 /**
  * Created by ouyangzn on 2016/10/8.<br/>
@@ -55,6 +60,27 @@ public class UIUtil {
     img.setLayoutParams(params);
     toolbar.addView(img);
     return img;
+  }
+
+  public static TextView setCenterTitle(Toolbar toolbar, @StringRes int resId) {
+    return setCenterTitle(toolbar, toolbar.getContext().getString(resId));
+  }
+
+  public static TextView setCenterTitle(Toolbar toolbar, String title) {
+    TextView titleView = new TextView(toolbar.getContext());
+    titleView.setGravity(Gravity.CENTER);
+    titleView.setTextAppearance(toolbar.getContext(), R.style.Toolbar_titleTextAppearance);
+    titleView.setSingleLine();
+    titleView.setEllipsize(TextUtils.TruncateAt.END);
+    titleView.setText(title);
+    ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT);
+    titleView.setLayoutParams(params);
+    Toolbar.LayoutParams lp = new Toolbar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.MATCH_PARENT);
+    lp.gravity = Gravity.CENTER;
+    toolbar.addView(titleView, lp);
+    return titleView;
   }
 
   /**

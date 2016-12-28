@@ -22,8 +22,8 @@ import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -131,8 +131,11 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
   }
 
   private void init(Context context, AttributeSet attrs) {
-    View view = LayoutInflater.from(context).inflate(R.layout.view_input_edit, this, true);
-    mEditText = ButterKnife.findById(view, R.id.et_input);
+    LayoutParams params =
+        new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    setLayoutParams(params);
+    inflate(context, R.layout.view_input_edit, this);
+    mEditText = ButterKnife.findById(this, R.id.et_input);
     mEditText.addTextChangedListener(this);
     mEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
       @Override public void onFocusChange(View v, boolean hasFocus) {
@@ -147,11 +150,12 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
         }
       }
     });
-    mDelete = ButterKnife.findById(view, R.id.img_delete_input);
+    mDelete = ButterKnife.findById(this, R.id.img_delete_input);
     mDelete.setOnClickListener(this);
     if (getInputText().length() == 0) {
       mDelete.setVisibility(GONE);
     }
+    // todo 增加几个基础属性
     TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.InputEdit);
     String hint = ta.getString(R.styleable.InputEdit_input_hint);
     setHint(hint);
