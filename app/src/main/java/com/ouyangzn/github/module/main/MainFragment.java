@@ -97,20 +97,6 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mAdapter.setOnLoadingMoreListener(this);
   }
 
-  //@Override protected void initView(View parent) {
-  //  search(false);
-  //
-  //  mRefreshLayout.setOnRefreshListener(() -> search(true));
-  //
-  //  mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-  //  mAdapter.setLoadMoreView(mInflater.inflate(R.layout.item_load_more, mRecyclerView, false));
-  //  mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
-  //  mRecyclerView.setAdapter(mAdapter);
-  //  View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
-  //  errorView.findViewById(R.id.layout_main_loading_failure).setOnClickListener(this);
-  //  setErrorView(errorView);
-  //}
-
   @Override protected void lazyInitView(View parent) {
     search(false);
 

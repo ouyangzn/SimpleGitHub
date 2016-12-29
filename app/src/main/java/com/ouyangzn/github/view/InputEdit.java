@@ -18,10 +18,13 @@ package com.ouyangzn.github.view;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -33,6 +36,7 @@ import butterknife.ButterKnife;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
 import com.ouyangzn.github.R;
+import com.ouyangzn.github.utils.ScreenUtil;
 import rx.functions.Action1;
 
 /**
@@ -105,6 +109,10 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
     mEditText.setImeOptions(imeOptions);
   }
 
+  private void setInputType(int type) {
+    mEditText.setInputType(type);
+  }
+
   @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.img_delete_input:
@@ -159,22 +167,72 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
     TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.InputEdit);
     String hint = ta.getString(R.styleable.InputEdit_input_hint);
     setHint(hint);
+    Drawable drawable = ta.getDrawable(R.styleable.InputEdit_editBg);
+    if (drawable != null) {
+      mEditText.setBackgroundDrawable(drawable);
+    }
+    drawable = ta.getDrawable(R.styleable.InputEdit_deleteImg);
+    int paddingRight = ScreenUtil.dp2px(context, 40);
+    int padding = ScreenUtil.dp2px(context, 10);
+    if (drawable != null) {
+      mDelete.setImageDrawable(drawable);
+      // 最后一个字离删除图标留一定的距离
+      paddingRight = drawable.getIntrinsicWidth() + padding + ScreenUtil.dp2px(context, 4);
+    }
+    mEditText.setPadding(padding, padding, paddingRight, padding);
+
+    boolean singleLine = ta.getBoolean(R.styleable.InputEdit_singleLine, true);
+    // todo 有bug,singleLine不起作用
+    if (singleLine) {
+      mEditText.setSingleLine();
+      mEditText.setGravity(Gravity.CENTER_VERTICAL);
+    } else {
+      mEditText.setSingleLine(false);
+      mEditText.setGravity(Gravity.START | Gravity.TOP);
+    }
+    initInputType(ta);
+    initImeOptions(ta);
+    ta.recycle();
+  }
+
+  private void initInputType(TypedArray ta) {
+    int inputType = ta.getInt(R.styleable.InputEdit_inputType, 1);
+    switch (inputType) {
+      default:
+      case 1:
+        mEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+        break;
+      case 2:
+        mEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        break;
+      case 3:
+        mEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        break;
+      case 4:
+        mEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+        break;
+      case 5:
+        mEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        break;
+    }
+  }
+
+  private void initImeOptions(TypedArray ta) {
     int imeOptions = ta.getInt(R.styleable.InputEdit_input_imeOptions, 1);
     switch (imeOptions) {
       case 1:
-        setImeOptions(EditorInfo.IME_ACTION_DONE);
+        mEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         break;
       case 2:
-        setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        mEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         break;
       case 3:
-        setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        mEditText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         break;
       case 4:
-        setImeOptions(EditorInfo.IME_ACTION_SEND);
+        mEditText.setImeOptions(EditorInfo.IME_ACTION_SEND);
         break;
     }
-    ta.recycle();
   }
 
   public interface OnClearTextListener {

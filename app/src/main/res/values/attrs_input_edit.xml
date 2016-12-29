@@ -18,9 +18,19 @@
     <!-- 对应EditText的hint -->
     <attr format="reference|string" name="input_hint"/>
     <!-- 对应EditText的背景 -->
-    <attr format="reference" name="background"/>
+    <attr format="reference" name="editBg"/>
+    <!-- 对应EditText的输入类型 -->
+    <attr format="enum" name="inputType">
+      <enum name="text" value="1"/>
+      <enum name="number" value="2"/>
+      <enum name="numberDecimal" value="3"/>
+      <enum name="phone" value="4"/>
+      <enum name="textPassword" value="5"/>
+    </attr>
+    <!-- 对应EditText的singleLine -->
+    <attr format="boolean" name="singleLine"/>
     <!-- 对应删除按钮图片 -->
-    <attr format="reference" name="deleteIcon"/>
+    <attr format="reference" name="deleteImg"/>
     <!-- 对应EditText的imeOptions -->
     <attr format="enum" name="input_imeOptions">
       <enum name="actionDone" value="1"/>

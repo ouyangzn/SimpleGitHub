@@ -23,13 +23,17 @@
       <com.ouyangzn.github.view.InputEdit
           android:id="@+id/view_search"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content"
+          android:layout_height="40dp"
           android:layout_marginBottom="@dimen/spacing_tiny"
           android:layout_marginLeft="@dimen/spacing_normal"
           android:layout_marginRight="@dimen/spacing_normal"
           android:layout_marginTop="@dimen/spacing_tiny"
+          app:deleteImg="@drawable/ic_input_delete"
+          app:editBg="@drawable/bg_border_corners5_light_blue"
+          app:inputType="text"
           app:input_hint="@string/hint_input_keyword"
           app:input_imeOptions="actionSearch"
+          app:singleLine="false"
           />
       <android.support.v7.widget.RecyclerView
           android:id="@+id/recycler_collect"
