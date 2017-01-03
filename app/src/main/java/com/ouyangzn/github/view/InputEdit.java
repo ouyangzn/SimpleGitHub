@@ -180,9 +180,15 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
       paddingRight = drawable.getIntrinsicWidth() + padding + ScreenUtil.dp2px(context, 4);
     }
     mEditText.setPadding(padding, padding, paddingRight, padding);
-
+    // setInputType会覆盖多行的设置，所以放在setSingleLine前设置。调用setSingleLine会执行以下代码
+    //if (singleLine) {
+    //  mEditor.mInputType &= ~EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+    //} else {
+    //  mEditor.mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+    //}
+    initInputType(ta);
+    initImeOptions(ta);
     boolean singleLine = ta.getBoolean(R.styleable.InputEdit_singleLine, true);
-    // todo 有bug,singleLine不起作用
     if (singleLine) {
       mEditText.setSingleLine();
       mEditText.setGravity(Gravity.CENTER_VERTICAL);
@@ -190,8 +196,6 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
       mEditText.setSingleLine(false);
       mEditText.setGravity(Gravity.START | Gravity.TOP);
     }
-    initInputType(ta);
-    initImeOptions(ta);
     ta.recycle();
   }
 
