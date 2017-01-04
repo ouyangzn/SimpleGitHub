@@ -42,10 +42,8 @@ public interface MainContract {
     /**
      * 搜索github上的数据
      * @param factor 搜索因子（即各种搜索条件）
-     * @param perPage 每页的数据量
-     * @param page 搜索第几页
      */
-    public abstract void queryData(SearchFactor factor, int perPage, int page);
+    public abstract void queryData(SearchFactor factor);
 
     /**
      * 保存搜索因子

@@ -65,11 +65,11 @@ public class MainPresenter extends IMainPresenter {
     }
   }
 
-  @Override public void queryData(SearchFactor factor, int perPage, int page) {
+  @Override public void queryData(SearchFactor factor) {
     if (mQueryDataSubscribe != null && !mQueryDataSubscribe.isUnsubscribed()) {
       mQueryDataSubscribe.unsubscribe();
     }
-    mQueryDataSubscribe = mDataSource.queryByKeyword(factor, perPage, page)
+    mQueryDataSubscribe = mDataSource.queryByKeyword(factor, factor.limit, factor.page)
         .subscribeOn(Schedulers.io())
         .doOnSubscribe(() -> {
           mView.setLoadingIndicator(true);

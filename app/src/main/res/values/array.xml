@@ -15,18 +15,18 @@
   -->
 <resources>
   <array name="array_language">
-    <!--<item>all</item>-->
-    <item>java</item>
-    <item>Object-C</item>
-    <item>swift</item>
-    <item>C</item>
-    <item>C++</item>
-    <item>php</item>
-    <item>js</item>
-    <item>python</item>
-    <item>ruby</item>
-    <item>c#</item>
-    <item>shell</item>
+    <item>@string/language_all</item>
+    <item>@string/language_java</item>
+    <item>@string/language_oc</item>
+    <item>@string/language_swift</item>
+    <item>@string/language_c</item>
+    <item>@string/language_cpp</item>
+    <item>@string/language_php</item>
+    <item>@string/language_js</item>
+    <item>@string/language_python</item>
+    <item>@string/language_ruby</item>
+    <item>@string/language_c_sharp</item>
+    <item>@string/language_shell</item>
   </array>
   <array name="long_click_main_dialog_item">
     <item>复制网址</item>

@@ -7,7 +7,7 @@
   <string name="nav_about">关于</string>
   <string name="language_all">all</string>
   <string name="language_java">java</string>
-  <string name="language_oc">Object-C</string>
+  <string name="language_oc">Objective-C</string>
   <string name="language_swift">swift</string>
   <string name="language_c">C</string>
   <string name="language_cpp">C++</string>

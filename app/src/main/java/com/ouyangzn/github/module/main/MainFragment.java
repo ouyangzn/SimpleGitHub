@@ -38,7 +38,6 @@ import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
 
-import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
 import static com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import static com.ouyangzn.github.module.main.MainContract.IMainView;
 
@@ -52,14 +51,10 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener, View.OnClickListener {
 
   private static final String LANGUAGE = "language";
-  private static final int DATA_EACH_PAGE = LIMIT_20;
   @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
   @BindView(R.id.recycler) RecyclerView mRecyclerView;
   private RepositoryAdapter mAdapter;
   private SearchFactor mSearchFactor;
-  // 重新加载或者加载下一页
-  private boolean mIsRefresh = true;
-  private int mCurrPage = 1;
 
   public static MainFragment getInstance(String language) {
     MainFragment fragment = new MainFragment();
@@ -67,11 +62,6 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     data.putString(LANGUAGE, language);
     fragment.setArguments(data);
     return fragment;
-  }
-
-  @Override public void onPause() {
-    super.onPause();
-    Log.d(TAG, "------------------onPause----------------------");
   }
 
   @Override protected Status getCurrentStatus() {
@@ -113,12 +103,11 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   private void search(boolean isRefresh) {
     if (isRefresh) {
-      mCurrPage = 1;
+      mSearchFactor.page = 1;
       mRefreshLayout.setRefreshing(true);
     }
     Log.d(TAG, "----------搜索数据:" + mSearchFactor);
-    mPresenter.queryData(mSearchFactor, DATA_EACH_PAGE, mCurrPage);
-    mIsRefresh = isRefresh;
+    mPresenter.queryData(mSearchFactor);
   }
 
   @Override public void onClick(View v) {
@@ -169,7 +158,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void showErrorOnQueryData(String tips) {
     toast(tips);
-    if (mIsRefresh) mRefreshLayout.setRefreshing(false);
+    stopRefresh();
     if (mAdapter.isLoadingMore()) {
       switchStatus(Status.STATUS_NORMAL);
       mAdapter.loadMoreFinish(true, null);
@@ -180,20 +169,16 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void showQueryDataResult(SearchResult result) {
     switchStatus(Status.STATUS_NORMAL);
+    stopRefresh();
     Log.d(TAG, "----------result = " + result.toString());
-    mCurrPage++;
-    boolean hasMore = result.getRepositories().size() == DATA_EACH_PAGE;
+    mSearchFactor.page++;
+    boolean hasMore = result.getRepositories().size() == mSearchFactor.limit;
     mAdapter.setHasMore(hasMore);
     mAdapter.setLanguageVisible(CommonConstants.GitHub.LANG_ALL.equals(mSearchFactor.language));
-    if (mIsRefresh) {
-      mRefreshLayout.setRefreshing(false);
-      mAdapter.resetData(result.getRepositories());
+    if (mAdapter.isLoadingMore()) {
+      mAdapter.loadMoreFinish(hasMore, result.getRepositories());
     } else {
-      if (mAdapter.isLoadingMore()) {
-        mAdapter.loadMoreFinish(hasMore, result.getRepositories());
-      } else {
-        mAdapter.addData(result.getRepositories());
-      }
+      mAdapter.resetData(result.getRepositories());
     }
   }
 
@@ -207,5 +192,11 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void setLoadingIndicator(boolean isActive) {
 
+  }
+
+  private void stopRefresh() {
+    if (mRefreshLayout != null && mRefreshLayout.isRefreshing()) {
+      mRefreshLayout.setRefreshing(false);
+    }
   }
 }
