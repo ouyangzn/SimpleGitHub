@@ -28,7 +28,8 @@ import com.trello.navi.component.support.NaviAppCompatActivity;
  * @author Ouyang
  * Description：Activity基类,包含一些activity的通用操作
  */
-public abstract class BaseActivity<V, T extends BasePresenter<V>> extends NaviAppCompatActivity {
+public abstract class BaseActivity<V, T extends BasePresenter<V>> extends NaviAppCompatActivity
+    implements BaseView<T> {
 
   protected String TAG = "BaseActivity";
   protected App mApp;
@@ -92,5 +93,13 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends NaviAp
     super.finish();
     //        overridePendingTransition(R.anim.anim_push_in,
     //                R.anim.anim_push_out);
+  }
+
+  /**
+   * 数据等加载指示器,默认空实现
+   *
+   * @param isActive 是否正在处理
+   */
+  @Override public void setLoadingIndicator(boolean isActive) {
   }
 }

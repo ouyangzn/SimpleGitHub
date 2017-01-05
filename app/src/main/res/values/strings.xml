@@ -18,6 +18,7 @@
   <string name="language_c_sharp">c#</string>
   <string name="language_shell">shell</string>
   <string name="loading">加载中…</string>
+  <string name="loading_more_failure">点击加载下一页</string>
   <string name="loading_failure">数据加载失败/(ㄒoㄒ)/~~</string>
   <string name="stars">%d·stars</string>
   <string name="hint_input_keyword">输入关键字搜索</string>

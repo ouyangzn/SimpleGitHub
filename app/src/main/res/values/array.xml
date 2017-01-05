@@ -15,7 +15,7 @@
   -->
 <resources>
   <array name="array_language">
-    <item>@string/language_all</item>
+    <!--<item>@string/language_all</item>-->
     <item>@string/language_java</item>
     <item>@string/language_oc</item>
     <item>@string/language_swift</item>

@@ -27,7 +27,7 @@ import com.ouyangzn.github.bean.localbean.SearchFactor;
  */
 public interface MainContract {
 
-  interface IMainView extends BaseView<MainPresenter> {
+  interface IMainView extends BaseView<IMainPresenter> {
 
     void showErrorOnQueryData(String tips);
 

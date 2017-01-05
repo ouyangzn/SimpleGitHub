@@ -20,7 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-  <LinearLayout
+  <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:focusable="true"
@@ -43,6 +43,17 @@
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/view_search"
         />
-  </LinearLayout>
+    <TextView
+        android:id="@+id/tv_choose_date_range"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_top_bottom_divide"
+        android:gravity="center"
+        android:text="选择时间范围"
+        android:visibility="gone"
+        />
+  </RelativeLayout>
 </android.support.v4.widget.SwipeRefreshLayout>

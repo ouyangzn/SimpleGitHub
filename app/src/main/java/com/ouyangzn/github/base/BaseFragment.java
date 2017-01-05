@@ -29,7 +29,8 @@ import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import com.trello.rxlifecycle.navi.NaviLifecycle;
 
-public abstract class BaseFragment<V, T extends BasePresenter<V>> extends NaviFragment {
+public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V>>
+    extends NaviFragment implements BaseView<T> {
 
   // 使用rxLifecycle方便控制rxJava事件的取消订阅时机
   protected final LifecycleProvider<FragmentEvent> mProvider =
@@ -159,6 +160,14 @@ public abstract class BaseFragment<V, T extends BasePresenter<V>> extends NaviFr
     for (int i = 0; i < childCount; i++) {
       mRootView.getChildAt(i).setVisibility(View.GONE);
     }
+  }
+
+  /**
+   * 默认空实现
+   *
+   * @param isActive 是否正在处理
+   */
+  @Override public void setLoadingIndicator(boolean isActive) {
   }
 
   /**

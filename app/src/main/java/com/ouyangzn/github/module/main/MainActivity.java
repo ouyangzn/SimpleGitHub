@@ -15,6 +15,7 @@
 
 package com.ouyangzn.github.module.main;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -60,9 +61,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
-    setTitle(R.string.app_name);
-
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
+    toolbar.setTitle(R.string.app_name);
+    toolbar.setTitleTextColor(Color.WHITE);
     setSupportActionBar(toolbar);
     ImageView collectImg =
         UIUtil.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,

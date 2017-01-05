@@ -25,6 +25,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
+import butterknife.OnClick;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.base.LazyLoadFragment;
@@ -99,6 +100,9 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
     errorView.findViewById(R.id.layout_main_loading_failure).setOnClickListener(this);
     setErrorView(errorView);
+    View loadMoreFail = mInflater.inflate(R.layout.item_load_more_failure, mRecyclerView, false);
+    loadMoreFail.setOnClickListener(this);
+    mAdapter.setLoadMoreFailureView(loadMoreFail);
   }
 
   private void search(boolean isRefresh) {
@@ -110,12 +114,20 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mPresenter.queryData(mSearchFactor);
   }
 
-  @Override public void onClick(View v) {
+  @OnClick({ R.id.tv_choose_date_range }) @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.layout_main_loading_failure:
         switchStatus(Status.STATUS_LOADING);
         search(false);
         break;
+      case R.id.tv_choose_date_range: {
+        toast("选时间范围");
+        break;
+      }
+      case R.id.tv_reload_more: {
+        mAdapter.reloadMore();
+        break;
+      }
     }
   }
 
@@ -161,7 +173,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     stopRefresh();
     if (mAdapter.isLoadingMore()) {
       switchStatus(Status.STATUS_NORMAL);
-      mAdapter.loadMoreFinish(true, null);
+      mAdapter.loadMoreFailure();
     } else {
       switchStatus(Status.STATUS_ERROR);
     }
