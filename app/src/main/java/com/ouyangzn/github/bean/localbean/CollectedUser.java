@@ -31,7 +31,7 @@ public class CollectedUser extends RealmObject {
 
   public void convert(User owner) {
     this.id = owner.getId();
-    this.login = owner.getLogin();
+    this.login = owner.getAuthorName();
     this.avatarUrl = owner.getAvatarUrl();
   }
 

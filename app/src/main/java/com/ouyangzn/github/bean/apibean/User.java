@@ -31,7 +31,7 @@ public class User {
   @Expose @SerializedName("gravatar_id") String gravatarId;
   @Expose @SerializedName("html_url") String htmlUrl;
   @Expose Integer id;
-  @Expose String login;
+  @Expose @SerializedName("login") String authorName;
   @Expose @SerializedName("organizations_url") String organizationsUrl;
   @Expose @SerializedName("received_events_url") String receivedEventsUrl;
   @Expose @SerializedName("repos_url") String reposUrl;
@@ -105,12 +105,12 @@ public class User {
     this.id = id;
   }
 
-  public String getLogin() {
-    return this.login;
+  public String getAuthorName() {
+    return authorName;
   }
 
-  public void setLogin(String login) {
-    this.login = login;
+  public void setAuthorName(String authorName) {
+    this.authorName = authorName;
   }
 
   public String getOrganizationsUrl() {
@@ -175,5 +175,27 @@ public class User {
 
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  @Override public String toString() {
+    return "User{" +
+        "avatarUrl='" + avatarUrl + '\'' +
+        ", eventsUrl='" + eventsUrl + '\'' +
+        ", followersUrl='" + followersUrl + '\'' +
+        ", followingUrl='" + followingUrl + '\'' +
+        ", gistsUrl='" + gistsUrl + '\'' +
+        ", gravatarId='" + gravatarId + '\'' +
+        ", htmlUrl='" + htmlUrl + '\'' +
+        ", authorName='" + authorName + '\'' +
+        ", organizationsUrl='" + organizationsUrl + '\'' +
+        ", receivedEventsUrl='" + receivedEventsUrl + '\'' +
+        ", reposUrl='" + reposUrl + '\'' +
+        ", siteAdmin=" + siteAdmin +
+        ", starredUrl='" + starredUrl + '\'' +
+        ", subscriptionsUrl='" + subscriptionsUrl + '\'' +
+        ", type='" + type + '\'' +
+        ", url='" + url + '\'' +
+        ", id=" + id +
+        '}';
   }
 }

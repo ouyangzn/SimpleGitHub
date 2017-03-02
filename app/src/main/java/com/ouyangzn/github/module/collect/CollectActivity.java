@@ -37,6 +37,7 @@ import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtil;
+import com.ouyangzn.github.utils.UIUtil;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.trello.rxlifecycle.LifecycleProvider;
@@ -96,8 +97,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
     LayoutInflater inflater = getLayoutInflater();
     mCollectAdapter.setEmptyView(inflater.inflate(R.layout.item_no_data, mRecyclerView, false));
-    mCollectAdapter.setLoadMoreView(
-        inflater.inflate(R.layout.item_load_more, mRecyclerView, false));
+    UIUtil.setRecyclerViewLoadMore(mCollectAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mCollectAdapter);
     RxView.touches(mRecyclerView, event -> {
       ScreenUtil.hideKeyBoard(mSearchEdit);

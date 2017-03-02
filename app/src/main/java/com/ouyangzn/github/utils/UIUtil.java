@@ -20,19 +20,42 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.ouyangzn.github.R;
+import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 
 /**
  * Created by ouyangzn on 2016/10/8.<br/>
  * Description：UI操作相关工具类，包括界面（activity等）跳转
  */
 public class UIUtil {
+
+  /**
+   * 给RecyclerView设置加载更多和加载更多失败时的属性
+   *
+   * @param mAdapter BaseRecyclerViewAdapter
+   * @param recyclerView RecyclerView
+   */
+  public static void setRecyclerViewLoadMore(BaseRecyclerViewAdapter mAdapter,
+      RecyclerView recyclerView) {
+    LayoutInflater inflater = LayoutInflater.from(recyclerView.getContext());
+    mAdapter.setLoadMoreView(inflater.inflate(R.layout.item_load_more, recyclerView, false));
+    View loadMoreFail = inflater.inflate(R.layout.item_load_more_failure, recyclerView, false);
+    loadMoreFail.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        mAdapter.reloadMore();
+      }
+    });
+    mAdapter.setLoadMoreFailureView(loadMoreFail);
+  }
 
   /**
    * 给toolbar添加一张图片

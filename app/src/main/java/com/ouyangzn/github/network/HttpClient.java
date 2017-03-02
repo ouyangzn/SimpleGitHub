@@ -14,7 +14,6 @@
  */
 package com.ouyangzn.github.network;
 
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.ouyangzn.github.BuildConfig;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +25,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -38,8 +38,18 @@ public class HttpClient {
     builder.connectTimeout(30, TimeUnit.SECONDS);
     builder.writeTimeout(30, TimeUnit.SECONDS);
     builder.readTimeout(30, TimeUnit.SECONDS);
-    if (BuildConfig.LOG_DEBUG) {
-      builder.addNetworkInterceptor(new StethoInterceptor());
+    if (BuildConfig.DEBUG) {
+      try {
+        Class<?> clazz = Class.forName("com.facebook.stetho.okhttp3.StethoInterceptor");
+        Interceptor interceptor = (Interceptor) clazz.newInstance();
+        builder.addNetworkInterceptor(interceptor);
+      } catch (ClassNotFoundException e) {
+        // ignore
+      } catch (InstantiationException e) {
+        // ignore
+      } catch (IllegalAccessException e) {
+        // ignore
+      }
       HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
       logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
       builder.interceptors().add(logging);

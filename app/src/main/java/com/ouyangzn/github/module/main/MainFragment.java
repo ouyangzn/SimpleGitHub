@@ -36,6 +36,7 @@ import com.ouyangzn.github.module.common.RepositoryAdapter;
 import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.utils.UIUtil;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import java.util.ArrayList;
 
@@ -94,15 +95,14 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-    mAdapter.setLoadMoreView(mInflater.inflate(R.layout.item_load_more, mRecyclerView, false));
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
+    UIUtil.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);
+
     View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
     errorView.findViewById(R.id.layout_main_loading_failure).setOnClickListener(this);
     setErrorView(errorView);
-    View loadMoreFail = mInflater.inflate(R.layout.item_load_more_failure, mRecyclerView, false);
-    loadMoreFail.setOnClickListener(this);
-    mAdapter.setLoadMoreFailureView(loadMoreFail);
+
   }
 
   private void search(boolean isRefresh) {
@@ -183,6 +183,9 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     switchStatus(Status.STATUS_NORMAL);
     stopRefresh();
     Log.d(TAG, "----------result = " + result.toString());
+    for (Repository rep : result.getRepositories()) {
+      Log.d(TAG, rep.toString());
+    }
     mSearchFactor.page++;
     boolean hasMore = result.getRepositories().size() == mSearchFactor.limit;
     mAdapter.setHasMore(hasMore);

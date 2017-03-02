@@ -3,6 +3,11 @@ apply plugin: 'android-apt'
 apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 
+// 跟下面的versionName保持一致，最后一位用于紧急修复版本
+def versionMajor = 1
+def versionMinor = 0
+def versionPatch = 0
+def versionBuild = 0
 android {
   compileSdkVersion rootProject.ext.compileSdkVersion
   buildToolsVersion rootProject.ext.buildToolsVersion
@@ -11,16 +16,38 @@ android {
     applicationId "com.ouyangzn.github"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 1
-    versionName "1.0"
+    versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
+    versionName "1.0.0"
   }
+  Properties properties = new Properties()
+  properties.load(project.rootProject.file('local.properties').newDataInputStream())
+  signingConfigs {
+    release {
+      try {
+        storeFile file("../appkey.jks")
+        storePassword properties.getProperty("keystore.password")
+        keyAlias properties.getProperty("key.alias")
+        keyPassword properties.getProperty("key.password")
+      } catch (ex) {
+        throw new InvalidUserDataException(
+            "You should define keystore.password、key.alias and key.password in local.properties.")
+      }
+    }
+  }
+
   buildTypes {
     release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
       buildConfigField "boolean", "LOG_DEBUG", "false"
     }
     debug {
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
       buildConfigField "boolean", "LOG_DEBUG", "true"
     }
   }
