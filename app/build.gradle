@@ -42,13 +42,19 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
       signingConfig signingConfigs.release
       buildConfigField "boolean", "LOG_DEBUG", "false"
+      ndk {
+        abiFilters "armeabi-v7a"
+      }
     }
     debug {
-      minifyEnabled true
-      shrinkResources true
+      minifyEnabled false
+      shrinkResources false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
       signingConfig signingConfigs.release
       buildConfigField "boolean", "LOG_DEBUG", "true"
+      ndk {
+        abiFilters "armeabi-v7a"
+      }
     }
   }
   compileOptions {
