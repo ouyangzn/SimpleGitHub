@@ -27,10 +27,12 @@ it's just a android client, used to search open source from github
 - 收藏和取消收藏
 - 收藏的project按关键字搜索
 
-接下来会做的(planing)
+接下来会做的(todo list)
 --------------------
-- 首页改版：一种语言对应一个fragment
+- ~~首页改版：一种语言对应一个fragment~~
 - 全语言搜索优化
+- 登录github账号，导入账户star数据
+- 对star的project进行分类展示、收藏等（目前github上不能对star分类，不太方便）
 
 License
 -------
