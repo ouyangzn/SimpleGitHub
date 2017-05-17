@@ -58,7 +58,7 @@ public class HttpClient {
       SSLContext sc = SSLContext.getInstance("SSL");
       sc.init(null, new TrustManager[] { new TrustAnyTrustManager() },
           new java.security.SecureRandom());
-      builder.sslSocketFactory(sc.getSocketFactory());
+      builder.sslSocketFactory(sc.getSocketFactory(), new TrustAnyTrustManager());
       builder.hostnameVerifier(new TrustAnyHostnameVerifier());
     } catch (KeyManagementException ignored) {
     } catch (NoSuchAlgorithmException ignored) {
