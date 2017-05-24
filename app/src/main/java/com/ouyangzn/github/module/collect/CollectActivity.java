@@ -35,7 +35,6 @@ import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.module.common.CollectAdapter;
 import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
-import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.ScreenUtil;
 import com.ouyangzn.github.utils.UIUtil;
 import com.ouyangzn.github.view.InputEdit;
@@ -80,7 +79,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override public ICollectPresenter initPresenter() {
-    return new CollectPresenter(mContext, mProvider);
+    return new CollectPresenter(mProvider);
   }
 
   @Override protected void initData() {
@@ -146,7 +145,6 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
 
   @Override public void showCollect(List<CollectedRepo> repoList) {
     int listSize = repoList.size();
-    Log.d(TAG, "----------repoList.size = " + listSize);
     mLoadingView.setVisibility(View.GONE);
     boolean hasMore = listSize == COUNT_EACH_PAGE;
     mCollectAdapter.setHasMore(hasMore);
@@ -203,8 +201,9 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mCollectAdapter.resetData(new ArrayList<>(0));
   }
 
-  @Override public void showCollectionCanceled() {
+  @Override public void showCollectionCanceled(CollectedRepo repo) {
     toast(R.string.tip_collect_cancel_success);
+    mCollectAdapter.remove(repo);
   }
 
   @Override public void showCollectionCancelFailure() {
@@ -218,7 +217,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   @Override public void onItemClick(View view, int position) {
     CollectedRepo repo = mCollectAdapter.getItem(position);
     Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setData(Uri.parse(repo.htmlUrl));
+    intent.setData(Uri.parse(repo.getHtmlUrl()));
     startActivity(intent);
   }
 
@@ -228,7 +227,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
       CollectedRepo item = mCollectAdapter.getItem(position);
       switch (which) {
         case 0:
-          copyUrl(item.htmlUrl);
+          copyUrl(item.getHtmlUrl());
           break;
         case 1:
           cancelCollectRepo(item);
@@ -273,14 +272,16 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     }
 
     @Override public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-      return mOldRepoList.get(oldItemPosition).id.equals(mNewRepoList.get(newItemPosition).id);
+      return mOldRepoList.get(oldItemPosition)
+          .getId()
+          .equals(mNewRepoList.get(newItemPosition).getId());
     }
 
     @Override public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
       CollectedRepo oldRepo = mOldRepoList.get(oldItemPosition);
       CollectedRepo newRepo = mNewRepoList.get(newItemPosition);
-      return oldRepo.collectTime == newRepo.collectTime
-          || oldRepo.stargazersCount == newRepo.stargazersCount;
+      return oldRepo.getCollectTime() == newRepo.getCollectTime()
+          || oldRepo.getStargazersCount() == newRepo.getStargazersCount();
     }
   }
 }

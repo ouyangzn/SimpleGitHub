@@ -19,6 +19,7 @@ import android.content.Context;
 import android.widget.ImageView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
+import com.ouyangzn.github.bean.localbean.CollectedRepoOwner;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.view.CornerMarkText;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
@@ -39,14 +40,15 @@ public class CollectAdapter extends BaseRecyclerViewAdapter<CollectedRepo> {
   }
 
   @Override protected void convert(BaseViewHolder holder, CollectedRepo repo) {
-    holder.setText(R.id.tv_project_name, repo.fullName);
-    holder.setText(R.id.tv_project_desc, repo.description);
-    holder.setText(R.id.tv_author, repo.owner.login);
-    holder.setText(R.id.tv_stars, mContext.getString(R.string.stars, repo.stargazersCount));
+    holder.setText(R.id.tv_project_name, repo.getFullName());
+    holder.setText(R.id.tv_project_desc, repo.getDescription());
+    CollectedRepoOwner owner = repo.getOwner();
+    holder.setText(R.id.tv_author, owner.getLogin());
+    holder.setText(R.id.tv_stars, mContext.getString(R.string.stars, repo.getStargazersCount()));
     ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
-    ImageLoader.load(photo, repo.owner.avatarUrl);
+    ImageLoader.load(photo, owner.getAvatarUrl());
     holder.setVisible(R.id.tv_language, true);
     CornerMarkText text = (CornerMarkText) holder.getConvertView().findViewById(R.id.tv_language);
-    text.setText(repo.language);
+    text.setText(repo.getLanguage());
   }
 }

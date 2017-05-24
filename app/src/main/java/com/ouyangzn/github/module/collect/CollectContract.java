@@ -36,7 +36,7 @@ public class CollectContract {
 
     void showQueryByKeyFailure();
 
-    void showCollectionCanceled();
+    void showCollectionCanceled(CollectedRepo repo);
 
     void showCollectionCancelFailure();
 

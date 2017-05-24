@@ -1,7 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
-apply plugin: 'realm-android'
+//apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 // 跟下面的versionName保持一致，最后一位用于紧急修复版本
 def versionMajor = 1
@@ -63,6 +64,11 @@ android {
   }
 }
 
+greendao {
+  schemaVersion 1
+  daoPackage "com.ouyangzn.github.dao"
+}
+
 dependencies {
   compile fileTree(include: ['*.jar'], dir: 'libs')
   testCompile 'junit:junit:4.12'
@@ -102,8 +108,11 @@ dependencies {
   // butterknife系列
   compile "com.jakewharton:butterknife:${BUTTERKNIFE_VERSION}"
   apt "com.jakewharton:butterknife-compiler:${BUTTERKNIFE_COMPILER_VERSION}"
+  // greendao
+  compile "org.greenrobot:greendao:${GREENDAO_VERSION}"
+
   // chrome调试与realm的调试
   debugCompile "com.facebook.stetho:stetho:${STETHO_VERSION}"
   debugCompile "com.facebook.stetho:stetho-okhttp3:${STETHO_OKHTTP_VERSION}"
-  debugCompile "com.uphyca:stetho_realm:${STETHO_REALM_VERSION}"
+  //  debugCompile "com.uphyca:stetho_realm:${STETHO_REALM_VERSION}"
 }

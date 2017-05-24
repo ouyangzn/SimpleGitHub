@@ -23,13 +23,15 @@ import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
+import com.ouyangzn.github.data.ICollectData;
 import com.ouyangzn.github.data.IGitHubData;
+import com.ouyangzn.github.data.local.LocalCollectData;
 import com.ouyangzn.github.data.remote.RemoteGitHubData;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.utils.RxJavaUtil;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
-import io.realm.Realm;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -45,24 +47,23 @@ public class MainPresenter extends IMainPresenter {
 
   private LifecycleProvider<FragmentEvent> mProvider;
   private IGitHubData mDataSource;
+  private ICollectData mCollectData;
+
   private App mApp;
-  private Realm mRealm;
   private SharedPreferences mConfigSp;
   private Subscription mQueryDataSubscribe;
 
   public MainPresenter(Context context, LifecycleProvider<FragmentEvent> provider) {
     mProvider = provider;
     mApp = (App) context.getApplicationContext();
-    mRealm = mApp.getGlobalRealm();
     mDataSource = new RemoteGitHubData();
+    mCollectData = new LocalCollectData();
     mConfigSp = mApp.getSharedPreferences(CommonConstants.ConfigSP.SP_NAME, Context.MODE_PRIVATE);
   }
 
   @Override protected void onDestroy() {
-    if (mRealm != null) {
-      mRealm.close();
-      mRealm = null;
-    }
+    mDataSource = null;
+    mCollectData = null;
   }
 
   @Override public void queryData(SearchFactor factor) {
@@ -86,7 +87,6 @@ public class MainPresenter extends IMainPresenter {
           mView.setLoadingIndicator(false);
           mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
         });
-    //addSubscription(mQueryDataSubscribe);
   }
 
   @Override public void saveSearchFactor(SearchFactor factor) {
@@ -100,39 +100,22 @@ public class MainPresenter extends IMainPresenter {
   }
 
   @Override public void collectRepo(final Repository repo) {
-    // realm原生态写法
-    mRealm.executeTransactionAsync(bgRealm -> {
+    RxJavaUtil.wrap(Observable.defer(() -> {
       CollectedRepo collectedRepo = new CollectedRepo();
       collectedRepo.convert(repo);
-      collectedRepo.collectTime = System.currentTimeMillis();
-      bgRealm.copyToRealmOrUpdate(collectedRepo);
-    }, () -> {
-      mView.showCollected();
+      collectedRepo.setCollectTime(System.currentTimeMillis());
+      return Observable.just(mCollectData.collectRepo(collectedRepo));
+    })).subscribe(success -> {
+      if (success) {
+        mView.showCollected();
+      } else {
+        Log.e(TAG, "----------未知原因收藏失败-----------");
+        mView.showCollectedFailure();
+      }
     }, error -> {
-      Log.d(TAG, "----------收藏失败：", error);
+      Log.e(TAG, "----------收藏失败：", error);
       mView.showCollectedFailure();
     });
-    // rxJava写法
-    //Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
-    //  try {
-    //    mRealm.beginTransaction();
-    //    CollectedRepo collectedRepo = new CollectedRepo();
-    //    collectedRepo.collectTime = System.currentTimeMillis();
-    //    collectedRepo.convert(repo);
-    //    mRealm.copyToRealmOrUpdate(collectedRepo);
-    //    mRealm.commitTransaction();
-    //    subscriber.onNext(null);
-    //    subscriber.onCompleted();
-    //  } catch (Exception e) {
-    //    if (mRealm.isInTransaction()) mRealm.cancelTransaction();
-    //    subscriber.onError(e);
-    //  }
-    //}).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
-    //  mView.showCollected();
-    //}, throwable -> {
-    //  Log.d(TAG, "----------收藏失败：", throwable);
-    //  mView.showCollectedFailure();
-    //});
   }
 
 }
