@@ -46,12 +46,6 @@ public class CommonConstants {
     public static final String LANG_SHELL = "Shell";
   }
 
-  public static class ConfigSP {
-    public static final String SP_NAME = "config";
-    /** 所选语言 */
-    public static final String KEY_LANGUAGE = "language";
-  }
-
   public static class NormalCons {
     /** 分页--每页20条数据 */
     public static final int LIMIT_20 = 20;

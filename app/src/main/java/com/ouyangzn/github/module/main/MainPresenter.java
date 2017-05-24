@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
@@ -30,12 +29,15 @@ import com.ouyangzn.github.data.remote.RemoteGitHubData;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtil;
+import com.ouyangzn.github.utils.SpUtil;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+import static com.ouyangzn.github.utils.SpUtil.KEY_LANGUAGE;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
@@ -58,7 +60,7 @@ public class MainPresenter extends IMainPresenter {
     mApp = (App) context.getApplicationContext();
     mDataSource = new RemoteGitHubData();
     mCollectData = new LocalCollectData();
-    mConfigSp = mApp.getSharedPreferences(CommonConstants.ConfigSP.SP_NAME, Context.MODE_PRIVATE);
+    mConfigSp = SpUtil.getSp(context);
   }
 
   @Override protected void onDestroy() {
@@ -92,8 +94,7 @@ public class MainPresenter extends IMainPresenter {
   @Override public void saveSearchFactor(SearchFactor factor) {
     Observable.just(factor)
         .observeOn(Schedulers.io())
-        .doOnNext(factor1 -> mConfigSp.edit()
-            .putString(CommonConstants.ConfigSP.KEY_LANGUAGE,
+        .doOnNext(factor1 -> mConfigSp.edit().putString(KEY_LANGUAGE,
                 App.getApp().getGson().toJson(factor1))
             .apply())
         .subscribe();

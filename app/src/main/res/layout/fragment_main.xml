@@ -35,7 +35,7 @@
         android:layout_marginLeft="@dimen/spacing_normal"
         android:layout_marginRight="@dimen/spacing_normal"
         android:layout_marginTop="@dimen/spacing_tiny"
-        app:editBg="@drawable/bg_border_corners5_light_blue"
+        app:editBg="@drawable/bg_border_corners5_light_blue_white"
         app:input_hint="@string/hint_input_keyword"
         app:input_imeOptions="actionSearch"
         />

@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
 import butterknife.OnClick;
+import com.jakewharton.rxbinding.view.RxView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.base.LazyLoadFragment;
@@ -36,8 +37,10 @@ import com.ouyangzn.github.module.common.RepositoryAdapter;
 import com.ouyangzn.github.utils.CommonUtil;
 import com.ouyangzn.github.utils.DialogUtil;
 import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.utils.ScreenUtil;
 import com.ouyangzn.github.utils.UIUtil;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
+import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
 
 import static com.ouyangzn.github.module.main.MainContract.IMainPresenter;
@@ -95,6 +98,10 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    RxView.touches(mRecyclerView, motionEvent -> {
+      ScreenUtil.hideKeyBoard(mRecyclerView);
+      return false;
+    }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
     UIUtil.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);

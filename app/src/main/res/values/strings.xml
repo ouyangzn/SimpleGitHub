@@ -4,7 +4,12 @@
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>
+  <string name="username_github">github账号</string>
+  <string name="confirm">确定</string>
+  <string name="cancel">取消</string>
   <string name="nav_about">关于</string>
+  <string name="nav_username">账号</string>
+  <string name="nav_my_stars">我的stars</string>
   <string name="language_all">all</string>
   <string name="language_java">java</string>
   <string name="language_oc">Objective-C</string>
@@ -30,4 +35,7 @@
   <string name="error_collect_failure">收藏失败,请重新收藏</string>
   <string name="error_collect_cancel_failure">取消收藏失败,请重新取消</string>
   <string name="error_main_load_failure">数据加载失败/(ㄒoㄒ)/~~\n点击重新加载</string>
+  <string name="error_username_null">用户名必须填写</string>
+  <!-- TODO: Remove or change this placeholder text -->
+  <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

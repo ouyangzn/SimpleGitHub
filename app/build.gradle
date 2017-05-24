@@ -71,7 +71,6 @@ greendao {
 
 dependencies {
   compile fileTree(include: ['*.jar'], dir: 'libs')
-  testCompile 'junit:junit:4.12'
   //
   compile "com.android.support:appcompat-v7:${APPCOMPAT_V7_VERSION}"
   compile "com.android.support:design:${DESIGN_VERSION}"
@@ -87,7 +86,6 @@ dependencies {
   compile "com.jakewharton.rxbinding:rxbinding:${RXBINDING_VERSION}"
   compile "com.jakewharton.rxbinding:rxbinding-recyclerview-v7:${RXBINDING_SUPPORT_VERSION}"
   compile "com.jakewharton.rxbinding:rxbinding-support-v4:${RXBINDING_SUPPORT_VERSION}"
-  compile 'com.trello:rxlifecycle:1.0'
   // If you want to bind to Android-specific lifecycles
   compile "com.trello:rxlifecycle-android:${RXLIFECYCLE_VERSION}"
   // If you want pre-written Activities and Fragments you can subclass as providers
@@ -115,4 +113,7 @@ dependencies {
   debugCompile "com.facebook.stetho:stetho:${STETHO_VERSION}"
   debugCompile "com.facebook.stetho:stetho-okhttp3:${STETHO_OKHTTP_VERSION}"
   //  debugCompile "com.uphyca:stetho_realm:${STETHO_REALM_VERSION}"
+  compile 'com.trello:rxlifecycle:1.0'
+  compile 'com.android.support:support-v4:24.2.1'
+  testCompile 'junit:junit:4.12'
 }

@@ -16,6 +16,7 @@
 package com.ouyangzn.github;
 
 import android.app.Application;
+import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.TypeAdapters;
@@ -24,6 +25,9 @@ import com.ouyangzn.github.json.DoubleAdapter;
 import com.ouyangzn.github.json.IntegerAdapter;
 import com.ouyangzn.github.json.LongAdapter;
 import com.ouyangzn.github.utils.ImageLoader;
+import com.ouyangzn.github.utils.SpUtil;
+
+import static com.ouyangzn.github.utils.SpUtil.KEY_USERNAME;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
@@ -32,11 +36,23 @@ import com.ouyangzn.github.utils.ImageLoader;
 public class App extends Application {
 
   private static App sApp;
-
+  private static String username;
   private Gson mGson;
 
   public static App getApp() {
     return sApp;
+  }
+
+  public static String getUsername() {
+    if (TextUtils.isEmpty(username)) {
+      username = SpUtil.getString(sApp, KEY_USERNAME);
+    }
+    return username;
+  }
+
+  public static void setUsername(String username) {
+    App.username = username;
+    SpUtil.put(sApp, KEY_USERNAME, username);
   }
 
   public Gson getGson() {

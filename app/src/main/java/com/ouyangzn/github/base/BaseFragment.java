@@ -67,7 +67,8 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
     if (mContentView == null) throw new UnsupportedOperationException("contentView == null");
     mRootView.addView(mContentView);
     if (mStatus == null) {
-      switchStatus(getCurrentStatus());
+      Status status = getCurrentStatus();
+      switchStatus(status == null ? Status.STATUS_NORMAL : status);
     } else {
       switchStatus(mStatus);
     }
@@ -168,6 +169,15 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
    * @param isActive 是否正在处理
    */
   @Override public void setLoadingIndicator(boolean isActive) {
+  }
+
+  /**
+   * 返回键事件
+   *
+   * @return 是否继续传播
+   */
+  public boolean onBackPressed() {
+    return false;
   }
 
   /**
