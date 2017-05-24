@@ -13,7 +13,8 @@ it's just a android client, used to search open source from github
 目前使用到的(used Library)
 -------------------------
 - 响应式编程：rxJava
-- 数据库：realm，尽管有些坑，但还是在继续使用
+- ~~数据库：realm，尽管有些坑，但还是在继续使用~~(线程问题实在麻烦，还是换回SQLite)
+- orm：[greenDao](https://github.com/greenrobot/greenDAO)
 - 图片加载：glide
 - 网络：okhttp、retrofit
 - [RecyclerViewAdapter](https://github.com/ouyangzn/BaseRecyclerAdapter)
@@ -29,15 +30,15 @@ it's just a android client, used to search open source from github
 
 接下来会做的(todo list)
 --------------------
-- ~~首页改版：一种语言对应一个fragment~~
-- 全语言搜索优化
-- 登录github账号，导入账户star数据
-- 对star的project进行分类展示、收藏等（目前github上不能对star分类，不太方便）
+- [x] 首页改版：一种语言对应一个fragment
+- [ ] 全语言搜索优化
+- [ ] 登录github账号，导入账户star数据
+- [ ] 对star的project进行分类展示、收藏等（目前github上不能对star分类，不太方便）
 
 License
 -------
 
-    Copyright 2016 ouyangzn
+    Copyright 2016-2017 ouyangzn
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
