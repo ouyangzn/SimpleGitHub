@@ -30,8 +30,8 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.base.LazyLoadFragment;
+import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.apibean.Repository;
-import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.common.RepositoryAdapter;
 import com.ouyangzn.github.utils.CommonUtil;
@@ -186,7 +186,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     }
   }
 
-  @Override public void showQueryDataResult(SearchResult result) {
+  @Override public void showQueryDataResult(RepoSearchResult result) {
     switchStatus(Status.STATUS_NORMAL);
     stopRefresh();
     Log.d(TAG, "----------result = " + result.toString());

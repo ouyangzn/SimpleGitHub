@@ -22,9 +22,9 @@ import java.util.List;
 
 /**
  * Created by ouyangzn on 2016/9/6.<br/>
- * Description：
+ * Description：搜索Repository返回的结果
  */
-public class SearchResult {
+public class RepoSearchResult {
 
   @Expose @SerializedName("total_count") Integer totalCount;
   @Expose @SerializedName("incomplete_results") Boolean incompleteResults;
@@ -55,7 +55,7 @@ public class SearchResult {
   }
 
   @Override public String toString() {
-    return "SearchResult{" +
+    return "RepoSearchResult{" +
         "totalCount=" + totalCount +
         ", incompleteResults=" + incompleteResults +
         ", repositories=" + repositories +

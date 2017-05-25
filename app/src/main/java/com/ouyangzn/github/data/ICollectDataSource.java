@@ -13,21 +13,38 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.network;
+package com.ouyangzn.github.data;
 
-import com.ouyangzn.github.bean.apibean.Repository;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import java.util.List;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-import rx.Observable;
 
 /**
- * Created by ouyangzn on 2017/5/18.<br/>
+ * Created by ouyangzn on 2016/9/30.<br/>
  * Description：
  */
-public interface UserApi {
+public interface ICollectDataSource {
 
-  @GET("/users/{user}/starred") Observable<List<Repository>> getStarred(
-      @Path("user") String username, @Query("page") int page, @Query("per_page") int perPage);
+  /**
+   * 查询所有收藏
+   *
+   * @param page 页码，从0开始
+   * @param limit 每页数量
+   * @return List<CollectedRepo>
+   */
+  List<CollectedRepo> queryCollectRepo(int page, int limit);
+
+  /**
+   * 根据关键字搜索
+   *
+   * @param keyword 关键字
+   * @return List<CollectedRepo>
+   */
+  List<CollectedRepo> queryByKeyword(String keyword);
+
+  boolean collectRepo(CollectedRepo repo);
+
+  boolean cancelRepo(CollectedRepo repo);
+
+  boolean cancelRepo(Long id);
+
 }

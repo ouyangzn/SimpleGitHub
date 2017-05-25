@@ -15,8 +15,8 @@
 package com.ouyangzn.github.module.collect;
 
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
-import com.ouyangzn.github.data.ICollectData;
-import com.ouyangzn.github.data.local.LocalCollectData;
+import com.ouyangzn.github.data.ICollectDataSource;
+import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
 import com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtil;
@@ -33,7 +33,7 @@ public class CollectPresenter extends ICollectPresenter {
 
   private final String TAG = CollectPresenter.class.getSimpleName();
 
-  private ICollectData mCollectData;
+  private ICollectDataSource mCollectData;
   private LifecycleProvider<ActivityEvent> mProvider;
 
   private Subscription mQueryAllSub;
@@ -41,13 +41,13 @@ public class CollectPresenter extends ICollectPresenter {
 
   public CollectPresenter(LifecycleProvider<ActivityEvent> provider) {
     mProvider = provider;
-    mCollectData = new LocalCollectData();
+    mCollectData = new CollectLocalDataSourceSource();
   }
 
   @Override public void queryByKey(String key) {
     if (mQueryByKeySub != null && mQueryByKeySub.isUnsubscribed()) mQueryByKeySub.unsubscribe();
-    mQueryByKeySub =
-        RxJavaUtil.wrap(Observable.defer(() -> Observable.just(mCollectData.queryByKeyword(key))),
+    mQueryByKeySub = RxJavaUtil.wrapActivity(
+        Observable.defer(() -> Observable.just(mCollectData.queryByKeyword(key))),
             mProvider)
         .subscribe(results -> {
           mView.showCollectQueryByKey(results);
@@ -61,7 +61,7 @@ public class CollectPresenter extends ICollectPresenter {
     if (mQueryAllSub != null && mQueryAllSub.isUnsubscribed()) {
       mQueryAllSub.unsubscribe();
     }
-    mQueryAllSub = RxJavaUtil.wrap(
+    mQueryAllSub = RxJavaUtil.wrapActivity(
         Observable.defer(() -> Observable.just(mCollectData.queryCollectRepo(page, limit))),
         mProvider).subscribe(repoList -> mView.showCollect(repoList), error -> {
       Log.e(TAG, "----------查询收藏,queryByKey出错：", error);
@@ -70,7 +70,8 @@ public class CollectPresenter extends ICollectPresenter {
   }
 
   @Override public void cancelCollectRepo(CollectedRepo repo) {
-    RxJavaUtil.wrap(Observable.defer(() -> Observable.just(mCollectData.cancelRepo(repo.getId()))),
+    RxJavaUtil.wrapActivity(
+        Observable.defer(() -> Observable.just(mCollectData.cancelRepo(repo.getId()))),
         mProvider).subscribe(success -> {
       if (success) {
         mView.showCollectionCanceled(repo);

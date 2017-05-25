@@ -15,36 +15,21 @@
 
 package com.ouyangzn.github.data;
 
-import com.ouyangzn.github.bean.localbean.CollectedRepo;
+import com.ouyangzn.github.bean.apibean.Repository;
 import java.util.List;
+import rx.Observable;
 
 /**
- * Created by ouyangzn on 2016/9/30.<br/>
+ * Created by ouyangzn on 2017/5/25.<br/>
  * Description：
  */
-public interface ICollectData {
+public interface IStarsDataSource {
 
   /**
-   * 查询所有收藏
+   * 查询某个人的stars
    *
-   * @param page 页码，从0开始
-   * @param limit 每页数量
-   * @return List<CollectedRepo>
+   * @param username 用户名
+   * @return Observable<List<Repository>>
    */
-  List<CollectedRepo> queryCollectRepo(int page, int limit);
-
-  /**
-   * 根据关键字搜索
-   *
-   * @param keyword 关键字
-   * @return List<CollectedRepo>
-   */
-  List<CollectedRepo> queryByKeyword(String keyword);
-
-  boolean collectRepo(CollectedRepo repo);
-
-  boolean cancelRepo(CollectedRepo repo);
-
-  boolean cancelRepo(Long id);
-
+  Observable<List<Repository>> querySomeoneStars(String username, int page, int limit);
 }

@@ -18,7 +18,7 @@ package com.ouyangzn.github.data.local;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.dao.CollectedRepoDao;
 import com.ouyangzn.github.dao.DaoSession;
-import com.ouyangzn.github.data.ICollectData;
+import com.ouyangzn.github.data.ICollectDataSource;
 import com.ouyangzn.github.db.DaoHelper;
 import com.ouyangzn.github.utils.Log;
 import java.util.List;
@@ -28,13 +28,13 @@ import org.greenrobot.greendao.query.WhereCondition;
  * Created by ouyangzn on 2017/5/18.<br/>
  * Description：收藏的库数据源
  */
-public class LocalCollectData implements ICollectData {
+public class CollectLocalDataSourceSource implements ICollectDataSource {
 
-  private final static String TAG = LocalCollectData.class.getSimpleName();
+  private final static String TAG = CollectLocalDataSourceSource.class.getSimpleName();
 
   private CollectedRepoDao mRepoDao;
 
-  public LocalCollectData() {
+  public CollectLocalDataSourceSource() {
     DaoSession daoSession = DaoHelper.getDaoSession();
     mRepoDao = daoSession.getCollectedRepoDao();
   }

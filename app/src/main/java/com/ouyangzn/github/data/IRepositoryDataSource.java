@@ -16,7 +16,7 @@
 package com.ouyangzn.github.data;
 
 import com.ouyangzn.github.base.CommonConstants.GitHub;
-import com.ouyangzn.github.bean.apibean.SearchResult;
+import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 import rx.Observable;
 
@@ -24,7 +24,7 @@ import rx.Observable;
  * Created by ouyangzn on 2016/9/6.<br/>
  * Description：
  */
-public interface IGitHubData {
+public interface IRepositoryDataSource {
   /**
    * 查询GitHub的数据
    *
@@ -35,11 +35,11 @@ public interface IGitHubData {
    * @param perPage 每页的数据量
    * @param page 搜索页数
    */
-  Observable<SearchResult> queryByKeyword(SearchFactor factor, String sort, String order,
+  Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, String sort, String order,
       int perPage, int page);
 
-  Observable<SearchResult> queryByKeyword(SearchFactor factor, int perPage, int page);
+  Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int perPage, int page);
 
-  Observable<SearchResult> queryByKeyword(SearchFactor factor, int page);
+  Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int page);
 
 }

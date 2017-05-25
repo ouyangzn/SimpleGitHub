@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016.  ouyangzn   <ouyangzn@163.com>
+ * Copyright (c) 2016.  ouyangzn   <email : ouyangzn@163.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.network;
+package com.ouyangzn.github.data.remote;
 
-import com.ouyangzn.github.bean.apibean.RepoSearchResult;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
+import com.ouyangzn.github.bean.apibean.Repository;
+import com.ouyangzn.github.data.IStarsDataSource;
+import com.ouyangzn.github.network.Api;
+import java.util.List;
 import rx.Observable;
 
 /**
- * Created by ouyangzn on 2016/9/5.<br/>
+ * Created by ouyangzn on 2017/5/25.<br/>
  * Description：
  */
-public interface SearchApi {
-
-  @GET("/search/repositories") Observable<RepoSearchResult> query(@Query("q") String keyword,
-      @Query("sort") String sort, @Query("order") String order, @Query("per_page") int perPage,
-      @Query("page") int page);
+public class StarsRemoteDataSource implements IStarsDataSource {
+  @Override
+  public Observable<List<Repository>> querySomeoneStars(String username, int page, int limit) {
+    return Api.getUserApi().getStarred(username, page, limit);
+  }
 }

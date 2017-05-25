@@ -135,13 +135,13 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         break;
       }
       case R.id.nav_username: {
-        showInputUsernameDialog();
+        showInputUsernameDialog(null);
         break;
       }
       case R.id.nav_my_stars: {
         String username = App.getUsername();
         if (TextUtils.isEmpty(username)) {
-          showInputUsernameDialog();
+          showInputUsernameDialog(v -> Actions.gotoMineStars(this));
         } else {
           Actions.gotoMineStars(this);
         }
@@ -154,8 +154,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   /**
    * 显示输入用户名的dialog
+   * @param onConfirmClick 点确定的回调
    */
-  private void showInputUsernameDialog() {
+  private void showInputUsernameDialog(View.OnClickListener onConfirmClick) {
     AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
     AlertDialog dialog = builder.setView(R.layout.dialog_input_view).create();
     dialog.show();
@@ -178,6 +179,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         return;
       }
       App.setUsername(username);
+      if (onConfirmClick != null) onConfirmClick.onClick(v);
     });
     Button btnCancel = ButterKnife.findById(dialog, R.id.btn_dialog_input_cancel);
     btnCancel.setTag(dialog);

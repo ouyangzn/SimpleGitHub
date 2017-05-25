@@ -11,8 +11,6 @@ buildscript {
     // in the individual module build.gradle files
     // butterknife
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-    // realm
-    //    classpath "io.realm:realm-gradle-plugin:${REALM_VERSION}"
     // retrolambda (https://github.com/evant/gradle-retrolambda)
     classpath "me.tatarka:gradle-retrolambda:${GRADLE_RETROLAMBDA_VERSION}"
     classpath "org.greenrobot:greendao-gradle-plugin:${GREENDAO_VERSION}" // add plugin

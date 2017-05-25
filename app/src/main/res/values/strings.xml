@@ -1,6 +1,7 @@
 <resources>
   <string name="app_name">open source</string>
   <string name="title_collect">收藏</string>
+  <string name="title_stars">我的stars</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>
@@ -36,6 +37,5 @@
   <string name="error_collect_cancel_failure">取消收藏失败,请重新取消</string>
   <string name="error_main_load_failure">数据加载失败/(ㄒoㄒ)/~~\n点击重新加载</string>
   <string name="error_username_null">用户名必须填写</string>
-  <!-- TODO: Remove or change this placeholder text -->
-  <string name="hello_blank_fragment">Hello blank fragment</string>
+  <string name="error_network_error">网络错误,请重试</string>
 </resources>

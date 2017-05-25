@@ -29,15 +29,15 @@
     <item>@string/language_shell</item>
   </array>
   <array name="long_click_main_dialog_item">
-    <item>复制网址</item>
-    <item>收藏</item>
+    <item>Copy Url</item>
+    <item>Collect</item>
   </array>
   <array name="long_click_collect_dialog_item">
-    <item>复制网址</item>
-    <item>取消收藏</item>
+    <item>Copy Url</item>
+    <item>Uncollect</item>
   </array>
   <array name="long_click_stars_dialog_item">
-    <item>复制网址</item>
-    <item>收藏</item>
+    <item>Copy Url</item>
+    <item>Collect</item>
   </array>
 </resources>

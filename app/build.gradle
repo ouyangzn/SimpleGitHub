@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
-//apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'org.greenrobot.greendao' // apply plugin
 
@@ -112,8 +111,5 @@ dependencies {
   // chrome调试与realm的调试
   debugCompile "com.facebook.stetho:stetho:${STETHO_VERSION}"
   debugCompile "com.facebook.stetho:stetho-okhttp3:${STETHO_OKHTTP_VERSION}"
-  //  debugCompile "com.uphyca:stetho_realm:${STETHO_REALM_VERSION}"
-  compile 'com.trello:rxlifecycle:1.0'
-  compile 'com.android.support:support-v4:24.2.1'
   testCompile 'junit:junit:4.12'
 }

@@ -17,6 +17,7 @@ package com.ouyangzn.github.utils;
 
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.ActivityEvent;
+import com.trello.rxlifecycle.android.FragmentEvent;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -50,27 +51,27 @@ public class RxJavaUtil {
    * @param provider LifecycleProvider<ActivityEvent>
    * @return Observable<T>
    */
-  public static <T> Observable<T> wrap(Observable<T> observable,
+  public static <T> Observable<T> wrapActivity(Observable<T> observable,
       LifecycleProvider<ActivityEvent> provider) {
     return observable.subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .compose(provider.bindUntilEvent(ActivityEvent.DESTROY));
   }
 
-  ///**
-  // * 包裹成subscribeOn子线程，observeOn主线程, activity销毁时取消
-  // *
-  // * @param observable Observable
-  // * @param <T> T
-  // * @param provider LifecycleProvider<FragmentEvent>
-  // * @return Observable<T>
-  // */
-  //public static <T> Observable<T> wrap(Observable<T> observable,
-  //    LifecycleProvider<FragmentEvent> provider) {
-  //  return observable.subscribeOn(Schedulers.io())
-  //      .observeOn(AndroidSchedulers.mainThread())
-  //      .compose(provider.bindUntilEvent(FragmentEvent.DESTROY));
-  //}
+  /**
+   * 包裹成subscribeOn子线程，observeOn主线程, activity销毁时取消
+   *
+   * @param observable Observable
+   * @param <T> T
+   * @param provider LifecycleProvider<FragmentEvent>
+   * @return Observable<T>
+   */
+  public static <T> Observable<T> wrapFragment(Observable<T> observable,
+      LifecycleProvider<FragmentEvent> provider) {
+    return observable.subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .compose(provider.bindUntilEvent(FragmentEvent.DESTROY));
+  }
 
   /**
    * unsubscribe the subscription

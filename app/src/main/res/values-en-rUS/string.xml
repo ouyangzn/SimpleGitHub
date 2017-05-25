@@ -15,7 +15,8 @@
   -->
 <resources>
   <string name="app_name">open source</string>
-  <string name="title_collect">collect</string>
+  <string name="title_collect">Collected</string>
+  <string name="title_stars">My stars</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>
@@ -50,4 +51,5 @@
   <string name="error_collect_cancel_failure">operate failure, retry please</string>
   <string name="error_main_load_failure">Load failure/(ㄒoㄒ)/~~\n click to refresh</string>
   <string name="error_username_null">Username can\'t be null</string>
+  <string name="error_network_error">Network error, retry please</string>
 </resources>

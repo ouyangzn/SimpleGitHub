@@ -17,9 +17,9 @@ package com.ouyangzn.github.data.remote;
 
 import android.text.TextUtils;
 import com.ouyangzn.github.base.CommonConstants.GitHub;
-import com.ouyangzn.github.bean.apibean.SearchResult;
+import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
-import com.ouyangzn.github.data.IGitHubData;
+import com.ouyangzn.github.data.IRepositoryDataSource;
 import com.ouyangzn.github.network.Api;
 import java.net.URLDecoder;
 import rx.Observable;
@@ -34,10 +34,10 @@ import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
  * <li>has keyword-->https://api.github.com/search/repositories?q=android+language:java&sort=stars&per_page=5&page=0</li>
  * <li>has keyword-->https://api.github.com/search/repositories?q=android+created:>2015-01-09+language:java&sort=stars&order=desc&per_page=3&page=1</li>
  */
-public class RemoteGitHubData implements IGitHubData {
+public class RepositoryRemoteDataSource implements IRepositoryDataSource {
 
   @Override
-  public Observable<SearchResult> queryByKeyword(SearchFactor factor, String sort, String order,
+  public Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, String sort, String order,
       int perPage, int page) {
     String q = "";
     if (factor.keyword != null) q = factor.keyword;
@@ -53,11 +53,11 @@ public class RemoteGitHubData implements IGitHubData {
   }
 
   @Override
-  public Observable<SearchResult> queryByKeyword(SearchFactor factor, int perPage, int page) {
+  public Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int perPage, int page) {
     return queryByKeyword(factor, GitHub.SORT_STARS, GitHub.ORDER_DESC, perPage, page);
   }
 
-  @Override public Observable<SearchResult> queryByKeyword(SearchFactor factor, int page) {
+  @Override public Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int page) {
     return queryByKeyword(factor, LIMIT_20, page);
   }
 }

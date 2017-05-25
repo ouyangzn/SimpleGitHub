@@ -22,10 +22,10 @@ import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
-import com.ouyangzn.github.data.ICollectData;
-import com.ouyangzn.github.data.IGitHubData;
-import com.ouyangzn.github.data.local.LocalCollectData;
-import com.ouyangzn.github.data.remote.RemoteGitHubData;
+import com.ouyangzn.github.data.ICollectDataSource;
+import com.ouyangzn.github.data.IRepositoryDataSource;
+import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
+import com.ouyangzn.github.data.remote.RepositoryRemoteDataSource;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtil;
@@ -48,8 +48,8 @@ public class MainPresenter extends IMainPresenter {
   private final String TAG = MainPresenter.class.getSimpleName();
 
   private LifecycleProvider<FragmentEvent> mProvider;
-  private IGitHubData mDataSource;
-  private ICollectData mCollectData;
+  private IRepositoryDataSource mDataSource;
+  private ICollectDataSource mCollectData;
 
   private App mApp;
   private SharedPreferences mConfigSp;
@@ -58,8 +58,8 @@ public class MainPresenter extends IMainPresenter {
   public MainPresenter(Context context, LifecycleProvider<FragmentEvent> provider) {
     mProvider = provider;
     mApp = (App) context.getApplicationContext();
-    mDataSource = new RemoteGitHubData();
-    mCollectData = new LocalCollectData();
+    mDataSource = new RepositoryRemoteDataSource();
+    mCollectData = new CollectLocalDataSourceSource();
     mConfigSp = SpUtil.getSp(context);
   }
 

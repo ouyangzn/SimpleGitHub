@@ -17,6 +17,8 @@ package com.ouyangzn.github.module.stars;
 
 import com.ouyangzn.github.base.BasePresenter;
 import com.ouyangzn.github.base.BaseView;
+import com.ouyangzn.github.bean.apibean.Repository;
+import java.util.List;
 
 /**
  * Created by ouyangzn on 2017/5/24.<br/>
@@ -24,10 +26,20 @@ import com.ouyangzn.github.base.BaseView;
  */
 public class StarsContract {
   interface IStarsView extends BaseView<IStarsPresenter> {
+    void showStars(List<Repository> repoList);
 
+    void showOnQueryStarsFail(String error);
   }
 
   static abstract class IStarsPresenter extends BasePresenter<IStarsView> {
+
+    /**
+     * 查询我的stars
+     *
+     * @param page 页码，从1开始
+     * @param limit 每页数量
+     */
+    public abstract void queryMineStars(int page, int limit);
 
   }
 }

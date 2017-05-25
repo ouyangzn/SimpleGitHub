@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -104,6 +105,12 @@ public class UIUtil {
     lp.gravity = Gravity.CENTER;
     toolbar.addView(titleView, lp);
     return titleView;
+  }
+
+  public static void stopRefresh(SwipeRefreshLayout refreshLayout) {
+    if (refreshLayout != null && refreshLayout.isRefreshing()) {
+      refreshLayout.setRefreshing(false);
+    }
   }
 
   /**

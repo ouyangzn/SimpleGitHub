@@ -15,6 +15,12 @@
 
 package com.ouyangzn.github.module.stars;
 
+import com.ouyangzn.github.App;
+import com.ouyangzn.github.R;
+import com.ouyangzn.github.data.IStarsDataSource;
+import com.ouyangzn.github.data.remote.StarsRemoteDataSource;
+import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.utils.RxJavaUtil;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
 
@@ -24,13 +30,26 @@ import com.trello.rxlifecycle.android.FragmentEvent;
  */
 public class StarsPresenter extends StarsContract.IStarsPresenter {
 
+  private static final String TAG = StarsPresenter.class.getSimpleName();
+
   private LifecycleProvider<FragmentEvent> mProvider;
+  private IStarsDataSource mStarsDataSource;
 
   public StarsPresenter(LifecycleProvider<FragmentEvent> provider) {
     mProvider = provider;
+    mStarsDataSource = new StarsRemoteDataSource();
   }
 
   @Override protected void onDestroy() {
+    mStarsDataSource = null;
+    mProvider = null;
+  }
 
+  @Override public void queryMineStars(int page, int limit) {
+    RxJavaUtil.wrapFragment(mStarsDataSource.querySomeoneStars(App.getUsername(), page, limit),
+        mProvider).subscribe(result -> mView.showStars(result), error -> {
+      Log.e(TAG, "查询我的star出错：", error);
+      mView.showOnQueryStarsFail(App.getApp().getString(R.string.error_network_error));
+    });
   }
 }
