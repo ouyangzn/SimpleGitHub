@@ -29,6 +29,10 @@ public class StarsContract {
     void showStars(List<Repository> repoList);
 
     void showOnQueryStarsFail(String error);
+
+    void showCollected();
+
+    void showCollectedFailure(String error);
   }
 
   static abstract class IStarsPresenter extends BasePresenter<IStarsView> {
@@ -40,6 +44,13 @@ public class StarsContract {
      * @param limit 每页数量
      */
     public abstract void queryMineStars(int page, int limit);
+
+    /**
+     * 收藏项目
+     *
+     * @param repo
+     */
+    public abstract void collectRepo(Repository repo);
 
   }
 }

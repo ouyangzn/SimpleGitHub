@@ -16,7 +16,6 @@
 package com.ouyangzn.github.module.stars;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,7 +23,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
 import android.view.View;
 import butterknife.BindView;
 import com.jakewharton.rxbinding.view.RxView;
@@ -43,7 +41,6 @@ import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
 import java.util.List;
-import rx.functions.Func1;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
 
@@ -90,28 +87,16 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
   @Override protected void initView(View parent) {
     getActivity().setTitle(R.string.title_stars);
     Context context = getContext();
-    mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-      @Override public void onRefresh() {
-        queryMineStars(true);
-      }
-    });
-    //mRefreshLayout.setOnRefreshListener(() -> queryMineStars(true));
+    mRefreshLayout.setOnRefreshListener(() -> queryMineStars(true));
     mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
     UIUtil.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);
-    RxView.touches(mRecyclerView, new Func1<MotionEvent, Boolean>() {
-      @Override public Boolean call(MotionEvent motionEvent) {
-        ScreenUtil.hideKeyBoard(mSearchEdit);
-        mSearchEdit.clearFocus();
-        return false;
-      }
+    RxView.touches(mRecyclerView, event -> {
+      ScreenUtil.hideKeyBoard(mSearchEdit);
+      mSearchEdit.clearFocus();
+      return false;
     }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
-    //RxView.touches(mRecyclerView, event -> {
-    //  ScreenUtil.hideKeyBoard(mSearchEdit);
-    //  mSearchEdit.clearFocus();
-    //  return false;
-    //}).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
   }
 
   private void queryMineStars(boolean isRefresh) {
@@ -145,6 +130,14 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
     }
   }
 
+  @Override public void showCollected() {
+    toast(R.string.tip_collect_success);
+  }
+
+  @Override public void showCollectedFailure(String error) {
+    toast(error);
+  }
+
   @Override public void requestMoreData() {
     queryMineStars(false);
   }
@@ -158,38 +151,23 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
 
   @Override public boolean onItemLongClick(View view, final int position) {
     AlertDialog.Builder builder = DialogUtil.getAlertDialog(getContext());
-    builder.setItems(R.array.long_click_stars_dialog_item, new DialogInterface.OnClickListener() {
-      @Override public void onClick(DialogInterface dialog, int which) {
-        Repository item = mAdapter.getItem(position);
-        switch (which) {
-          case 0:
-            copyUrl(item.getHtmlUrl());
-            break;
-          case 1:
-            CollectRepo(item);
-            break;
-        }
-        dialog.dismiss();
+    builder.setItems(R.array.long_click_stars_dialog_item, (dialog, which) -> {
+      Repository item = mAdapter.getItem(position);
+      switch (which) {
+        case 0:
+          copyUrl(item.getHtmlUrl());
+          break;
+        case 1:
+          collectRepo(item);
+          break;
       }
+      dialog.dismiss();
     }).show();
     return true;
-    //builder.setItems(R.array.long_click_stars_dialog_item, (dialog, which) -> {
-    //  Repository item = mAdapter.getItem(position);
-    //  switch (which) {
-    //    case 0:
-    //      copyUrl(item.getHtmlUrl());
-    //      break;
-    //    case 1:
-    //      CollectRepo(item);
-    //      break;
-    //  }
-    //  dialog.dismiss();
-    //}).show();
-    //return true;
   }
 
-  private void CollectRepo(Repository repo) {
-
+  private void collectRepo(Repository repo) {
+    mPresenter.collectRepo(repo);
   }
 
   private void copyUrl(String url) {
