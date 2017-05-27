@@ -87,7 +87,7 @@ public class MainPresenter extends IMainPresenter {
         }, throwable -> {
           Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
           mView.setLoadingIndicator(false);
-          mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
+          mView.showErrorOnQueryData(mApp.getString(R.string.error_search_failure));
         });
   }
 

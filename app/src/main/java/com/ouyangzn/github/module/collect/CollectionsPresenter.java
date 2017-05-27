@@ -14,10 +14,12 @@
  */
 package com.ouyangzn.github.module.collect;
 
+import com.ouyangzn.github.App;
+import com.ouyangzn.github.R;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.data.ICollectDataSource;
 import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
-import com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
+import com.ouyangzn.github.module.collect.CollectionsContract.ICollectionsPresenter;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtils;
 import com.trello.rxlifecycle.LifecycleProvider;
@@ -29,9 +31,9 @@ import rx.Subscription;
  * Created by ouyangzn on 2016/9/27.<br/>
  * Description：
  */
-public class CollectPresenter extends ICollectPresenter {
+public class CollectionsPresenter extends ICollectionsPresenter {
 
-  private final String TAG = CollectPresenter.class.getSimpleName();
+  private final String TAG = CollectionsPresenter.class.getSimpleName();
 
   private ICollectDataSource mCollectData;
   private LifecycleProvider<FragmentEvent> mProvider;
@@ -39,7 +41,7 @@ public class CollectPresenter extends ICollectPresenter {
   private Subscription mQueryAllSub;
   private Subscription mQueryByKeySub;
 
-  public CollectPresenter(LifecycleProvider<FragmentEvent> provider) {
+  public CollectionsPresenter(LifecycleProvider<FragmentEvent> provider) {
     mProvider = provider;
     mCollectData = new CollectLocalDataSourceSource();
   }
@@ -53,7 +55,7 @@ public class CollectPresenter extends ICollectPresenter {
           mView.showCollectQueryByKey(results);
         }, error -> {
           Log.e(TAG, "----------查询收藏,queryByKey出错：", error);
-          mView.showQueryByKeyFailure();
+          mView.showQueryByKeyFailure(App.getApp().getString(R.string.error_search_failure));
         });
   }
 
@@ -65,7 +67,7 @@ public class CollectPresenter extends ICollectPresenter {
         Observable.defer(() -> Observable.just(mCollectData.queryCollectRepo(page, limit))),
         mProvider).subscribe(repoList -> mView.showCollect(repoList), error -> {
       Log.e(TAG, "----------查询收藏,queryByKey出错：", error);
-          mView.showErrorOnQueryFailure();
+      mView.showErrorOnQueryFailure(App.getApp().getString(R.string.error_search_failure));
         });
   }
 

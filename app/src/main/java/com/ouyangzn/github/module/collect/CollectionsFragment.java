@@ -50,9 +50,9 @@ import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
  * Created by ouyangzn on 2017/5/27.<br/>
  * Description：收藏
  */
-public class CollectionsFragment
-    extends BaseFragment<CollectContract.ICollectView, CollectContract.ICollectPresenter>
-    implements CollectContract.ICollectView,
+public class CollectionsFragment extends
+    BaseFragment<CollectionsContract.ICollectionsView, CollectionsContract.ICollectionsPresenter>
+    implements CollectionsContract.ICollectionsView,
     BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener,
     BaseRecyclerViewAdapter.OnLoadingMoreListener {
@@ -90,8 +90,8 @@ public class CollectionsFragment
     super.onDestroyView();
   }
 
-  @Override public CollectContract.ICollectPresenter initPresenter() {
-    return new CollectPresenter(mProvider);
+  @Override public CollectionsContract.ICollectionsPresenter initPresenter() {
+    return new CollectionsPresenter(mProvider);
   }
 
   @Override protected void initView(View parent) {
@@ -123,7 +123,6 @@ public class CollectionsFragment
         // 初始化时，rxView会先调用一次textChanged事件
         .skip(1)
         .subscribe(text -> {
-          // fixme 有时候会有编辑框失去焦点的bug，暂时不知道哪里导致的
           String keyword = text.toString();
           // 清空搜索条件，为搜索全部收藏
           if (TextUtils.isEmpty(keyword)) {
@@ -173,9 +172,10 @@ public class CollectionsFragment
     }
   }
 
-  @Override public void showErrorOnQueryFailure() {
+  @Override public void showErrorOnQueryFailure(String error) {
+    toast(error);
     if (!mCollectAdapter.isLoadingMore()) {
-      switchStatus(Status.STATUS_ERROR);
+      switchStatus(Status.STATUS_NORMAL);
       UiUtils.stopRefresh(mRefreshLayout);
     } else {
       mCollectAdapter.loadMoreFailure();
@@ -183,11 +183,11 @@ public class CollectionsFragment
   }
 
   @Override public void showCollectQueryByKey(List<CollectedRepo> repoList) {
-    mCollectAdapter.resetData(repoList);
+    showCollect(repoList);
   }
 
-  @Override public void showQueryByKeyFailure() {
-    mCollectAdapter.resetData(new ArrayList<>(0));
+  @Override public void showQueryByKeyFailure(String error) {
+    showErrorOnQueryFailure(error);
   }
 
   @Override public void showCollectionCanceled(CollectedRepo repo) {

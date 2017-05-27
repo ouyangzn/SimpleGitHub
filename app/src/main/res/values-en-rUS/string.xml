@@ -42,7 +42,7 @@
   <string name="loading_failure">Load failure/(ㄒoㄒ)/~~</string>
   <string name="stars">%d·stars</string>
   <string name="hint_input_keyword">search</string>
-  <string name="error_search_github">search failure, retry please</string>
+  <string name="error_search_failure">search failure, retry please</string>
   <string name="no_data">no data</string>
   <string name="tip_copy_success">copy success</string>
   <string name="tip_collect_success">collect success</string>
