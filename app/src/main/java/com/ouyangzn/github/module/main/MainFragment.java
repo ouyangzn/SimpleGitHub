@@ -34,11 +34,11 @@ import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.common.RepositoryAdapter;
-import com.ouyangzn.github.utils.CommonUtil;
-import com.ouyangzn.github.utils.DialogUtil;
+import com.ouyangzn.github.utils.CommonUtils;
+import com.ouyangzn.github.utils.DialogUtils;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.ScreenUtil;
-import com.ouyangzn.github.utils.UIUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.UiUtils;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
@@ -94,16 +94,17 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override protected void lazyInitView(View parent) {
     search(false);
+    requestNoToolbar();
 
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     RxView.touches(mRecyclerView, motionEvent -> {
-      ScreenUtil.hideKeyBoard(mRecyclerView);
+      ScreenUtils.hideKeyBoard(mRecyclerView);
       return false;
     }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
-    UIUtil.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
+    UiUtils.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);
 
     View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
@@ -146,7 +147,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {
-    AlertDialog.Builder builder = DialogUtil.getAlertDialog(getActivity());
+    AlertDialog.Builder builder = DialogUtils.getAlertDialog(getActivity());
     builder.setItems(R.array.long_click_main_dialog_item, (dialog, which) -> {
       Repository item = mAdapter.getItem(position);
       switch (which) {
@@ -163,7 +164,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
   }
 
   private void copyUrl(String url) {
-    CommonUtil.copy(getContext(), url);
+    CommonUtils.copy(getContext(), url);
     toast(R.string.tip_copy_success);
   }
 
@@ -189,10 +190,6 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
   @Override public void showQueryDataResult(RepoSearchResult result) {
     switchStatus(Status.STATUS_NORMAL);
     stopRefresh();
-    Log.d(TAG, "----------result = " + result.toString());
-    for (Repository rep : result.getRepositories()) {
-      Log.d(TAG, rep.toString());
-    }
     mSearchFactor.page++;
     boolean hasMore = result.getRepositories().size() == mSearchFactor.limit;
     mAdapter.setHasMore(hasMore);

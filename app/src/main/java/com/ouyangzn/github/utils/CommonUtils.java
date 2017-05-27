@@ -23,7 +23,7 @@ import android.content.Context;
  * Created by ouyangzn on 2016/9/30.<br/>
  * Description：
  */
-public class CommonUtil {
+public class CommonUtils {
 
   public static void copy(Context context, String content) {
     ClipboardManager clip = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);

@@ -15,7 +15,6 @@
 
 package com.ouyangzn.github.module.main;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -39,15 +38,14 @@ import butterknife.ButterKnife;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
-import com.ouyangzn.github.module.collect.CollectActivity;
 import com.ouyangzn.github.module.common.MainPagerAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
 import com.ouyangzn.github.utils.Actions;
-import com.ouyangzn.github.utils.DialogUtil;
+import com.ouyangzn.github.utils.DialogUtils;
 import com.ouyangzn.github.utils.ImageLoader;
-import com.ouyangzn.github.utils.ScreenUtil;
-import com.ouyangzn.github.utils.UIUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.UiUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,12 +69,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
 
   @Override protected void initView(Bundle savedInstanceState) {
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
-    toolbar.setTitle(R.string.app_name);
-    toolbar.setTitleTextColor(Color.WHITE);
-    setSupportActionBar(toolbar);
+    UiUtils.setCenterTitle(toolbar, R.string.app_name);
     ImageView collectImg =
-        UIUtil.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
-            new int[] { 0, 0, ScreenUtil.dp2px(mContext, 15), 0 });
+        UiUtils.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
+            new int[] { 0, 0, ScreenUtils.dp2px(mContext, 15), 0 });
     collectImg.setId(R.id.id_toolbar_right_img);
     collectImg.setOnClickListener(this);
     // @BindView 找不到，NavigationView下的view直接find也找不到
@@ -113,7 +109,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.id_toolbar_right_img: {
-        UIUtil.openActivity(this, CollectActivity.class);
+        Actions.gotoCollections(this);
         break;
       }
     }
@@ -157,7 +153,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
    * @param onConfirmClick 点确定的回调
    */
   private void showInputUsernameDialog(View.OnClickListener onConfirmClick) {
-    AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
+    AlertDialog.Builder builder = DialogUtils.getAlertDialog(mContext);
     AlertDialog dialog = builder.setView(R.layout.dialog_input_view).create();
     dialog.show();
     TextView tvTitle = ButterKnife.findById(dialog, R.id.tv_dialog_input_title);
@@ -171,7 +167,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     Button btnConfirm = ButterKnife.findById(dialog, R.id.btn_dialog_input_confirm);
     btnConfirm.setTag(dialog);
     btnConfirm.setOnClickListener(v -> {
-      ScreenUtil.hideKeyBoard(v);
+      ScreenUtils.hideKeyBoard(v);
       dialog.dismiss();
       String username = etUsername.getText().toString().trim();
       if (TextUtils.isEmpty(username)) {
@@ -184,7 +180,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     Button btnCancel = ButterKnife.findById(dialog, R.id.btn_dialog_input_cancel);
     btnCancel.setTag(dialog);
     btnCancel.setOnClickListener(v -> {
-      ScreenUtil.hideKeyBoard(v);
+      ScreenUtils.hideKeyBoard(v);
       dialog.dismiss();
     });
   }

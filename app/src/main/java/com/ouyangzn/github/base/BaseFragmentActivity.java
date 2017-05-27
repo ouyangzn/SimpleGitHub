@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import android.view.View;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.ScreenUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
 
 /**
  * Created by ouyangzn on 2017/5/3.<br/>
@@ -85,7 +85,7 @@ public class BaseFragmentActivity extends BaseActivity {
 
   @Override public void finish() {
     View focus = getCurrentFocus();
-    if (focus != null) ScreenUtil.hideKeyBoard(focus);
+    if (focus != null) ScreenUtils.hideKeyBoard(focus);
     super.finish();
   }
 

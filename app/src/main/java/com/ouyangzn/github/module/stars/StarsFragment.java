@@ -32,10 +32,10 @@ import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.module.common.StarsAdapter;
 import com.ouyangzn.github.module.stars.StarsContract.IStarsPresenter;
 import com.ouyangzn.github.module.stars.StarsContract.IStarsView;
-import com.ouyangzn.github.utils.CommonUtil;
-import com.ouyangzn.github.utils.DialogUtil;
-import com.ouyangzn.github.utils.ScreenUtil;
-import com.ouyangzn.github.utils.UIUtil;
+import com.ouyangzn.github.utils.CommonUtils;
+import com.ouyangzn.github.utils.DialogUtils;
+import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.UiUtils;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.trello.rxlifecycle.android.FragmentEvent;
@@ -85,15 +85,15 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
   }
 
   @Override protected void initView(View parent) {
-    getActivity().setTitle(R.string.title_stars);
+    UiUtils.setCenterTitle(mToolbar, R.string.title_stars);
     Context context = getContext();
     mRefreshLayout.setOnRefreshListener(() -> queryMineStars(true));
     mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
-    UIUtil.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
+    UiUtils.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);
     RxView.touches(mRecyclerView, event -> {
-      ScreenUtil.hideKeyBoard(mSearchEdit);
+      ScreenUtils.hideKeyBoard(mSearchEdit);
       mSearchEdit.clearFocus();
       return false;
     }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
@@ -110,7 +110,7 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
 
   @Override public void showStars(List<Repository> repoList) {
     switchStatus(Status.STATUS_NORMAL);
-    UIUtil.stopRefresh(mRefreshLayout);
+    UiUtils.stopRefresh(mRefreshLayout);
     mCurrPage++;
     if (!mAdapter.isLoadingMore()) {
       mAdapter.setHasMore(repoList.size() == LIMIT);
@@ -122,7 +122,7 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
 
   @Override public void showOnQueryStarsFail(String error) {
     if (!mAdapter.isLoadingMore()) {
-      UIUtil.stopRefresh(mRefreshLayout);
+      UiUtils.stopRefresh(mRefreshLayout);
       switchStatus(Status.STATUS_ERROR);
       toast(error);
     } else {
@@ -150,7 +150,7 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {
-    AlertDialog.Builder builder = DialogUtil.getAlertDialog(getContext());
+    AlertDialog.Builder builder = DialogUtils.getAlertDialog(getContext());
     builder.setItems(R.array.long_click_stars_dialog_item, (dialog, which) -> {
       Repository item = mAdapter.getItem(position);
       switch (which) {
@@ -171,7 +171,7 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
   }
 
   private void copyUrl(String url) {
-    CommonUtil.copy(getContext(), url);
+    CommonUtils.copy(getContext(), url);
     toast(R.string.tip_copy_success);
   }
 }

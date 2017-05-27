@@ -27,7 +27,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.utils.ScreenUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
 
 /**
  * Created by ouyangzn on 2016/9/14.<br/>
@@ -75,19 +75,19 @@ public class CornerMarkText extends View {
   }
 
   private void init(Context context, AttributeSet attrs) {
-    mMinSize = ScreenUtil.dp2px(context, 20);
+    mMinSize = ScreenUtils.dp2px(context, 20);
 
     TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CornerMarkText);
     mTextBgColor = ta.getColor(R.styleable.CornerMarkText_bg_color, 0x8000ff00);
     mText = ta.getString(R.styleable.CornerMarkText_text);
     mTextSize = ta.getDimensionPixelSize(R.styleable.CornerMarkText_text_size,
-        ScreenUtil.sp2px(context, 10));
+        ScreenUtils.sp2px(context, 10));
     mTextColor = ta.getColor(R.styleable.CornerMarkText_text_color,
         getResources().getColor(R.color.colorAccent));
     mMinSize = ta.getDimensionPixelOffset(R.styleable.CornerMarkText_min_size,
-        ScreenUtil.dp2px(context, 20));
+        ScreenUtils.dp2px(context, 20));
     mMaxSize = ta.getDimensionPixelOffset(R.styleable.CornerMarkText_max_size,
-        ScreenUtil.dp2px(context, 40));
+        ScreenUtils.dp2px(context, 40));
     ta.recycle();
     initTextPaint();
     initTextBgPaint();
@@ -240,7 +240,7 @@ public class CornerMarkText extends View {
     float height = getMeasuredHeight() / 2 + mTextPaint.getFontMetrics().descent;
     // 解决大写字母偏上的问题
     if (mText.equals(mText.toUpperCase())) {
-      height += ScreenUtil.dp2px(getContext(), 1);
+      height += ScreenUtils.dp2px(getContext(), 1);
     }
     canvas.drawText(mText, width, height, mTextPaint);
     canvas.restore();

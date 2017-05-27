@@ -22,12 +22,14 @@ import android.content.SharedPreferences;
  * Created by ouyangzn on 2017/3/17.<br/>
  * Description：SharedPreferences工具类
  */
-public class SpUtil {
+public class SpUtils {
 
   /** 所选语言 */
   public static final String KEY_LANGUAGE = "language";
   /** 使用的用户 */
   public static final String KEY_USERNAME = "username";
+  /** 使用账号密码登录的认证证书 */
+  public static final String KEY_AUTHORIZATION = "authorization";
   private static final String SP_NAME = "config";
 
   public static void put(Context context, String key, String value) {

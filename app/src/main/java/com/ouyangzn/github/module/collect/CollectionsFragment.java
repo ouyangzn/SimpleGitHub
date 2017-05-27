@@ -24,94 +24,97 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import butterknife.BindView;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.base.BaseActivity;
+import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.module.common.CollectAdapter;
-import com.ouyangzn.github.utils.CommonUtil;
-import com.ouyangzn.github.utils.DialogUtil;
-import com.ouyangzn.github.utils.ScreenUtil;
-import com.ouyangzn.github.utils.UIUtil;
+import com.ouyangzn.github.utils.CommonUtils;
+import com.ouyangzn.github.utils.DialogUtils;
+import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.UiUtils;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
-import com.trello.rxlifecycle.LifecycleProvider;
-import com.trello.rxlifecycle.android.ActivityEvent;
-import com.trello.rxlifecycle.navi.NaviLifecycle;
+import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import rx.android.schedulers.AndroidSchedulers;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
-import static com.ouyangzn.github.module.collect.CollectContract.ICollectPresenter;
-import static com.ouyangzn.github.module.collect.CollectContract.ICollectView;
 
-public class CollectActivity extends BaseActivity<ICollectView, ICollectPresenter>
-    implements ICollectView, BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
+/**
+ * Created by ouyangzn on 2017/5/27.<br/>
+ * Description：收藏
+ */
+public class CollectionsFragment
+    extends BaseFragment<CollectContract.ICollectView, CollectContract.ICollectPresenter>
+    implements CollectContract.ICollectView,
+    BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener,
     BaseRecyclerViewAdapter.OnLoadingMoreListener {
 
-  // 使用rxLifecycle方便控制rxJava事件的取消订阅时机
-  protected final LifecycleProvider<ActivityEvent> mProvider =
-      NaviLifecycle.createActivityLifecycleProvider(this);
-
-  private final int COUNT_EACH_PAGE = LIMIT_10;
+  private final int LIMIT = LIMIT_10;
   private final int FIRST_PAGE = 0;
 
-  @BindView(R.id.refreshLayout) SwipeRefreshLayout mRefreshLayout;
-  @BindView(R.id.view_search) InputEdit mSearchEdit;
-  @BindView(R.id.recycler_collect) RecyclerView mRecyclerView;
-  @BindView(R.id.layout_loading) View mLoadingView;
+  @BindView(R.id.refresh_collections) SwipeRefreshLayout mRefreshLayout;
+  @BindView(R.id.recycler_collections) RecyclerView mRecyclerView;
+  @BindView(R.id.view_search_collections) InputEdit mSearchEdit;
 
   private CollectAdapter mCollectAdapter;
-  // 重新加载或者加载下一页
-  private boolean mIsRefresh = true;
   // 当前分页页数
   private int mCurrPage = FIRST_PAGE;
 
+  @Override protected Status getCurrentStatus() {
+    return Status.STATUS_LOADING;
+  }
+
   @Override protected int getContentView() {
-    return R.layout.activity_collect;
+    return R.layout.fragment_collections;
   }
 
-  @Override public ICollectPresenter initPresenter() {
-    return new CollectPresenter(mProvider);
-  }
-
-  @Override protected void initData() {
-    mCollectAdapter = new CollectAdapter(mContext, new ArrayList<>(0));
+  @Override protected void initData(Bundle savedInstanceState) {
+    mCollectAdapter = new CollectAdapter(getContext(), new ArrayList<>(0));
     mCollectAdapter.setOnRecyclerViewItemClickListener(this);
     mCollectAdapter.setOnRecyclerViewItemLongClickListener(this);
     mCollectAdapter.setOnLoadingMoreListener(this);
     queryCollect(true);
   }
 
-  @Override protected void initView(Bundle savedInstanceState) {
-    setTitle(R.string.title_collect);
-    mLoadingView.setVisibility(View.VISIBLE);
-    mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-    LayoutInflater inflater = getLayoutInflater();
-    mCollectAdapter.setEmptyView(inflater.inflate(R.layout.item_no_data, mRecyclerView, false));
-    UIUtil.setRecyclerViewLoadMore(mCollectAdapter, mRecyclerView);
+  @Override public void onDestroyView() {
+    // 不置空会导致内存泄漏
+    mRecyclerView.setAdapter(null);
+    super.onDestroyView();
+  }
+
+  @Override public CollectContract.ICollectPresenter initPresenter() {
+    return new CollectPresenter(mProvider);
+  }
+
+  @Override protected void initView(View parent) {
+    UiUtils.setCenterTitle(mToolbar, R.string.title_collect);
+    mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    mCollectAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
+    UiUtils.setRecyclerViewLoadMore(mCollectAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mCollectAdapter);
     RxView.touches(mRecyclerView, event -> {
-      ScreenUtil.hideKeyBoard(mSearchEdit);
+      ScreenUtils.hideKeyBoard(mSearchEdit);
       mSearchEdit.clearFocus();
       return false;
-    }).compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY)).subscribe();
+    }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
 
     mRefreshLayout.setOnRefreshListener(() -> queryCollect(true));
 
     RxTextView.textChanges(mSearchEdit.getEditText())
         .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-        .compose(mProvider.bindUntilEvent(ActivityEvent.DESTROY))
+        .compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW))
         // 初始化时，rxView会先调用一次textChanged事件
         .skip(1)
         .subscribe(text -> {
+          // fixme 有时候会有编辑框失去焦点的bug，暂时不知道哪里导致的
           String keyword = text.toString();
           // 清空搜索条件，为搜索全部收藏
           if (TextUtils.isEmpty(keyword)) {
@@ -130,67 +133,45 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     queryCollect(true);
   }
 
+  /**
+   * fixme 有bug,show的时候当做有分页来处理了
+   *
+   * @param keyword
+   */
   private void queryByKey(String keyword) {
     mPresenter.queryByKey(keyword);
   }
 
   private void queryCollect(boolean isRefresh) {
     if (isRefresh) {
-      mRefreshLayout.setRefreshing(true);
       mCurrPage = FIRST_PAGE;
     }
-    mIsRefresh = isRefresh;
-    mPresenter.queryCollect(mCurrPage, COUNT_EACH_PAGE);
+    mPresenter.queryCollect(mCurrPage, LIMIT);
   }
 
   @Override public void showCollect(List<CollectedRepo> repoList) {
-    int listSize = repoList.size();
-    mLoadingView.setVisibility(View.GONE);
-    boolean hasMore = listSize == COUNT_EACH_PAGE;
-    mCollectAdapter.setHasMore(hasMore);
-    // 没有数据的话，没必要增加当前页数,其实是为了解决realm.findAllAsync时会先返回一个空集合的问题
-    if (listSize > 0) {
-      mCurrPage++;
-    }
-    if (mIsRefresh) {
-      mRefreshLayout.setRefreshing(false);
+    switchStatus(Status.STATUS_NORMAL);
+    UiUtils.stopRefresh(mRefreshLayout);
+    mCurrPage++;
+    boolean hasMore = repoList.size() == LIMIT;
+    if (!mCollectAdapter.isLoadingMore()) {
+      mCollectAdapter.setHasMore(hasMore);
       //calculateDiffAndRefresh(mCollectAdapter, repoList);
       mCollectAdapter.resetData(repoList);
     } else {
-      if (mCollectAdapter.isLoadingMore()) {
-        // loadMore获取数据速度太快了的时候，会crash：Cannot call this method(-->notifyDataSetChanged())
-        // while RecyclerView is computing a layout or scrolling
-        mRecyclerView.post(() -> mCollectAdapter.loadMoreFinish(hasMore, repoList));
-      } else {
-        mCollectAdapter.addData(repoList);
-      }
+      // loadMore获取数据速度太快了的时候，会crash：Cannot call this method(-->notifyDataSetChanged())
+      // while RecyclerView is computing a layout or scrolling
+      mRecyclerView.post(() -> mCollectAdapter.loadMoreFinish(hasMore, repoList));
     }
   }
 
-  private void calculateDiffAndRefresh(BaseRecyclerViewAdapter<CollectedRepo> adapter,
-      List<CollectedRepo> repoList) {
-    // ------------很大几率crash,暂未解决,exception：Inconsistency detected. Invalid view holder adapter positionViewHolder---------------
-    // 使用DiffUtil计算有变化的数据进行局部刷新
-    List<CollectedRepo> oldData = adapter.getData();
-    DiffUtil.DiffResult diffResult =
-        DiffUtil.calculateDiff(new CollectDiffCallback(repoList, oldData));
-    /*
-    需要先替换adapter中的数据但不刷新，刷新通知交由diffResult.dispatchUpdatesTo()来做
-    <pre>
-         List oldList = mAdapter.getData();
-         DiffResult result = DiffUtil.calculateDiff(new MyCallback(oldList, newList));
-         mAdapter.setData(newList);
-         result.dispatchUpdatesTo(mAdapter);
-    </pre>
-    */
-    oldData.clear();
-    oldData.addAll(repoList);
-    diffResult.dispatchUpdatesTo(adapter);
-  }
-
   @Override public void showErrorOnQueryFailure() {
-    mLoadingView.setVisibility(View.GONE);
-    if (mIsRefresh) mRefreshLayout.setRefreshing(false);
+    if (!mCollectAdapter.isLoadingMore()) {
+      switchStatus(Status.STATUS_ERROR);
+      UiUtils.stopRefresh(mRefreshLayout);
+    } else {
+      mCollectAdapter.loadMoreFailure();
+    }
   }
 
   @Override public void showCollectQueryByKey(List<CollectedRepo> repoList) {
@@ -214,6 +195,11 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     //mRefreshLayout.setRefreshing(isActive);
   }
 
+  @Override public void requestMoreData() {
+    //mRecyclerView.post(() -> queryCollect(false));
+    queryCollect(false);
+  }
+
   @Override public void onItemClick(View view, int position) {
     CollectedRepo repo = mCollectAdapter.getItem(position);
     Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -222,7 +208,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {
-    AlertDialog.Builder builder = DialogUtil.getAlertDialog(mContext);
+    AlertDialog.Builder builder = DialogUtils.getAlertDialog(getContext());
     builder.setItems(R.array.long_click_collect_dialog_item, (dialog, which) -> {
       CollectedRepo item = mCollectAdapter.getItem(position);
       switch (which) {
@@ -239,7 +225,7 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
   }
 
   private void copyUrl(String url) {
-    CommonUtil.copy(mContext, url);
+    CommonUtils.copy(getContext(), url);
     toast(R.string.tip_copy_success);
   }
 
@@ -247,8 +233,25 @@ public class CollectActivity extends BaseActivity<ICollectView, ICollectPresente
     mPresenter.cancelCollectRepo(repo);
   }
 
-  @Override public void requestMoreData() {
-    queryCollect(false);
+  private void calculateDiffAndRefresh(BaseRecyclerViewAdapter<CollectedRepo> adapter,
+      List<CollectedRepo> repoList) {
+    // ------------很大几率crash,暂未解决,exception：Inconsistency detected. Invalid view holder adapter positionViewHolder---------------
+    // 使用DiffUtil计算有变化的数据进行局部刷新
+    List<CollectedRepo> oldData = adapter.getData();
+    DiffUtil.DiffResult diffResult =
+        DiffUtil.calculateDiff(new CollectDiffCallback(repoList, oldData));
+    /*
+    需要先替换adapter中的数据但不刷新，刷新通知交由diffResult.dispatchUpdatesTo()来做
+    <pre>
+         List oldList = mAdapter.getData();
+         DiffResult result = DiffUtil.calculateDiff(new MyCallback(oldList, newList));
+         mAdapter.setData(newList);
+         result.dispatchUpdatesTo(mAdapter);
+    </pre>
+    */
+    oldData.clear();
+    oldData.addAll(repoList);
+    diffResult.dispatchUpdatesTo(adapter);
   }
 
   public static class CollectDiffCallback extends DiffUtil.Callback {

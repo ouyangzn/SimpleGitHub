@@ -17,6 +17,7 @@ package com.ouyangzn.github.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,9 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
   protected View mContentView;
   protected View mLoadingView;
   protected View mErrorView;
+  protected Toolbar mToolbar;
   private ViewGroup mRootView;
+  private ViewGroup mContentContainer;
   private com.ouyangzn.github.utils.Toast mToast;
   private Status mStatus;
   private Unbinder mUnbinder;
@@ -61,11 +64,14 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
     super.onCreateView(inflater, container, savedInstanceState);
     mInflater = inflater;
     mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_base_content, container, false);
+    mContentContainer = (ViewGroup) mRootView.findViewById(R.id.layout_content_container);
     mLoadingView = mRootView.findViewById(R.id.stub_loading);
     mErrorView = mRootView.findViewById(R.id.stub_error);
     mContentView = inflater.inflate(getContentView(), container, false);
     if (mContentView == null) throw new UnsupportedOperationException("contentView == null");
-    mRootView.addView(mContentView);
+    mContentContainer.addView(mContentView);
+    mToolbar = (Toolbar) mRootView.findViewById(R.id.toolbar);
+    requestToolbarOverlay(false);
     if (mStatus == null) {
       Status status = getCurrentStatus();
       switchStatus(status == null ? Status.STATUS_NORMAL : status);
@@ -88,17 +94,31 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
     mUnbinder.unbind();
   }
 
+  public void requestToolbarOverlay(boolean overlay) {
+    if (overlay) {
+      mContentContainer.setPadding(0, 0, 0, 0);
+    } else {
+      mContentContainer.setPadding(0, getResources().getDimensionPixelSize(R.dimen.toolbar_height),
+          0, 0);
+    }
+  }
+
+  public void requestNoToolbar() {
+    mToolbar.setVisibility(View.GONE);
+    requestToolbarOverlay(true);
+  }
+
   protected void setLoadingView(View loadingView) {
     loadingView.setVisibility(mLoadingView.getVisibility());
-    mRootView.removeView(mLoadingView);
-    mRootView.addView(loadingView);
+    mContentContainer.removeView(mLoadingView);
+    mContentContainer.addView(loadingView);
     mLoadingView = loadingView;
   }
 
   protected void setErrorView(View errorView) {
     errorView.setVisibility(mErrorView.getVisibility());
-    mRootView.removeView(mErrorView);
-    mRootView.addView(errorView);
+    mContentContainer.removeView(mErrorView);
+    mContentContainer.addView(errorView);
     mErrorView = errorView;
   }
 
@@ -157,9 +177,9 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
   public abstract T initPresenter();
 
   private void hideAllView() {
-    int childCount = mRootView.getChildCount();
+    int childCount = mContentContainer.getChildCount();
     for (int i = 0; i < childCount; i++) {
-      mRootView.getChildAt(i).setVisibility(View.GONE);
+      mContentContainer.getChildAt(i).setVisibility(View.GONE);
     }
   }
 

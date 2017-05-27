@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.jakewharton.rxbinding.widget.TextViewEditorActionEvent;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.utils.ScreenUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
 import rx.functions.Action1;
 
 /**
@@ -172,12 +172,12 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
       mEditText.setBackgroundDrawable(drawable);
     }
     drawable = ta.getDrawable(R.styleable.InputEdit_deleteImg);
-    int paddingRight = ScreenUtil.dp2px(context, 40);
-    int padding = ScreenUtil.dp2px(context, 10);
+    int paddingRight = ScreenUtils.dp2px(context, 40);
+    int padding = ScreenUtils.dp2px(context, 10);
     if (drawable != null) {
       mDelete.setImageDrawable(drawable);
       // 最后一个字离删除图标留一定的距离
-      paddingRight = drawable.getIntrinsicWidth() + padding + ScreenUtil.dp2px(context, 4);
+      paddingRight = drawable.getIntrinsicWidth() + padding + ScreenUtils.dp2px(context, 4);
     }
     mEditText.setPadding(padding, padding, paddingRight, padding);
     // setInputType会覆盖多行的设置，所以放在setSingleLine前设置。调用setSingleLine会执行以下代码

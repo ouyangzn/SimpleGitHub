@@ -31,11 +31,11 @@ import android.view.inputmethod.InputMethodManager;
  *
  * @author ouyangzn
  */
-public class ScreenUtil {
+public class ScreenUtils {
 
-  private static final String TAG = ScreenUtil.class.getSimpleName();
+  private static final String TAG = ScreenUtils.class.getSimpleName();
 
-  private ScreenUtil() {
+  private ScreenUtils() {
     throw new UnsupportedOperationException("cannot be instantiated");
   }
 

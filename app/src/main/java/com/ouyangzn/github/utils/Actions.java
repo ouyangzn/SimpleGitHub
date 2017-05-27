@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BaseFragmentActivity;
+import com.ouyangzn.github.module.collect.CollectionsFragment;
 import com.ouyangzn.github.module.stars.StarsFragment;
 
 /**
@@ -45,6 +46,14 @@ public class Actions {
    */
   public static void gotoMineStars(Activity activity) {
     startActivity(activity, StarsFragment.class);
+  }
+
+  public static void gotoCollections(Fragment fragment) {
+    startActivity(fragment, CollectionsFragment.class);
+  }
+
+  public static void gotoCollections(Activity activity) {
+    startActivity(activity, CollectionsFragment.class);
   }
 
   /**

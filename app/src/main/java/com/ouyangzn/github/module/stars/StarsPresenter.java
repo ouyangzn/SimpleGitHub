@@ -24,7 +24,7 @@ import com.ouyangzn.github.data.IStarsDataSource;
 import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
 import com.ouyangzn.github.data.remote.StarsRemoteDataSource;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.RxJavaUtil;
+import com.ouyangzn.github.utils.RxJavaUtils;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import rx.Observable;
@@ -53,7 +53,7 @@ public class StarsPresenter extends StarsContract.IStarsPresenter {
   }
 
   @Override public void queryMineStars(int page, int limit) {
-    RxJavaUtil.wrapFragment(mStarsDataSource.querySomeoneStars(App.getUsername(), page, limit),
+    RxJavaUtils.wrapFragment(mStarsDataSource.querySomeoneStars(App.getUsername(), page, limit),
         mProvider).subscribe(result -> mView.showStars(result), error -> {
       Log.e(TAG, "查询我的star出错：", error);
       mView.showOnQueryStarsFail(App.getApp().getString(R.string.error_network_error));
@@ -61,7 +61,7 @@ public class StarsPresenter extends StarsContract.IStarsPresenter {
   }
 
   @Override public void collectRepo(Repository repo) {
-    RxJavaUtil.wrap(Observable.defer(() -> {
+    RxJavaUtils.wrap(Observable.defer(() -> {
       CollectedRepo collectedRepo = new CollectedRepo();
       collectedRepo.convert(repo);
       collectedRepo.setCollectTime(System.currentTimeMillis());

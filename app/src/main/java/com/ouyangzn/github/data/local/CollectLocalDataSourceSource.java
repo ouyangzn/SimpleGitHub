@@ -22,6 +22,7 @@ import com.ouyangzn.github.data.ICollectDataSource;
 import com.ouyangzn.github.db.DaoHelper;
 import com.ouyangzn.github.utils.Log;
 import java.util.List;
+import org.greenrobot.greendao.query.QueryBuilder;
 import org.greenrobot.greendao.query.WhereCondition;
 
 /**
@@ -49,12 +50,10 @@ public class CollectLocalDataSourceSource implements ICollectDataSource {
   }
 
   @Override public List<CollectedRepo> queryByKeyword(String keyword) {
-    WhereCondition.PropertyCondition condition =
-        new WhereCondition.PropertyCondition(CollectedRepoDao.Properties.FullName, keyword);
-    WhereCondition.PropertyCondition condition2 =
-        new WhereCondition.PropertyCondition(CollectedRepoDao.Properties.Description, keyword);
-    return mRepoDao.queryBuilder()
-        .whereOr(condition, condition2)
+    WhereCondition fullName = CollectedRepoDao.Properties.FullName.like("%" + keyword + "%");
+    WhereCondition desc = CollectedRepoDao.Properties.Description.like("%" + keyword + "%");
+    QueryBuilder<CollectedRepo> qb = mRepoDao.queryBuilder();
+    return qb.where(qb.or(fullName, desc))
         .orderDesc(CollectedRepoDao.Properties.CollectTime)
         .list();
   }

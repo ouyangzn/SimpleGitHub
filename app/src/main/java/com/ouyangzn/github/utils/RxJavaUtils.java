@@ -28,9 +28,9 @@ import rx.schedulers.Schedulers;
  * Created by ouyangzn on 2016/9/30.<br/>
  * Description：
  */
-public class RxJavaUtil {
+public class RxJavaUtils {
 
-  private static final String TAG = RxJavaUtil.class.getSimpleName();
+  private static final String TAG = RxJavaUtils.class.getSimpleName();
 
   /**
    * 包裹成subscribeOn子线程，observeOn主线程

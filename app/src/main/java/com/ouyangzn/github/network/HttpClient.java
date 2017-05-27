@@ -14,6 +14,8 @@
  */
 package com.ouyangzn.github.network;
 
+import android.text.TextUtils;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.BuildConfig;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +29,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
@@ -53,6 +56,14 @@ public class HttpClient {
       HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
       logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
       builder.interceptors().add(logging);
+      String authorization = App.getAuthorization();
+      if (!TextUtils.isEmpty(authorization)) {
+        builder.addNetworkInterceptor(chain -> {
+          Request request = chain.request();
+          request = request.newBuilder().addHeader("Authorization", authorization).build();
+          return chain.proceed(request);
+        });
+      }
     }
     try {
       SSLContext sc = SSLContext.getInstance("SSL");

@@ -28,8 +28,8 @@ import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
 import com.ouyangzn.github.data.remote.RepositoryRemoteDataSource;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.RxJavaUtil;
-import com.ouyangzn.github.utils.SpUtil;
+import com.ouyangzn.github.utils.RxJavaUtils;
+import com.ouyangzn.github.utils.SpUtils;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import rx.Observable;
@@ -37,7 +37,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-import static com.ouyangzn.github.utils.SpUtil.KEY_LANGUAGE;
+import static com.ouyangzn.github.utils.SpUtils.KEY_LANGUAGE;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
@@ -60,7 +60,7 @@ public class MainPresenter extends IMainPresenter {
     mApp = (App) context.getApplicationContext();
     mDataSource = new RepositoryRemoteDataSource();
     mCollectData = new CollectLocalDataSourceSource();
-    mConfigSp = SpUtil.getSp(context);
+    mConfigSp = SpUtils.getSp(context);
   }
 
   @Override protected void onDestroy() {
@@ -101,7 +101,7 @@ public class MainPresenter extends IMainPresenter {
   }
 
   @Override public void collectRepo(final Repository repo) {
-    RxJavaUtil.wrap(Observable.defer(() -> {
+    RxJavaUtils.wrap(Observable.defer(() -> {
       CollectedRepo collectedRepo = new CollectedRepo();
       collectedRepo.convert(repo);
       collectedRepo.setCollectTime(System.currentTimeMillis());
