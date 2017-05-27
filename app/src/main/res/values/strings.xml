@@ -1,7 +1,7 @@
 <resources>
   <string name="app_name">open source</string>
   <string name="title_collect">收藏</string>
-  <string name="title_stars">我的stars</string>
+  <string name="title_stars">Stars</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>

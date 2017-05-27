@@ -44,10 +44,10 @@ public class CollectPresenter extends ICollectPresenter {
     mCollectData = new CollectLocalDataSourceSource();
   }
 
-  @Override public void queryByKey(String key) {
+  @Override public void queryByKey(String key, int page, int limit) {
     if (mQueryByKeySub != null && mQueryByKeySub.isUnsubscribed()) mQueryByKeySub.unsubscribe();
     mQueryByKeySub = RxJavaUtils.wrapFragment(
-        Observable.defer(() -> Observable.just(mCollectData.queryByKeyword(key))),
+        Observable.defer(() -> Observable.just(mCollectData.queryByKeyword(key, page, limit))),
             mProvider)
         .subscribe(results -> {
           mView.showCollectQueryByKey(results);

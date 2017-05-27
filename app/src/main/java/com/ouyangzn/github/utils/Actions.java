@@ -48,10 +48,19 @@ public class Actions {
     startActivity(activity, StarsFragment.class);
   }
 
+  /**
+   * 跳转到我收藏
+   *
+   * @param fragment 当前所在的fragment对象
+   */
   public static void gotoCollections(Fragment fragment) {
     startActivity(fragment, CollectionsFragment.class);
   }
 
+  /**
+   * 跳转到我收藏
+   * @param activity 当前所在的activity对象
+   */
   public static void gotoCollections(Activity activity) {
     startActivity(activity, CollectionsFragment.class);
   }

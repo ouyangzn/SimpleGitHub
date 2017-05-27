@@ -39,7 +39,7 @@ public interface ICollectDataSource {
    * @param keyword 关键字
    * @return List<CollectedRepo>
    */
-  List<CollectedRepo> queryByKeyword(String keyword);
+  List<CollectedRepo> queryByKeyword(String keyword, int page, int limit);
 
   boolean collectRepo(CollectedRepo repo);
 

@@ -49,11 +49,11 @@ public class CollectLocalDataSourceSource implements ICollectDataSource {
         .list();
   }
 
-  @Override public List<CollectedRepo> queryByKeyword(String keyword) {
+  @Override public List<CollectedRepo> queryByKeyword(String keyword, int page, int limit) {
     WhereCondition fullName = CollectedRepoDao.Properties.FullName.like("%" + keyword + "%");
     WhereCondition desc = CollectedRepoDao.Properties.Description.like("%" + keyword + "%");
     QueryBuilder<CollectedRepo> qb = mRepoDao.queryBuilder();
-    return qb.where(qb.or(fullName, desc))
+    return qb.where(qb.or(fullName, desc)).limit(limit).offset(page * limit)
         .orderDesc(CollectedRepoDao.Properties.CollectTime)
         .list();
   }

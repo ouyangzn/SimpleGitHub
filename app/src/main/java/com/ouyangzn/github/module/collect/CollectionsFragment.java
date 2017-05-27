@@ -106,7 +106,16 @@ public class CollectionsFragment
       return false;
     }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
 
-    mRefreshLayout.setOnRefreshListener(() -> queryCollect(true));
+    mRefreshLayout.setOnRefreshListener(() -> {
+      // 下拉刷新的话清除搜索关键字
+      String keyword = mSearchEdit.getInputText().trim();
+      if (TextUtils.isEmpty(keyword)) {
+        queryCollect(true);
+      } else {
+        mSearchEdit.clearFocus();
+        mSearchEdit.getEditText().setText(null);
+      }
+    });
 
     RxTextView.textChanges(mSearchEdit.getEditText())
         .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
@@ -122,7 +131,7 @@ public class CollectionsFragment
           } else {
             keyword = keyword.trim();
             if (!TextUtils.isEmpty(keyword)) {
-              queryByKey(keyword);
+              queryByKey(keyword, true);
             }
           }
         });
@@ -134,12 +143,11 @@ public class CollectionsFragment
   }
 
   /**
-   * fixme 有bug,show的时候当做有分页来处理了
-   *
-   * @param keyword
+   * @param keyword keyword
    */
-  private void queryByKey(String keyword) {
-    mPresenter.queryByKey(keyword);
+  private void queryByKey(String keyword, boolean newKeyword) {
+    if (newKeyword) mCurrPage = FIRST_PAGE;
+    mPresenter.queryByKey(keyword, mCurrPage, LIMIT);
   }
 
   private void queryCollect(boolean isRefresh) {
@@ -196,8 +204,12 @@ public class CollectionsFragment
   }
 
   @Override public void requestMoreData() {
-    //mRecyclerView.post(() -> queryCollect(false));
-    queryCollect(false);
+    String keyword = mSearchEdit.getInputText().trim();
+    if (TextUtils.isEmpty(keyword)) {
+      queryCollect(false);
+    } else {
+      queryByKey(keyword, false);
+    }
   }
 
   @Override public void onItemClick(View view, int position) {
