@@ -47,12 +47,12 @@
         android:id="@+id/btn_dialog_input_confirm"
         android:layout_marginRight="@dimen/spacing_small"
         android:text="@string/confirm"
-        style="@style/style_btn_middle_corners5_red"
+        style="@style/style_btn_middle_corners5_blue"
         />
     <Button
         android:id="@+id/btn_dialog_input_cancel"
         android:text="@string/cancel"
-        style="@style/style_btn_middle_corners5_red"
+        style="@style/style_btn_middle_corners5_blue"
         />
   </LinearLayout>
 </LinearLayout>

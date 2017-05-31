@@ -15,6 +15,7 @@
 
 package com.ouyangzn.github.module.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -24,25 +25,19 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import butterknife.ButterKnife;
-import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.module.common.MainPagerAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
 import com.ouyangzn.github.utils.Actions;
-import com.ouyangzn.github.utils.DialogUtils;
+import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.utils.UiUtils;
@@ -53,6 +48,7 @@ import java.util.List;
 public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
+  private final int REQUEST_STARS_LOGIN = 1;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
 
@@ -131,15 +127,14 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         break;
       }
       case R.id.nav_username: {
-        showInputUsernameDialog(null);
+        Actions.gotoLogin(this);
         break;
       }
       case R.id.nav_my_stars: {
-        String username = App.getUsername();
-        if (TextUtils.isEmpty(username)) {
-          showInputUsernameDialog(v -> Actions.gotoMineStars(this));
-        } else {
+        if (CommonUtils.canBrowsing()) {
           Actions.gotoMineStars(this);
+        } else {
+          Actions.gotoLogin(this, REQUEST_STARS_LOGIN);
         }
         break;
       }
@@ -148,40 +143,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     return true;
   }
 
-  /**
-   * 显示输入用户名的dialog
-   * @param onConfirmClick 点确定的回调
-   */
-  private void showInputUsernameDialog(View.OnClickListener onConfirmClick) {
-    AlertDialog.Builder builder = DialogUtils.getAlertDialog(mContext);
-    AlertDialog dialog = builder.setView(R.layout.dialog_input_view).create();
-    dialog.show();
-    TextView tvTitle = ButterKnife.findById(dialog, R.id.tv_dialog_input_title);
-    tvTitle.setText(R.string.username_github);
-    EditText etUsername = ButterKnife.findById(dialog, R.id.et_dialog_input);
-    String user = App.getUsername();
-    etUsername.setText(user);
-    if (!TextUtils.isEmpty(user)) {
-      etUsername.setSelection(user.length());
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == REQUEST_STARS_LOGIN && resultCode == RESULT_OK) {
+      Actions.gotoMineStars(this);
     }
-    Button btnConfirm = ButterKnife.findById(dialog, R.id.btn_dialog_input_confirm);
-    btnConfirm.setTag(dialog);
-    btnConfirm.setOnClickListener(v -> {
-      ScreenUtils.hideKeyBoard(v);
-      dialog.dismiss();
-      String username = etUsername.getText().toString().trim();
-      if (TextUtils.isEmpty(username)) {
-        toast(R.string.error_username_null);
-        return;
-      }
-      App.setUsername(username);
-      if (onConfirmClick != null) onConfirmClick.onClick(v);
-    });
-    Button btnCancel = ButterKnife.findById(dialog, R.id.btn_dialog_input_cancel);
-    btnCancel.setTag(dialog);
-    btnCancel.setOnClickListener(v -> {
-      ScreenUtils.hideKeyBoard(v);
-      dialog.dismiss();
-    });
   }
 }

@@ -21,6 +21,8 @@
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>
   <string name="username_github">GitHub Username</string>
+  <string name="password_github">GitHub password</string>
+  <string name="login">login</string>
   <string name="confirm">Confirm</string>
   <string name="cancel">Cancel</string>
   <string name="nav_about">About</string>
@@ -42,14 +44,16 @@
   <string name="loading_failure">Load failure/(ㄒoㄒ)/~~</string>
   <string name="stars">%d·stars</string>
   <string name="hint_input_keyword">search</string>
-  <string name="error_search_failure">search failure, retry please</string>
   <string name="no_data">no data</string>
+  <string name="login_just_browsing">just input username for browsing</string>
   <string name="tip_copy_success">copy success</string>
   <string name="tip_collect_success">collect success</string>
   <string name="tip_collect_cancel_success">cancel collect success</string>
+  <string name="error_search_failure">search failure, retry please</string>
   <string name="error_collect_failure">operate failure, retry please</string>
   <string name="error_collect_cancel_failure">operate failure, retry please</string>
   <string name="error_main_load_failure">Load failure/(ㄒoㄒ)/~~\n click to refresh</string>
   <string name="error_username_null">Username can\'t be null</string>
   <string name="error_network_error">Network error, retry please</string>
+  <string name="error_need_login">Need Login</string>
 </resources>

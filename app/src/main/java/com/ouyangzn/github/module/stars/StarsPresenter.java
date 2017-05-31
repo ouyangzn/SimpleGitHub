@@ -23,10 +23,12 @@ import com.ouyangzn.github.data.ICollectDataSource;
 import com.ouyangzn.github.data.IStarsDataSource;
 import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
 import com.ouyangzn.github.data.remote.StarsRemoteDataSource;
+import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtils;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
+import java.util.List;
 import rx.Observable;
 
 /**
@@ -53,11 +55,20 @@ public class StarsPresenter extends StarsContract.IStarsPresenter {
   }
 
   @Override public void queryMineStars(int page, int limit) {
-    RxJavaUtils.wrapFragment(mStarsDataSource.querySomeoneStars(App.getUsername(), page, limit),
-        mProvider).subscribe(result -> mView.showStars(result), error -> {
-      Log.e(TAG, "查询我的star出错：", error);
-      mView.showOnQueryStarsFail(App.getApp().getString(R.string.error_network_error));
-    });
+    Observable<List<Repository>> observable;
+    if (CommonUtils.canEdit()) {
+      observable = mStarsDataSource.queryMineStars(page, limit);
+    } else if (CommonUtils.canBrowsing()) {
+      observable = mStarsDataSource.querySomeoneStars(App.getUsername(), page, limit);
+    } else {
+      mView.showOnQueryStarsFail(App.getApp().getString(R.string.error_need_login));
+      return;
+    }
+    RxJavaUtils.wrapFragment(observable, mProvider)
+        .subscribe(result -> mView.showStars(result), error -> {
+          Log.e(TAG, "查询我的star出错：", error);
+          mView.showOnQueryStarsFail(App.getApp().getString(R.string.error_network_error));
+        });
   }
 
   @Override public void collectRepo(Repository repo) {

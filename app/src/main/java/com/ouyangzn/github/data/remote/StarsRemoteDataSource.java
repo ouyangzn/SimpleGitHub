@@ -26,6 +26,10 @@ import rx.Observable;
  * Description：
  */
 public class StarsRemoteDataSource implements IStarsDataSource {
+  @Override public Observable<List<Repository>> queryMineStars(int page, int limit) {
+    return Api.getUserApi().getStarred(page, limit);
+  }
+
   @Override
   public Observable<List<Repository>> querySomeoneStars(String username, int page, int limit) {
     return Api.getUserApi().getStarred(username, page, limit);

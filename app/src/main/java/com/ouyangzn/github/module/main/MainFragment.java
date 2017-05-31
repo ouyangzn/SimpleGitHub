@@ -25,7 +25,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
-import butterknife.OnClick;
 import com.jakewharton.rxbinding.view.RxView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
@@ -122,16 +121,12 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mPresenter.queryData(mSearchFactor);
   }
 
-  @OnClick({ R.id.tv_choose_date_range }) @Override public void onClick(View v) {
+  @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.layout_main_loading_failure:
         switchStatus(Status.STATUS_LOADING);
         search(false);
         break;
-      case R.id.tv_choose_date_range: {
-        toast("选时间范围");
-        break;
-      }
       case R.id.tv_reload_more: {
         mAdapter.reloadMore();
         break;

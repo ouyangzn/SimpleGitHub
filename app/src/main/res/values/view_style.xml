@@ -42,8 +42,18 @@
     <item name="android:textColor">#fff</item>
     <item name="android:textSize">18sp</item>
   </style>
+  <!-- 距左右15dp的按钮 -->
+  <style name="style_btn_margin_lr_15_corners5_blue" parent="@style/Widget.AppCompat.Button.Borderless">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">40dp</item>
+    <item name="android:layout_marginLeft">@dimen/spacing_normal</item>
+    <item name="android:layout_marginRight">@dimen/spacing_normal</item>
+    <item name="android:background">@drawable/bg_border_corners5_light_blue</item>
+    <item name="android:textSize">@dimen/font_normal</item>
+    <item name="android:textColor">@color/color_btn_text</item>
+  </style>
   <!-- 中等大小的按钮 -->
-  <style name="style_btn_middle_corners5_red" parent="@style/Widget.AppCompat.Button.Borderless">
+  <style name="style_btn_middle_corners5_blue" parent="@style/Widget.AppCompat.Button.Borderless">
     <item name="android:layout_width">125dp</item>
     <item name="android:layout_height">40dp</item>
     <item name="android:background">@drawable/bg_border_corners5_light_blue</item>

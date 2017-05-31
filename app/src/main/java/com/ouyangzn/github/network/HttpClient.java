@@ -41,6 +41,15 @@ public class HttpClient {
     builder.connectTimeout(30, TimeUnit.SECONDS);
     builder.writeTimeout(30, TimeUnit.SECONDS);
     builder.readTimeout(30, TimeUnit.SECONDS);
+    String authorization = App.getAuthorization();
+    if (!TextUtils.isEmpty(authorization)) {
+      builder.interceptors().add(0, chain -> {
+        Request.Builder reqBuilder = chain.request()
+            .newBuilder()
+            .addHeader("Authorization", "Basic b3V5YW5nem46aWxvdmViYWxsMjMuNjk=");
+        return chain.proceed(reqBuilder.build());
+      });
+    }
     if (BuildConfig.DEBUG) {
       try {
         Class<?> clazz = Class.forName("com.facebook.stetho.okhttp3.StethoInterceptor");
@@ -54,16 +63,8 @@ public class HttpClient {
         // ignore
       }
       HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-      logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+      logging.setLevel(HttpLoggingInterceptor.Level.BODY);
       builder.interceptors().add(logging);
-      String authorization = App.getAuthorization();
-      if (!TextUtils.isEmpty(authorization)) {
-        builder.addNetworkInterceptor(chain -> {
-          Request request = chain.request();
-          request = request.newBuilder().addHeader("Authorization", authorization).build();
-          return chain.proceed(request);
-        });
-      }
     }
     try {
       SSLContext sc = SSLContext.getInstance("SSL");

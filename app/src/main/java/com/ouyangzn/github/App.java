@@ -60,7 +60,7 @@ public class App extends Application {
 
   public static void login(String username, String password) {
     setAuthorization(
-        Base64.encodeToString(("Basic " + username + ":" + password).getBytes(), Base64.DEFAULT));
+        "Basic " + Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP));
   }
 
   public static String getAuthorization() {

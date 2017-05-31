@@ -180,13 +180,6 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
       paddingRight = drawable.getIntrinsicWidth() + padding + ScreenUtils.dp2px(context, 4);
     }
     mEditText.setPadding(padding, padding, paddingRight, padding);
-    // setInputType会覆盖多行的设置，所以放在setSingleLine前设置。调用setSingleLine会执行以下代码
-    //if (singleLine) {
-    //  mEditor.mInputType &= ~EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-    //} else {
-    //  mEditor.mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-    //}
-    initInputType(ta);
     initImeOptions(ta);
     boolean singleLine = ta.getBoolean(R.styleable.InputEdit_singleLine, true);
     if (singleLine) {
@@ -196,27 +189,42 @@ public class InputEdit extends FrameLayout implements View.OnClickListener, Text
       mEditText.setSingleLine(false);
       mEditText.setGravity(Gravity.START | Gravity.TOP);
     }
+    // singleLine会导致password的inputType无效，所以需要先singleLine
+    initInputType(ta, singleLine);
     ta.recycle();
   }
 
-  private void initInputType(TypedArray ta) {
+  /**
+   * 初始化输入类型，解决了单行与密码类型互相冲突的问题
+   *
+   * @param ta TypedArray
+   * @param singleLine 是否设置了单行
+   */
+  private void initInputType(TypedArray ta, boolean singleLine) {
     int inputType = ta.getInt(R.styleable.InputEdit_inputType, 1);
     switch (inputType) {
       default:
       case 1:
-        mEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+        mEditText.setInputType(InputType.TYPE_CLASS_TEXT | (singleLine ? InputType.TYPE_NULL
+            : InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         break;
       case 2:
-        mEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        mEditText.setInputType(InputType.TYPE_CLASS_NUMBER | (singleLine ? InputType.TYPE_NULL
+            : InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         break;
       case 3:
-        mEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        mEditText.setInputType(
+            InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | (singleLine
+                ? InputType.TYPE_NULL : InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         break;
       case 4:
-        mEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+        mEditText.setInputType(InputType.TYPE_CLASS_PHONE | (singleLine ? InputType.TYPE_NULL
+            : InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         break;
       case 5:
-        mEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        mEditText.setInputType(
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | (singleLine
+                ? InputType.TYPE_NULL : InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         break;
     }
   }

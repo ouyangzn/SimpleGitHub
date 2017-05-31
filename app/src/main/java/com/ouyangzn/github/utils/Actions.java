@@ -22,6 +22,7 @@ import android.support.v4.app.Fragment;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BaseFragmentActivity;
 import com.ouyangzn.github.module.collect.CollectionsFragment;
+import com.ouyangzn.github.module.login.LoginFragment;
 import com.ouyangzn.github.module.stars.StarsFragment;
 
 /**
@@ -46,6 +47,43 @@ public class Actions {
    */
   public static void gotoMineStars(Activity activity) {
     startActivity(activity, StarsFragment.class);
+  }
+
+  /**
+   * 跳转到登录
+   * @param fragment 当前所在的fragment对象
+   */
+  public static void gotoLogin(Fragment fragment) {
+    startActivity(fragment, LoginFragment.class);
+  }
+
+  /**
+   * 跳转到登录
+   *
+   * @param fragment 当前所在的fragment对象
+   * @param requestCode 请求码
+   */
+  public static void gotoLogin(Fragment fragment, int requestCode) {
+    startActivity(fragment, LoginFragment.class, requestCode);
+  }
+
+  /**
+   * 跳转到登录
+   *
+   * @param activity 当前所在的activity对象
+   */
+  public static void gotoLogin(Activity activity) {
+    startActivity(activity, LoginFragment.class);
+  }
+
+  /**
+   * 跳转到登录
+   *
+   * @param activity 当前所在的activity对象
+   * @param requestCode 请求码
+   */
+  public static void gotoLogin(Activity activity, int requestCode) {
+    startActivity(activity, LoginFragment.class, requestCode);
   }
 
   /**
@@ -92,6 +130,18 @@ public class Actions {
    *
    * @param fragment 当前所在的fragment对象
    * @param clazz 目标fragment
+   * @param requestCode 请求码
+   */
+  public static void startActivity(Fragment fragment, Class<? extends BaseFragment> clazz,
+      int requestCode) {
+    startActivity(fragment, clazz, null, requestCode);
+  }
+
+  /**
+   * 跳转到另一个fragment
+   *
+   * @param fragment 当前所在的fragment对象
+   * @param clazz 目标fragment
    * @param bundle 需要传过去的数据
    * @param requestCode 请求码
    */
@@ -125,6 +175,18 @@ public class Actions {
   public static void startActivity(Activity activity, Class<? extends BaseFragment> clazz,
       Bundle bundle) {
     startActivity(activity, clazz, bundle, -1);
+  }
+
+  /**
+   * 跳转到另一个fragment
+   *
+   * @param activity 当前所在的activity对象
+   * @param clazz 目标fragment
+   * @param requestCode 请求码
+   */
+  public static void startActivity(Activity activity, Class<? extends BaseFragment> clazz,
+      int requestCode) {
+    startActivity(activity, clazz, null, requestCode);
   }
 
   /**

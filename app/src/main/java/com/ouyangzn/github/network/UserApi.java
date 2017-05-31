@@ -30,4 +30,7 @@ public interface UserApi {
 
   @GET("users/{user}/starred") Observable<List<Repository>> getStarred(
       @Path("user") String username, @Query("page") int page, @Query("per_page") int perPage);
+
+  @GET("user/starred") Observable<List<Repository>> getStarred(@Query("page") int page,
+      @Query("per_page") int perPage);
 }
