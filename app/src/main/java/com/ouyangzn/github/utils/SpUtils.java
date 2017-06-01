@@ -30,6 +30,8 @@ public class SpUtils {
   public static final String KEY_USERNAME = "username";
   /** 使用账号密码登录的认证证书 */
   public static final String KEY_AUTHORIZATION = "authorization";
+  /** 当前登录的用户 */
+  public static final String KEY_USER = "user";
   private static final String SP_NAME = "config";
 
   public static void put(Context context, String key, String value) {

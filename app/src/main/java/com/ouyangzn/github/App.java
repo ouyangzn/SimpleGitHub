@@ -21,6 +21,7 @@ import android.util.Base64;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.TypeAdapters;
+import com.ouyangzn.github.bean.apibean.User;
 import com.ouyangzn.github.db.DaoHelper;
 import com.ouyangzn.github.json.DoubleAdapter;
 import com.ouyangzn.github.json.IntegerAdapter;
@@ -29,6 +30,7 @@ import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.SpUtils;
 
 import static com.ouyangzn.github.utils.SpUtils.KEY_AUTHORIZATION;
+import static com.ouyangzn.github.utils.SpUtils.KEY_USER;
 import static com.ouyangzn.github.utils.SpUtils.KEY_USERNAME;
 
 /**
@@ -40,6 +42,7 @@ public class App extends Application {
   private static App sApp;
   private static String sUsername;
   private static String sAuthorization;
+  private static User sUser;
   private Gson mGson;
 
   public static App getApp() {
@@ -58,9 +61,25 @@ public class App extends Application {
     SpUtils.put(sApp, KEY_USERNAME, username);
   }
 
-  public static void login(String username, String password) {
-    setAuthorization(
-        "Basic " + Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP));
+  public static void onLogin(User user) {
+    setUser(user);
+  }
+
+  public static void onLogout() {
+    clearAuthorization();
+    setUser(null);
+  }
+
+  public static User getUser() {
+    if (sUser == null) {
+      sUser = sApp.getGson().fromJson(SpUtils.getString(sApp, KEY_USER), User.class);
+    }
+    return sUser;
+  }
+
+  public static void setUser(User user) {
+    sUser = user;
+    SpUtils.put(sApp, KEY_USER, sApp.getGson().toJson(user));
   }
 
   public static String getAuthorization() {
@@ -70,9 +89,15 @@ public class App extends Application {
     return sAuthorization;
   }
 
-  private static void setAuthorization(String authorization) {
-    sAuthorization = authorization;
+  public static void setAuthorization(String username, String password) {
+    sAuthorization =
+        "Basic " + Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP);
     SpUtils.put(sApp, KEY_AUTHORIZATION, sAuthorization);
+  }
+
+  private static void clearAuthorization() {
+    sAuthorization = null;
+    SpUtils.put(sApp, KEY_AUTHORIZATION, null);
   }
 
   public Gson getGson() {

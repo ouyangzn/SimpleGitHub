@@ -45,8 +45,7 @@ public class HttpClient {
     if (!TextUtils.isEmpty(authorization)) {
       builder.interceptors().add(0, chain -> {
         Request.Builder reqBuilder = chain.request()
-            .newBuilder()
-            .addHeader("Authorization", "Basic b3V5YW5nem46aWxvdmViYWxsMjMuNjk=");
+            .newBuilder().addHeader("Authorization", App.getAuthorization());
         return chain.proceed(reqBuilder.build());
       });
     }

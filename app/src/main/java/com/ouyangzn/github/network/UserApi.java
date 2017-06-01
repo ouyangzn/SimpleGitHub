@@ -16,15 +16,17 @@
 package com.ouyangzn.github.network;
 
 import com.ouyangzn.github.bean.apibean.Repository;
+import com.ouyangzn.github.bean.apibean.User;
 import java.util.List;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 
 /**
  * Created by ouyangzn on 2017/5/18.<br/>
- * Description：
+ * Description：用户相关API
  */
 public interface UserApi {
 
@@ -33,4 +35,13 @@ public interface UserApi {
 
   @GET("user/starred") Observable<List<Repository>> getStarred(@Query("page") int page,
       @Query("per_page") int perPage);
+
+  /**
+   * 登录
+   *
+   * @param authorization 字符串格式："Basic " + Base64.encodeToString((username + ":" +
+   * password).getBytes(), Base64.NO_WRAP);
+   * @return 登录用户的用户信息
+   */
+  @GET("user") Observable<User> login(@Header("Authorization") String authorization);
 }

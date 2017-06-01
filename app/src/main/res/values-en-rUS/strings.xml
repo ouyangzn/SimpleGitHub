@@ -56,4 +56,5 @@
   <string name="error_username_null">Username can\'t be null</string>
   <string name="error_network_error">Network error, retry please</string>
   <string name="error_need_login">Need Login</string>
+  <string name="error_login_failure">Login failure, please check you username or password</string>
 </resources>

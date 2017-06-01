@@ -31,7 +31,10 @@ import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BasePresenter;
+import com.ouyangzn.github.data.remote.LoginDataSource;
 import com.ouyangzn.github.utils.DialogUtils;
+import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.utils.RxJavaUtils;
 import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.view.InputEdit;
 
@@ -77,18 +80,24 @@ public class LoginFragment extends BaseFragment {
           toast(R.string.error_password_null);
           return;
         }
-        App.login(username, password);
-        onLogin();
+        RxJavaUtils.wrap(LoginDataSource.login(username, password)).subscribe(user -> {
+          App.setAuthorization(username, password);
+          App.onLogin(user);
+          finishSelf();
+        }, error -> {
+          Log.e(TAG, "登录失败：", error);
+          toast(R.string.error_login_failure);
+        });
         break;
       }
       case R.id.tv_login_just_browsing: {
-        showInputUsernameDialog(view -> onLogin());
+        showInputUsernameDialog(view -> finishSelf());
         break;
       }
     }
   }
 
-  private void onLogin() {
+  private void finishSelf() {
     FragmentActivity activity = getActivity();
     activity.setResult(Activity.RESULT_OK);
     activity.finish();
