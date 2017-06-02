@@ -17,19 +17,47 @@ package com.ouyangzn.github.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BaseFragmentActivity;
+import com.ouyangzn.github.bean.apibean.User;
+import com.ouyangzn.github.module.account.LoginFragment;
+import com.ouyangzn.github.module.account.UserInfoFragment;
 import com.ouyangzn.github.module.collect.CollectionsFragment;
-import com.ouyangzn.github.module.login.LoginFragment;
 import com.ouyangzn.github.module.stars.StarsFragment;
+
+import static com.ouyangzn.github.module.account.UserInfoFragment.EXTRA_KEY_USER;
 
 /**
  * Created by ouyangzn on 2017/5/24.<br/>
  * Description：ui跳转工具类
  */
 public class Actions {
+
+  /**
+   * 跳转到用户信息
+   * @param fragment 当前所在的fragment对象
+   * @param user 用户
+   */
+  public static void gotoUserInfo(Fragment fragment, User user) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(EXTRA_KEY_USER, user);
+    startActivity(fragment, UserInfoFragment.class, bundle);
+  }
+
+  /**
+   * 跳转到用户信息
+   *
+   * @param activity 当前所在的activity对象
+   * @param user 用户
+   */
+  public static void gotoUserInfo(Activity activity, User user) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(EXTRA_KEY_USER, user);
+    startActivity(activity, UserInfoFragment.class, bundle);
+  }
 
   /**
    * 跳转到我的stars
@@ -101,6 +129,18 @@ public class Actions {
    */
   public static void gotoCollections(Activity activity) {
     startActivity(activity, CollectionsFragment.class);
+  }
+
+  /**
+   * 打开一个链接
+   *
+   * @param activity 当前所在的activity对象
+   * @param url url
+   */
+  public static void openUrl(Activity activity, String url) {
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.setData(Uri.parse(url));
+    activity.startActivity(intent);
   }
 
   /**

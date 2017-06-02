@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.module.login;
+package com.ouyangzn.github.module.account;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
@@ -37,6 +39,7 @@ import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtils;
 import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.view.InputEdit;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by ouyangzn on 2017/5/27.<br/>
@@ -46,6 +49,7 @@ public class LoginFragment extends BaseFragment {
 
   @BindView(R.id.input_login_username) InputEdit mInputUsername;
   @BindView(R.id.input_login_password) InputEdit mInputPassword;
+  private ProgressDialog mProgressDialog;
 
   @Override protected Status getCurrentStatus() {
     return null;
@@ -80,14 +84,23 @@ public class LoginFragment extends BaseFragment {
           toast(R.string.error_password_null);
           return;
         }
-        RxJavaUtils.wrap(LoginDataSource.login(username, password)).subscribe(user -> {
-          App.setAuthorization(username, password);
-          App.onLogin(user);
-          finishSelf();
-        }, error -> {
-          Log.e(TAG, "登录失败：", error);
-          toast(R.string.error_login_failure);
-        });
+        RxJavaUtils.wrap(LoginDataSource.login(username, password))
+            .doOnSubscribe(() -> {
+              Context context = getContext();
+              mProgressDialog =
+                  DialogUtils.showProgressDialog(context, context.getString(R.string.loading),
+                      false);
+            })
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .doOnNext(user -> DialogUtils.dismissProgressDialog(mProgressDialog))
+            .subscribe(user -> {
+              App.setAuthorization(username, password);
+              App.onLogin(user);
+              finishSelf();
+            }, error -> {
+              Log.e(TAG, "登录失败：", error);
+              toast(R.string.error_login_failure);
+            });
         break;
       }
       case R.id.tv_login_just_browsing: {

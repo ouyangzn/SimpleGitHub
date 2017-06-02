@@ -15,8 +15,6 @@
 
 package com.ouyangzn.github.module.collect;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -45,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import rx.android.schedulers.AndroidSchedulers;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
+import static com.ouyangzn.github.utils.Actions.openUrl;
 
 /**
  * Created by ouyangzn on 2017/5/27.<br/>
@@ -96,6 +95,8 @@ public class CollectionsFragment extends
 
   @Override protected void initView(View parent) {
     UiUtils.setCenterTitle(mToolbar, R.string.title_collect);
+    mToolbar.setNavigationIcon(R.drawable.ic_back_white);
+    mToolbar.setNavigationOnClickListener(v -> getActivity().onBackPressed());
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     mCollectAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
     UiUtils.setRecyclerViewLoadMore(mCollectAdapter, mRecyclerView);
@@ -214,9 +215,7 @@ public class CollectionsFragment extends
 
   @Override public void onItemClick(View view, int position) {
     CollectedRepo repo = mCollectAdapter.getItem(position);
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setData(Uri.parse(repo.getHtmlUrl()));
-    startActivity(intent);
+    openUrl(this.getActivity(), repo.getHtmlUrl());
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {

@@ -166,6 +166,8 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
 
   protected abstract int getContentView();
 
+  public abstract T initPresenter();
+
   /**
    * 初始化一些数据,此时view还未创建完，
    * 如果是拿到数据马上显示的操作，应放到{@link #initView(View)}中
@@ -175,8 +177,6 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
   protected abstract void initData(Bundle savedInstanceState);
 
   protected abstract void initView(View parent);
-
-  public abstract T initPresenter();
 
   private void hideAllView() {
     int childCount = mContentContainer.getChildCount();

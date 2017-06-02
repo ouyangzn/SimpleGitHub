@@ -15,8 +15,6 @@
 
 package com.ouyangzn.github.module.main;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -44,6 +42,7 @@ import java.util.ArrayList;
 
 import static com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import static com.ouyangzn.github.module.main.MainContract.IMainView;
+import static com.ouyangzn.github.utils.Actions.openUrl;
 
 /**
  * Created by ouyangzn on 2016/10/24.<br/>
@@ -91,6 +90,11 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mAdapter.setOnLoadingMoreListener(this);
   }
 
+  @Override public void onDestroyView() {
+    mRecyclerView.setAdapter(null);
+    super.onDestroyView();
+  }
+
   @Override protected void lazyInitView(View parent) {
     search(false);
     requestNoToolbar();
@@ -136,9 +140,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void onItemClick(View view, int position) {
     Repository repository = mAdapter.getItem(position);
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setData(Uri.parse(repository.getHtmlUrl()));
-    startActivity(intent);
+    openUrl(this.getActivity(), repository.getHtmlUrl());
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {

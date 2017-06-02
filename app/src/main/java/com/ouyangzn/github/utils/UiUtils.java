@@ -16,6 +16,7 @@
 package com.ouyangzn.github.utils;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.annotation.StringRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +36,15 @@ import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
  * Description：UI操作相关工具类，包括界面（activity等）跳转
  */
 public class UiUtils {
+
+  /**
+   * 给textView添加下划线
+   *
+   * @param textView TextView
+   */
+  public static void addUnderLine(TextView textView) {
+    textView.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+  }
 
   /**
    * 给RecyclerView设置加载更多和加载更多失败时的属性

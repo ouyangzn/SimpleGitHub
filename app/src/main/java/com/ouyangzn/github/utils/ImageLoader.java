@@ -17,6 +17,7 @@ package com.ouyangzn.github.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.DrawableRes;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
@@ -35,8 +36,16 @@ public class ImageLoader {
     sContext = context.getApplicationContext();
   }
 
-  public static void loadAsCircle(ImageView target, int resId) {
+  public static void loadAsCircle(ImageView target, @DrawableRes int resId) {
     Glide.with(sContext).load(resId).bitmapTransform(new CropCircleTransformation(sContext)).into(target);
+  }
+
+  public static void loadAsCircle(ImageView target, @DrawableRes int defId, String url) {
+    Glide.with(sContext)
+        .load(url)
+        .placeholder(defId)
+        .bitmapTransform(new CropCircleTransformation(sContext))
+        .into(target);
   }
 
   public static void load(ImageView target, String url) {

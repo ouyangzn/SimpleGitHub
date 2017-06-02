@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import butterknife.ButterKnife;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.module.common.MainPagerAdapter;
@@ -126,8 +127,12 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
         toast("点击about");
         break;
       }
-      case R.id.nav_username: {
-        Actions.gotoLogin(this);
+      case R.id.nav_account: {
+        if (CommonUtils.canEdit()) {
+          Actions.gotoUserInfo(this, App.getUser());
+        } else {
+          Actions.gotoLogin(this);
+        }
         break;
       }
       case R.id.nav_my_stars: {
