@@ -32,7 +32,7 @@ it's just a android client, used to search open source from github
 --------------------
 - [x] 首页改版：一种语言对应一个fragment
 - [ ] 全语言搜索优化
-- [ ] 登录github账号，导入账户star数据
+- [x] 登录github账号，导入账户star数据
 - [ ] 对star的project进行分类展示、收藏等（目前github上不能对star分类，不太方便）
 
 License
