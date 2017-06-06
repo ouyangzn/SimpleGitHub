@@ -13,21 +13,38 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.utils;
+package com.ouyangzn.github.data;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
+import java.util.List;
 
 /**
  * Created by ouyangzn on 2016/9/30.<br/>
  * Description：
  */
-public class CommonUtil {
+public interface ICollectDataSource {
 
-  public static void copy(Context context, String content) {
-    ClipboardManager clip = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-    ClipData data = ClipData.newPlainText(content, content);
-    clip.setPrimaryClip(data);
-  }
+  /**
+   * 查询所有收藏
+   *
+   * @param page 页码，从0开始
+   * @param limit 每页数量
+   * @return List<CollectedRepo>
+   */
+  List<CollectedRepo> queryCollectRepo(int page, int limit);
+
+  /**
+   * 根据关键字搜索
+   *
+   * @param keyword 关键字
+   * @return List<CollectedRepo>
+   */
+  List<CollectedRepo> queryByKeyword(String keyword, int page, int limit);
+
+  boolean collectRepo(CollectedRepo repo);
+
+  boolean cancelRepo(CollectedRepo repo);
+
+  boolean cancelRepo(Long id);
+
 }

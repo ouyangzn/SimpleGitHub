@@ -13,33 +13,21 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.bean.localbean;
+package com.ouyangzn.github.data.remote;
 
+import android.util.Base64;
 import com.ouyangzn.github.bean.apibean.User;
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
+import com.ouyangzn.github.network.Api;
+import rx.Observable;
 
 /**
- * Created by ouyangzn on 2016/9/27.<br/>
- * Description：
+ * Created by ouyangzn on 2017/6/1.<br/>
+ * Description：登录相关
  */
-public class CollectedUser extends RealmObject {
-
-  @PrimaryKey public Integer id;
-  public String avatarUrl;
-  public String login;
-
-  public void convert(User owner) {
-    this.id = owner.getId();
-    this.login = owner.getAuthorName();
-    this.avatarUrl = owner.getAvatarUrl();
-  }
-
-  @Override public String toString() {
-    return "CollectedUser{" +
-        "id=" + id +
-        ", avatarUrl='" + avatarUrl + '\'' +
-        ", login='" + login + '\'' +
-        '}';
+public class LoginDataSource {
+  public static Observable<User> login(String username, String password) {
+    String authorization =
+        "Basic " + Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP);
+    return Api.getUserApi().login(authorization);
   }
 }

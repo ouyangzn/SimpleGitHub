@@ -16,18 +16,29 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     >
-  <ViewStub
-      android:id="@+id/stub_loading"
+  <FrameLayout
+      android:id="@+id/layout_content_container"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout="@layout/content_loading"
-      />
-  <ViewStub
-      android:id="@+id/stub_error"
+      >
+    <ViewStub
+        android:id="@+id/stub_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/content_loading"
+        />
+    <ViewStub
+        android:id="@+id/stub_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/content_error"
+        />
+  </FrameLayout>
+  <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout="@layout/content_error"
+      android:layout_height="@dimen/toolbar_height"
+      android:background="?attr/colorPrimary"
       />
 </FrameLayout>

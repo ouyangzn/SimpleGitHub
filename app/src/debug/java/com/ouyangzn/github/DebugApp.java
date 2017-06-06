@@ -16,9 +16,6 @@
 package com.ouyangzn.github;
 
 import com.facebook.stetho.Stetho;
-import com.uphyca.stetho_realm.RealmInspectorModulesProvider;
-
-import static com.ouyangzn.github.db.GlobalRealmMigration.DB_NAME;
 
 /**
  * Created by ouyangzn on 2016/9/29.<br/>
@@ -33,17 +30,17 @@ public class DebugApp extends App {
   }
 
   private void initStetho() {
-    RealmInspectorModulesProvider provider = RealmInspectorModulesProvider.builder(this)
-        //.withFolder(getCacheDir())
-        .withEncryptionKey(DB_NAME, getGlobalRealmKey())
-        //.withMetaTables()
-        //.withDescendingOrder()
-        //.withLimit(1000)
-        //.databaseNamePattern(Pattern.compile(".+\\.realm"))
-        .build();
+    //RealmInspectorModulesProvider provider = RealmInspectorModulesProvider.builder(this)
+    //    //.withFolder(getCacheDir())
+    //    .withEncryptionKey(DB_NAME, getGlobalRealmKey())
+    //    //.withMetaTables()
+    //    //.withDescendingOrder()
+    //    //.withLimit(1000)
+    //    //.databaseNamePattern(Pattern.compile(".+\\.realm"))
+    //    .build();
     Stetho.initialize(Stetho.newInitializerBuilder(this)
         .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-        .enableWebKitInspector(provider)
+        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
         .build());
   }
 }

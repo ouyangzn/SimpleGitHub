@@ -15,8 +15,6 @@
 
 package com.ouyangzn.github.module.main;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -25,23 +23,26 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
-import butterknife.OnClick;
+import com.jakewharton.rxbinding.view.RxView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.base.LazyLoadFragment;
+import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.apibean.Repository;
-import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 import com.ouyangzn.github.module.common.RepositoryAdapter;
-import com.ouyangzn.github.utils.CommonUtil;
-import com.ouyangzn.github.utils.DialogUtil;
+import com.ouyangzn.github.utils.CommonUtils;
+import com.ouyangzn.github.utils.DialogUtils;
 import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.UIUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.UiUtils;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
+import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
 
 import static com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import static com.ouyangzn.github.module.main.MainContract.IMainView;
+import static com.ouyangzn.github.utils.Actions.openUrl;
 
 /**
  * Created by ouyangzn on 2016/10/24.<br/>
@@ -89,14 +90,24 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mAdapter.setOnLoadingMoreListener(this);
   }
 
+  @Override public void onDestroyView() {
+    mRecyclerView.setAdapter(null);
+    super.onDestroyView();
+  }
+
   @Override protected void lazyInitView(View parent) {
     search(false);
+    requestNoToolbar();
 
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    RxView.touches(mRecyclerView, motionEvent -> {
+      ScreenUtils.hideKeyBoard(mRecyclerView);
+      return false;
+    }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
-    UIUtil.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
+    UiUtils.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);
 
     View errorView = mInflater.inflate(R.layout.view_error_main, (ViewGroup) parent, false);
@@ -114,16 +125,12 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     mPresenter.queryData(mSearchFactor);
   }
 
-  @OnClick({ R.id.tv_choose_date_range }) @Override public void onClick(View v) {
+  @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.layout_main_loading_failure:
         switchStatus(Status.STATUS_LOADING);
         search(false);
         break;
-      case R.id.tv_choose_date_range: {
-        toast("选时间范围");
-        break;
-      }
       case R.id.tv_reload_more: {
         mAdapter.reloadMore();
         break;
@@ -133,13 +140,11 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void onItemClick(View view, int position) {
     Repository repository = mAdapter.getItem(position);
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setData(Uri.parse(repository.getHtmlUrl()));
-    startActivity(intent);
+    openUrl(this.getActivity(), repository.getHtmlUrl());
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {
-    AlertDialog.Builder builder = DialogUtil.getAlertDialog(getActivity());
+    AlertDialog.Builder builder = DialogUtils.getAlertDialog(getActivity());
     builder.setItems(R.array.long_click_main_dialog_item, (dialog, which) -> {
       Repository item = mAdapter.getItem(position);
       switch (which) {
@@ -156,7 +161,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
   }
 
   private void copyUrl(String url) {
-    CommonUtil.copy(getContext(), url);
+    CommonUtils.copy(getContext(), url);
     toast(R.string.tip_copy_success);
   }
 
@@ -179,13 +184,9 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     }
   }
 
-  @Override public void showQueryDataResult(SearchResult result) {
+  @Override public void showQueryDataResult(RepoSearchResult result) {
     switchStatus(Status.STATUS_NORMAL);
     stopRefresh();
-    Log.d(TAG, "----------result = " + result.toString());
-    for (Repository rep : result.getRepositories()) {
-      Log.d(TAG, rep.toString());
-    }
     mSearchFactor.page++;
     boolean hasMore = result.getRepositories().size() == mSearchFactor.limit;
     mAdapter.setHasMore(hasMore);

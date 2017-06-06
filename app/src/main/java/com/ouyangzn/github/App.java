@@ -16,19 +16,27 @@
 package com.ouyangzn.github;
 
 import android.app.Application;
+import android.text.TextUtils;
+import android.util.Base64;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.TypeAdapters;
-import com.ouyangzn.github.db.GlobalRealmMigration;
+import com.ouyangzn.github.bean.apibean.User;
+import com.ouyangzn.github.db.DaoHelper;
+import com.ouyangzn.github.event.Event;
+import com.ouyangzn.github.event.EventBusIndex;
 import com.ouyangzn.github.json.DoubleAdapter;
 import com.ouyangzn.github.json.IntegerAdapter;
 import com.ouyangzn.github.json.LongAdapter;
 import com.ouyangzn.github.utils.ImageLoader;
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
+import com.ouyangzn.github.utils.SpUtils;
+import org.greenrobot.eventbus.EventBus;
 
-import static com.ouyangzn.github.db.GlobalRealmMigration.DB_NAME;
-import static com.ouyangzn.github.db.GlobalRealmMigration.DB_VERSION;
+import static com.ouyangzn.github.event.EventType.TYPE_LOGIN;
+import static com.ouyangzn.github.event.EventType.TYPE_LOGOUT;
+import static com.ouyangzn.github.utils.SpUtils.KEY_AUTHORIZATION;
+import static com.ouyangzn.github.utils.SpUtils.KEY_USER;
+import static com.ouyangzn.github.utils.SpUtils.KEY_USERNAME;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
@@ -37,21 +45,66 @@ import static com.ouyangzn.github.db.GlobalRealmMigration.DB_VERSION;
 public class App extends Application {
 
   private static App sApp;
-
+  private static String sUsername;
+  private static String sAuthorization;
+  private static User sUser;
   private Gson mGson;
 
   public static App getApp() {
     return sApp;
   }
 
-  public Realm getGlobalRealm() {
-    return Realm.getInstance(new RealmConfiguration.Builder().name(DB_NAME)
-        // 密码必须64个字节
-        .encryptionKey(getGlobalRealmKey())
-        .schemaVersion(DB_VERSION)
-        .migration(new GlobalRealmMigration())
-        //.deleteRealmIfMigrationNeeded()
-        .build());
+  public static String getUsername() {
+    if (TextUtils.isEmpty(sUsername)) {
+      sUsername = SpUtils.getString(sApp, KEY_USERNAME);
+    }
+    return sUsername;
+  }
+
+  public static void setUsername(String username) {
+    App.sUsername = username;
+    SpUtils.put(sApp, KEY_USERNAME, username);
+  }
+
+  public static void onLogin(User user) {
+    setUser(user);
+    EventBus.getDefault().post(new Event(TYPE_LOGIN));
+  }
+
+  public static void onLogout() {
+    clearAuthorization();
+    setUser(null);
+    EventBus.getDefault().post(new Event(TYPE_LOGOUT));
+  }
+
+  public static User getUser() {
+    if (sUser == null) {
+      sUser = sApp.getGson().fromJson(SpUtils.getString(sApp, KEY_USER), User.class);
+    }
+    return sUser;
+  }
+
+  public static void setUser(User user) {
+    sUser = user;
+    SpUtils.put(sApp, KEY_USER, sApp.getGson().toJson(user));
+  }
+
+  public static String getAuthorization() {
+    if (sAuthorization == null) {
+      sAuthorization = SpUtils.getString(sApp, KEY_AUTHORIZATION);
+    }
+    return sAuthorization;
+  }
+
+  public static void setAuthorization(String username, String password) {
+    sAuthorization =
+        "Basic " + Base64.encodeToString((username + ":" + password).getBytes(), Base64.NO_WRAP);
+    SpUtils.put(sApp, KEY_AUTHORIZATION, sAuthorization);
+  }
+
+  private static void clearAuthorization() {
+    sAuthorization = null;
+    SpUtils.put(sApp, KEY_AUTHORIZATION, null);
   }
 
   public Gson getGson() {
@@ -72,10 +125,12 @@ public class App extends Application {
     super.onCreate();
     sApp = this;
     ImageLoader.init(sApp);
-    Realm.init(sApp);
+    DaoHelper.initDao(sApp);
+    EventBus.builder()
+        .addIndex(new EventBusIndex())
+        .logNoSubscriberMessages(BuildConfig.LOG_DEBUG)
+        .throwSubscriberException(BuildConfig.LOG_DEBUG)
+        .installDefaultEventBus();
   }
 
-  protected byte[] getGlobalRealmKey() {
-    return "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789".getBytes();
-  }
 }

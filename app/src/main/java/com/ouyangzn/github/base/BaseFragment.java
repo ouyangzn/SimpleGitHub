@@ -17,6 +17,7 @@ package com.ouyangzn.github.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,9 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
   protected View mContentView;
   protected View mLoadingView;
   protected View mErrorView;
+  protected Toolbar mToolbar;
   private ViewGroup mRootView;
+  private ViewGroup mContentContainer;
   private com.ouyangzn.github.utils.Toast mToast;
   private Status mStatus;
   private Unbinder mUnbinder;
@@ -61,13 +64,17 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
     super.onCreateView(inflater, container, savedInstanceState);
     mInflater = inflater;
     mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_base_content, container, false);
+    mContentContainer = (ViewGroup) mRootView.findViewById(R.id.layout_content_container);
     mLoadingView = mRootView.findViewById(R.id.stub_loading);
     mErrorView = mRootView.findViewById(R.id.stub_error);
     mContentView = inflater.inflate(getContentView(), container, false);
     if (mContentView == null) throw new UnsupportedOperationException("contentView == null");
-    mRootView.addView(mContentView);
+    mContentContainer.addView(mContentView);
+    mToolbar = (Toolbar) mRootView.findViewById(R.id.toolbar);
+    requestToolbarOverlay(false);
     if (mStatus == null) {
-      switchStatus(getCurrentStatus());
+      Status status = getCurrentStatus();
+      switchStatus(status == null ? Status.STATUS_NORMAL : status);
     } else {
       switchStatus(mStatus);
     }
@@ -77,7 +84,9 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
 
   @Override public final void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    mPresenter.onAttach((V) this);
+    if (mPresenter != null) {
+      mPresenter.onAttach((V) this);
+    }
     initView(mContentView);
   }
 
@@ -87,17 +96,31 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
     mUnbinder.unbind();
   }
 
+  public void requestToolbarOverlay(boolean overlay) {
+    if (overlay) {
+      mContentContainer.setPadding(0, 0, 0, 0);
+    } else {
+      mContentContainer.setPadding(0, getResources().getDimensionPixelSize(R.dimen.toolbar_height),
+          0, 0);
+    }
+  }
+
+  public void requestNoToolbar() {
+    mToolbar.setVisibility(View.GONE);
+    requestToolbarOverlay(true);
+  }
+
   protected void setLoadingView(View loadingView) {
     loadingView.setVisibility(mLoadingView.getVisibility());
-    mRootView.removeView(mLoadingView);
-    mRootView.addView(loadingView);
+    mContentContainer.removeView(mLoadingView);
+    mContentContainer.addView(loadingView);
     mLoadingView = loadingView;
   }
 
   protected void setErrorView(View errorView) {
     errorView.setVisibility(mErrorView.getVisibility());
-    mRootView.removeView(mErrorView);
-    mRootView.addView(errorView);
+    mContentContainer.removeView(mErrorView);
+    mContentContainer.addView(errorView);
     mErrorView = errorView;
   }
 
@@ -143,6 +166,8 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
 
   protected abstract int getContentView();
 
+  public abstract T initPresenter();
+
   /**
    * 初始化一些数据,此时view还未创建完，
    * 如果是拿到数据马上显示的操作，应放到{@link #initView(View)}中
@@ -153,12 +178,10 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
 
   protected abstract void initView(View parent);
 
-  public abstract T initPresenter();
-
   private void hideAllView() {
-    int childCount = mRootView.getChildCount();
+    int childCount = mContentContainer.getChildCount();
     for (int i = 0; i < childCount; i++) {
-      mRootView.getChildAt(i).setVisibility(View.GONE);
+      mContentContainer.getChildAt(i).setVisibility(View.GONE);
     }
   }
 
@@ -168,6 +191,15 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
    * @param isActive 是否正在处理
    */
   @Override public void setLoadingIndicator(boolean isActive) {
+  }
+
+  /**
+   * 返回键事件
+   *
+   * @return 是否继续传播
+   */
+  public boolean onBackPressed() {
+    return false;
   }
 
   /**

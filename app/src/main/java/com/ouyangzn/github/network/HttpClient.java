@@ -14,6 +14,8 @@
  */
 package com.ouyangzn.github.network;
 
+import android.text.TextUtils;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.BuildConfig;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +29,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
@@ -38,6 +41,14 @@ public class HttpClient {
     builder.connectTimeout(30, TimeUnit.SECONDS);
     builder.writeTimeout(30, TimeUnit.SECONDS);
     builder.readTimeout(30, TimeUnit.SECONDS);
+    String authorization = App.getAuthorization();
+    if (!TextUtils.isEmpty(authorization)) {
+      builder.interceptors().add(0, chain -> {
+        Request.Builder reqBuilder = chain.request()
+            .newBuilder().addHeader("Authorization", App.getAuthorization());
+        return chain.proceed(reqBuilder.build());
+      });
+    }
     if (BuildConfig.DEBUG) {
       try {
         Class<?> clazz = Class.forName("com.facebook.stetho.okhttp3.StethoInterceptor");
@@ -51,14 +62,14 @@ public class HttpClient {
         // ignore
       }
       HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-      logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+      logging.setLevel(HttpLoggingInterceptor.Level.BODY);
       builder.interceptors().add(logging);
     }
     try {
       SSLContext sc = SSLContext.getInstance("SSL");
       sc.init(null, new TrustManager[] { new TrustAnyTrustManager() },
           new java.security.SecureRandom());
-      builder.sslSocketFactory(sc.getSocketFactory());
+      builder.sslSocketFactory(sc.getSocketFactory(), new TrustAnyTrustManager());
       builder.hostnameVerifier(new TrustAnyHostnameVerifier());
     } catch (KeyManagementException ignored) {
     } catch (NoSuchAlgorithmException ignored) {

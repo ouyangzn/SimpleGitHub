@@ -25,9 +25,9 @@ import com.ouyangzn.github.R;
  *
  * @author ouyangzn
  */
-public class DialogUtil {
+public class DialogUtils {
 
-  private DialogUtil() {
+  private DialogUtils() {
     throw new UnsupportedOperationException("cannot be instantiated");
   }
 

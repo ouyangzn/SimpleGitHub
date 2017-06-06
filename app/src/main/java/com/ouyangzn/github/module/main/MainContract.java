@@ -17,8 +17,8 @@ package com.ouyangzn.github.module.main;
 
 import com.ouyangzn.github.base.BasePresenter;
 import com.ouyangzn.github.base.BaseView;
+import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.apibean.Repository;
-import com.ouyangzn.github.bean.apibean.SearchResult;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
 
 /**
@@ -31,7 +31,7 @@ public interface MainContract {
 
     void showErrorOnQueryData(String tips);
 
-    void showQueryDataResult(SearchResult result);
+    void showQueryDataResult(RepoSearchResult result);
 
     void showCollected();
 

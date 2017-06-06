@@ -19,21 +19,25 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.base.CommonConstants;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
-import com.ouyangzn.github.data.IGitHubData;
-import com.ouyangzn.github.data.remote.RemoteGitHubData;
+import com.ouyangzn.github.data.ICollectDataSource;
+import com.ouyangzn.github.data.IRepositoryDataSource;
+import com.ouyangzn.github.data.local.CollectLocalDataSourceSource;
+import com.ouyangzn.github.data.remote.RepositoryRemoteDataSource;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.utils.Log;
+import com.ouyangzn.github.utils.RxJavaUtils;
+import com.ouyangzn.github.utils.SpUtils;
 import com.trello.rxlifecycle.LifecycleProvider;
 import com.trello.rxlifecycle.android.FragmentEvent;
-import io.realm.Realm;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+import static com.ouyangzn.github.utils.SpUtils.KEY_LANGUAGE;
 
 /**
  * Created by ouyangzn on 2016/9/5.<br/>
@@ -44,25 +48,24 @@ public class MainPresenter extends IMainPresenter {
   private final String TAG = MainPresenter.class.getSimpleName();
 
   private LifecycleProvider<FragmentEvent> mProvider;
-  private IGitHubData mDataSource;
+  private IRepositoryDataSource mDataSource;
+  private ICollectDataSource mCollectData;
+
   private App mApp;
-  private Realm mRealm;
   private SharedPreferences mConfigSp;
   private Subscription mQueryDataSubscribe;
 
   public MainPresenter(Context context, LifecycleProvider<FragmentEvent> provider) {
     mProvider = provider;
     mApp = (App) context.getApplicationContext();
-    mRealm = mApp.getGlobalRealm();
-    mDataSource = new RemoteGitHubData();
-    mConfigSp = mApp.getSharedPreferences(CommonConstants.ConfigSP.SP_NAME, Context.MODE_PRIVATE);
+    mDataSource = new RepositoryRemoteDataSource();
+    mCollectData = new CollectLocalDataSourceSource();
+    mConfigSp = SpUtils.getSp(context);
   }
 
   @Override protected void onDestroy() {
-    if (mRealm != null) {
-      mRealm.close();
-      mRealm = null;
-    }
+    mDataSource = null;
+    mCollectData = null;
   }
 
   @Override public void queryData(SearchFactor factor) {
@@ -84,55 +87,36 @@ public class MainPresenter extends IMainPresenter {
         }, throwable -> {
           Log.e(TAG, "----------查询数据出错:" + throwable.getMessage());
           mView.setLoadingIndicator(false);
-          mView.showErrorOnQueryData(mApp.getString(R.string.error_search_github));
+          mView.showErrorOnQueryData(mApp.getString(R.string.error_search_failure));
         });
-    //addSubscription(mQueryDataSubscribe);
   }
 
   @Override public void saveSearchFactor(SearchFactor factor) {
     Observable.just(factor)
         .observeOn(Schedulers.io())
-        .doOnNext(factor1 -> mConfigSp.edit()
-            .putString(CommonConstants.ConfigSP.KEY_LANGUAGE,
+        .doOnNext(factor1 -> mConfigSp.edit().putString(KEY_LANGUAGE,
                 App.getApp().getGson().toJson(factor1))
             .apply())
         .subscribe();
   }
 
   @Override public void collectRepo(final Repository repo) {
-    // realm原生态写法
-    mRealm.executeTransactionAsync(bgRealm -> {
+    RxJavaUtils.wrap(Observable.defer(() -> {
       CollectedRepo collectedRepo = new CollectedRepo();
       collectedRepo.convert(repo);
-      collectedRepo.collectTime = System.currentTimeMillis();
-      bgRealm.copyToRealmOrUpdate(collectedRepo);
-    }, () -> {
-      mView.showCollected();
+      collectedRepo.setCollectTime(System.currentTimeMillis());
+      return Observable.just(mCollectData.collectRepo(collectedRepo));
+    })).subscribe(success -> {
+      if (success) {
+        mView.showCollected();
+      } else {
+        Log.e(TAG, "----------未知原因收藏失败-----------");
+        mView.showCollectedFailure();
+      }
     }, error -> {
-      Log.d(TAG, "----------收藏失败：", error);
+      Log.e(TAG, "----------收藏失败：", error);
       mView.showCollectedFailure();
     });
-    // rxJava写法
-    //Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
-    //  try {
-    //    mRealm.beginTransaction();
-    //    CollectedRepo collectedRepo = new CollectedRepo();
-    //    collectedRepo.collectTime = System.currentTimeMillis();
-    //    collectedRepo.convert(repo);
-    //    mRealm.copyToRealmOrUpdate(collectedRepo);
-    //    mRealm.commitTransaction();
-    //    subscriber.onNext(null);
-    //    subscriber.onCompleted();
-    //  } catch (Exception e) {
-    //    if (mRealm.isInTransaction()) mRealm.cancelTransaction();
-    //    subscriber.onError(e);
-    //  }
-    //}).subscribeOn(AndroidSchedulers.mainThread()).subscribe(aVoid -> {
-    //  mView.showCollected();
-    //}, throwable -> {
-    //  Log.d(TAG, "----------收藏失败：", throwable);
-    //  mView.showCollectedFailure();
-    //});
   }
 
 }

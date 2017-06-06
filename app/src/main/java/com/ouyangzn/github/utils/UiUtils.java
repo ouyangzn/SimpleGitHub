@@ -17,9 +17,9 @@ package com.ouyangzn.github.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
+import android.graphics.Paint;
 import android.support.annotation.StringRes;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -36,7 +36,16 @@ import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
  * Created by ouyangzn on 2016/10/8.<br/>
  * Description：UI操作相关工具类，包括界面（activity等）跳转
  */
-public class UIUtil {
+public class UiUtils {
+
+  /**
+   * 给textView添加下划线
+   *
+   * @param textView TextView
+   */
+  public static void addUnderLine(TextView textView) {
+    textView.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+  }
 
   /**
    * 给RecyclerView设置加载更多和加载更多失败时的属性
@@ -77,12 +86,23 @@ public class UIUtil {
     try {
       params.setMargins(margin[0], margin[1], margin[2], margin[3]);
     } catch (Exception e) {
-      int margin_15 = ScreenUtil.dp2px(context, 15);
+      int margin_15 = ScreenUtils.dp2px(context, 15);
       params.setMargins(margin_15, 0, margin_15, 0);
     }
     img.setLayoutParams(params);
     toolbar.addView(img);
     return img;
+  }
+
+  /**
+   * 添加返回键，点击后会调用activity的onBackPressed
+   *
+   * @param toolbar Toolbar
+   * @param activity Activity
+   */
+  public static void addWhiteBackBtn(Toolbar toolbar, Activity activity) {
+    toolbar.setNavigationIcon(R.drawable.ic_back_white);
+    toolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
   }
 
   public static TextView setCenterTitle(Toolbar toolbar, @StringRes int resId) {
@@ -106,52 +126,10 @@ public class UIUtil {
     return titleView;
   }
 
-  /**
-   * 打开一个activity
-   *
-   * @param currActivity 当前的activity
-   * @param target 要打开的activity
-   */
-  public static void openActivity(Activity currActivity, Class target) {
-    openActivity(currActivity, target, null);
+  public static void stopRefresh(SwipeRefreshLayout refreshLayout) {
+    if (refreshLayout != null && refreshLayout.isRefreshing()) {
+      refreshLayout.setRefreshing(false);
+    }
   }
 
-  /**
-   * 打开一个activity
-   *
-   * @param currActivity 当前的activity
-   * @param target 要打开的activity
-   * @param data 要携带过去的数据
-   */
-  public static void openActivity(Activity currActivity, Class target, Bundle data) {
-    openActivityForResult(currActivity, target, -1, data);
-  }
-
-  /**
-   * 打开一个activity
-   *
-   * @param currActivity 当前的activity
-   * @param target 要打开的activity
-   * @param requestCode 请求码
-   */
-  public static void openActivityForResult(Activity currActivity, Class target, int requestCode) {
-    openActivityForResult(currActivity, target, requestCode, null);
-  }
-
-  /**
-   * 打开一个activity
-   *
-   * @param currActivity 当前的activity
-   * @param target 要打开的activity
-   * @param requestCode 请求码
-   * @param data 要携带过去的数据
-   */
-  public static void openActivityForResult(Activity currActivity, Class target, int requestCode,
-      Bundle data) {
-    Intent intent = new Intent(currActivity, target);
-    if (data != null) intent.putExtras(data);
-    currActivity.startActivityForResult(intent, requestCode);
-    //        overridePendingTransition(R.anim.anim_slide_in,
-    //                R.anim.anim_slide_out);
-  }
 }

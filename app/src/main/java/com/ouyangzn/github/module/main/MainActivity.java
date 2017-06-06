@@ -15,8 +15,9 @@
 
 package com.ouyangzn.github.module.main;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -29,25 +30,39 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import butterknife.ButterKnife;
+import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
-import com.ouyangzn.github.module.collect.CollectActivity;
+import com.ouyangzn.github.bean.apibean.User;
+import com.ouyangzn.github.event.Event;
 import com.ouyangzn.github.module.common.MainPagerAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
+import com.ouyangzn.github.utils.Actions;
+import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.ImageLoader;
-import com.ouyangzn.github.utils.ScreenUtil;
-import com.ouyangzn.github.utils.UIUtil;
+import com.ouyangzn.github.utils.ScreenUtils;
+import com.ouyangzn.github.utils.UiUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import static com.ouyangzn.github.event.EventType.TYPE_LOGIN;
+import static com.ouyangzn.github.event.EventType.TYPE_LOGOUT;
 
 public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
+  private final int REQUEST_STARS_LOGIN = 1;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
+  private ImageView mImgAvatar;
+  private TextView mTvEmail;
 
   @Override protected int getContentView() {
     return R.layout.activity_main;
@@ -58,23 +73,36 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override protected void initData() {
+    EventBus.getDefault().register(this);
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    EventBus.getDefault().unregister(this);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
-    toolbar.setTitle(R.string.app_name);
-    toolbar.setTitleTextColor(Color.WHITE);
-    setSupportActionBar(toolbar);
+    UiUtils.setCenterTitle(toolbar, R.string.app_name);
     ImageView collectImg =
-        UIUtil.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
-            new int[] { 0, 0, ScreenUtil.dp2px(mContext, 15), 0 });
+        UiUtils.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
+            new int[] { 0, 0, ScreenUtils.dp2px(mContext, 15), 0 });
     collectImg.setId(R.id.id_toolbar_right_img);
     collectImg.setOnClickListener(this);
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
     mNavView.setNavigationItemSelectedListener(this);
-    ImageView img_photo = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.img_photo);
-    ImageLoader.loadAsCircle(img_photo, R.drawable.ic_photo);
+    View headerView = mNavView.getHeaderView(0);
+    mImgAvatar = (ImageView) headerView.findViewById(R.id.img_photo);
+    mTvEmail = (TextView) headerView.findViewById(R.id.tv_email);
+    User user = App.getUser();
+    if (user != null) {
+      ImageLoader.loadAsCircle(mImgAvatar, R.drawable.ic_default_photo, user.getAvatarUrl());
+      mTvEmail.setText(user.getEmail());
+    } else {
+      mImgAvatar.setImageResource(R.drawable.ic_default_photo);
+      mTvEmail.setText(null);
+    }
 
     // @BindView 找不到
     mDrawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
@@ -98,13 +126,28 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     viewPager.setAdapter(
         new MainPagerAdapter(getSupportFragmentManager(), fragmentList, titleList));
     viewPager.setOffscreenPageLimit(fragmentList.size());
+  }
 
+  @Subscribe(threadMode = ThreadMode.MAIN) public void onMessageEvent(Event event) {
+    switch (event.getEventType()) {
+      case TYPE_LOGIN: {
+        User user = App.getUser();
+        ImageLoader.loadAsCircle(mImgAvatar, R.drawable.ic_default_photo, user.getAvatarUrl());
+        mTvEmail.setText(user.getEmail());
+        break;
+      }
+      case TYPE_LOGOUT: {
+        mImgAvatar.setImageResource(R.drawable.ic_default_photo);
+        mTvEmail.setText(null);
+        break;
+      }
+    }
   }
 
   @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.id_toolbar_right_img: {
-        UIUtil.openActivity(this, CollectActivity.class);
+        Actions.gotoCollections(this);
         break;
       }
     }
@@ -118,11 +161,27 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     }
   }
 
-  @Override public boolean onNavigationItemSelected(MenuItem item) {
+  @Override public boolean onNavigationItemSelected(@NonNull MenuItem item) {
     int id = item.getItemId();
     switch (id) {
       case R.id.nav_about: {
-        toast("点击about");
+        Actions.gotoAbout(this);
+        break;
+      }
+      case R.id.nav_account: {
+        if (CommonUtils.canEdit()) {
+          Actions.gotoUserInfo(this, App.getUser());
+        } else {
+          Actions.gotoLogin(this);
+        }
+        break;
+      }
+      case R.id.nav_my_stars: {
+        if (CommonUtils.canBrowsing()) {
+          Actions.gotoMineStars(this);
+        } else {
+          Actions.gotoLogin(this, REQUEST_STARS_LOGIN);
+        }
         break;
       }
     }
@@ -130,4 +189,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     return true;
   }
 
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == REQUEST_STARS_LOGIN && resultCode == RESULT_OK) {
+      Actions.gotoMineStars(this);
+    }
+  }
 }

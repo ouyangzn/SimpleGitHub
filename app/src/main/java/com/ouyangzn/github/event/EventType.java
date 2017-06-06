@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.data;
-
-import com.ouyangzn.github.bean.localbean.CollectedRepo;
-import java.util.List;
+package com.ouyangzn.github.event;
 
 /**
- * Created by ouyangzn on 2016/9/30.<br/>
- * Description：
+ * Created by ouyangzn on 2017/6/6.<br/>
+ * Description：eventBus事件类型
  */
-public interface ICollectData {
-
-  List<CollectedRepo> queryCollectRepo();
+public interface EventType {
+  /** 登录 */
+  String TYPE_LOGIN = "login";
+  /** 退出登录 */
+  String TYPE_LOGOUT = "logout";
 }

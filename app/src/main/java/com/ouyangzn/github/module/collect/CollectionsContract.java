@@ -24,25 +24,25 @@ import java.util.List;
  * Created by ouyangzn on 2016/9/27.<br/>
  * Description：
  */
-public class CollectContract {
+public class CollectionsContract {
 
-  interface ICollectView extends BaseView<ICollectPresenter> {
+  interface ICollectionsView extends BaseView<ICollectionsPresenter> {
 
     void showCollect(List<CollectedRepo> repoList);
 
-    void showErrorOnQueryFailure();
+    void showErrorOnQueryFailure(String error);
 
     void showCollectQueryByKey(List<CollectedRepo> repoList);
 
-    void showQueryByKeyFailure();
+    void showQueryByKeyFailure(String error);
 
-    void showCollectionCanceled();
+    void showCollectionCanceled(CollectedRepo repo);
 
     void showCollectionCancelFailure();
 
   }
 
-  abstract static class ICollectPresenter extends BasePresenter<ICollectView> {
+  abstract static class ICollectionsPresenter extends BasePresenter<ICollectionsView> {
 
     /**
      * 查询收藏的项目
@@ -52,7 +52,7 @@ public class CollectContract {
      */
     public abstract void queryCollect(int page, int countEachPage);
 
-    public abstract void queryByKey(String key);
+    public abstract void queryByKey(String key, int page, int limit);
 
     public abstract void cancelCollectRepo(CollectedRepo repo);
   }

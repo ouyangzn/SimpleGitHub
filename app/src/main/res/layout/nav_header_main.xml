@@ -15,15 +15,15 @@
       android:id="@+id/img_photo"
       android:layout_width="60dp"
       android:layout_height="60dp"
-      android:src="@drawable/ic_photo"
+      android:src="@drawable/ic_default_photo"
       />
   <TextView
       android:id="@+id/tv_email"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:paddingTop="@dimen/padding_normal"
-      android:paddingBottom="@dimen/padding_normal"
       android:gravity="center_vertical"
+      android:paddingBottom="@dimen/padding_normal"
+      android:paddingTop="@dimen/padding_normal"
       android:text="ouyangzhaoneng@gmail.com"
       />
 </LinearLayout>

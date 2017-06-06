@@ -36,4 +36,8 @@
     <item>复制网址</item>
     <item>取消收藏</item>
   </array>
+  <array name="long_click_stars_dialog_item">
+    <item>复制网址</item>
+    <item>收藏</item>
+  </array>
 </resources>

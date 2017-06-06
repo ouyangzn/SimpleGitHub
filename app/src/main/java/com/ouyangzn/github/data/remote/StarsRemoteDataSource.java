@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.utils;
+package com.ouyangzn.github.data.remote;
 
-import rx.functions.Action1;
+import com.ouyangzn.github.bean.apibean.Repository;
+import com.ouyangzn.github.data.IStarsDataSource;
+import com.ouyangzn.github.network.Api;
+import java.util.List;
+import rx.Observable;
 
 /**
- * Created by ouyangzn on 2016/9/30.<br/>
+ * Created by ouyangzn on 2017/5/25.<br/>
  * Description：
  */
-public class RxJavaUtil {
-
-  private static final String TAG = RxJavaUtil.class.getSimpleName();
-
-  public static <T> Action1<T> discardResult() {
-    return t -> Log.w(TAG,
-        "----------discardResult, result = " + (t == null ? "null" : t.toString()));
+public class StarsRemoteDataSource implements IStarsDataSource {
+  @Override public Observable<List<Repository>> queryMineStars(int page, int limit) {
+    return Api.getUserApi().getStarred(page, limit);
   }
 
-  public static Action1<Throwable> discardError() {
-    return e -> Log.w(TAG, "----------discardError: ", e);
+  @Override
+  public Observable<List<Repository>> querySomeoneStars(String username, int page, int limit) {
+    return Api.getUserApi().getStarred(username, page, limit);
   }
 }
