@@ -30,10 +30,13 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import butterknife.ButterKnife;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
+import com.ouyangzn.github.bean.apibean.User;
+import com.ouyangzn.github.event.Event;
 import com.ouyangzn.github.module.common.MainPagerAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
@@ -45,6 +48,12 @@ import com.ouyangzn.github.utils.UiUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import static com.ouyangzn.github.event.EventType.TYPE_LOGIN;
+import static com.ouyangzn.github.event.EventType.TYPE_LOGOUT;
 
 public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -52,6 +61,8 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   private final int REQUEST_STARS_LOGIN = 1;
   private DrawerLayout mDrawerLayout;
   private NavigationView mNavView;
+  private ImageView mImgAvatar;
+  private TextView mTvEmail;
 
   @Override protected int getContentView() {
     return R.layout.activity_main;
@@ -62,6 +73,12 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   }
 
   @Override protected void initData() {
+    EventBus.getDefault().register(this);
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    EventBus.getDefault().unregister(this);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
@@ -75,8 +92,17 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
     mNavView.setNavigationItemSelectedListener(this);
-    ImageView img_photo = (ImageView) mNavView.getHeaderView(0).findViewById(R.id.img_photo);
-    ImageLoader.loadAsCircle(img_photo, R.drawable.ic_photo);
+    View headerView = mNavView.getHeaderView(0);
+    mImgAvatar = (ImageView) headerView.findViewById(R.id.img_photo);
+    mTvEmail = (TextView) headerView.findViewById(R.id.tv_email);
+    User user = App.getUser();
+    if (user != null) {
+      ImageLoader.loadAsCircle(mImgAvatar, R.drawable.ic_default_photo, user.getAvatarUrl());
+      mTvEmail.setText(user.getEmail());
+    } else {
+      mImgAvatar.setImageResource(R.drawable.ic_default_photo);
+      mTvEmail.setText(null);
+    }
 
     // @BindView 找不到
     mDrawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
@@ -100,7 +126,22 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     viewPager.setAdapter(
         new MainPagerAdapter(getSupportFragmentManager(), fragmentList, titleList));
     viewPager.setOffscreenPageLimit(fragmentList.size());
+  }
 
+  @Subscribe(threadMode = ThreadMode.MAIN) public void onMessageEvent(Event event) {
+    switch (event.getEventType()) {
+      case TYPE_LOGIN: {
+        User user = App.getUser();
+        ImageLoader.loadAsCircle(mImgAvatar, R.drawable.ic_default_photo, user.getAvatarUrl());
+        mTvEmail.setText(user.getEmail());
+        break;
+      }
+      case TYPE_LOGOUT: {
+        mImgAvatar.setImageResource(R.drawable.ic_default_photo);
+        mTvEmail.setText(null);
+        break;
+      }
+    }
   }
 
   @Override public void onClick(View v) {
@@ -124,7 +165,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     int id = item.getItemId();
     switch (id) {
       case R.id.nav_about: {
-        toast("点击about");
+        Actions.gotoAbout(this);
         break;
       }
       case R.id.nav_account: {

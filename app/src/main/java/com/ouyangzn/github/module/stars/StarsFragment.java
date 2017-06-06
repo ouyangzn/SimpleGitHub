@@ -85,6 +85,8 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
   }
 
   @Override protected void initView(View parent) {
+    mToolbar.setNavigationIcon(R.drawable.ic_back_white);
+    mToolbar.setNavigationOnClickListener(v -> getActivity().onBackPressed());
     UiUtils.setCenterTitle(mToolbar, R.string.title_stars);
     Context context = getContext();
     mRefreshLayout.setOnRefreshListener(() -> queryMineStars(true));

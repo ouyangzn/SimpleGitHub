@@ -3,6 +3,7 @@
   <string name="title_collect">收藏</string>
   <string name="title_stars">Stars</string>
   <string name="title_user_info">用户信息</string>
+  <string name="title_about">关于作者</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
   <string name="action_settings">Settings</string>

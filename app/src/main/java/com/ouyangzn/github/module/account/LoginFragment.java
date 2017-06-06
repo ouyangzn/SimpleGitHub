@@ -92,12 +92,13 @@ public class LoginFragment extends BaseFragment {
                       false);
             })
             .subscribeOn(AndroidSchedulers.mainThread())
-            .doOnNext(user -> DialogUtils.dismissProgressDialog(mProgressDialog))
             .subscribe(user -> {
+              DialogUtils.dismissProgressDialog(mProgressDialog);
               App.setAuthorization(username, password);
               App.onLogin(user);
               finishSelf();
             }, error -> {
+              DialogUtils.dismissProgressDialog(mProgressDialog);
               Log.e(TAG, "登录失败：", error);
               toast(R.string.error_login_failure);
             });

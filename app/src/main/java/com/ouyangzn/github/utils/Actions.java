@@ -23,6 +23,7 @@ import android.support.v4.app.Fragment;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BaseFragmentActivity;
 import com.ouyangzn.github.bean.apibean.User;
+import com.ouyangzn.github.module.account.AboutFragment;
 import com.ouyangzn.github.module.account.LoginFragment;
 import com.ouyangzn.github.module.account.UserInfoFragment;
 import com.ouyangzn.github.module.collect.CollectionsFragment;
@@ -129,6 +130,15 @@ public class Actions {
    */
   public static void gotoCollections(Activity activity) {
     startActivity(activity, CollectionsFragment.class);
+  }
+
+  /**
+   * 跳转到关于
+   *
+   * @param activity 当前所在的activity对象
+   */
+  public static void gotoAbout(Activity activity) {
+    startActivity(activity, AboutFragment.class);
   }
 
   /**

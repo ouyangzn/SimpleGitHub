@@ -15,6 +15,7 @@
 
 package com.ouyangzn.github.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Paint;
 import android.support.annotation.StringRes;
@@ -91,6 +92,17 @@ public class UiUtils {
     img.setLayoutParams(params);
     toolbar.addView(img);
     return img;
+  }
+
+  /**
+   * 添加返回键，点击后会调用activity的onBackPressed
+   *
+   * @param toolbar Toolbar
+   * @param activity Activity
+   */
+  public static void addWhiteBackBtn(Toolbar toolbar, Activity activity) {
+    toolbar.setNavigationIcon(R.drawable.ic_back_white);
+    toolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
   }
 
   public static TextView setCenterTitle(Toolbar toolbar, @StringRes int resId) {

@@ -23,12 +23,17 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.TypeAdapters;
 import com.ouyangzn.github.bean.apibean.User;
 import com.ouyangzn.github.db.DaoHelper;
+import com.ouyangzn.github.event.Event;
+import com.ouyangzn.github.event.EventBusIndex;
 import com.ouyangzn.github.json.DoubleAdapter;
 import com.ouyangzn.github.json.IntegerAdapter;
 import com.ouyangzn.github.json.LongAdapter;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.utils.SpUtils;
+import org.greenrobot.eventbus.EventBus;
 
+import static com.ouyangzn.github.event.EventType.TYPE_LOGIN;
+import static com.ouyangzn.github.event.EventType.TYPE_LOGOUT;
 import static com.ouyangzn.github.utils.SpUtils.KEY_AUTHORIZATION;
 import static com.ouyangzn.github.utils.SpUtils.KEY_USER;
 import static com.ouyangzn.github.utils.SpUtils.KEY_USERNAME;
@@ -63,11 +68,13 @@ public class App extends Application {
 
   public static void onLogin(User user) {
     setUser(user);
+    EventBus.getDefault().post(new Event(TYPE_LOGIN));
   }
 
   public static void onLogout() {
     clearAuthorization();
     setUser(null);
+    EventBus.getDefault().post(new Event(TYPE_LOGOUT));
   }
 
   public static User getUser() {
@@ -119,6 +126,11 @@ public class App extends Application {
     sApp = this;
     ImageLoader.init(sApp);
     DaoHelper.initDao(sApp);
+    EventBus.builder()
+        .addIndex(new EventBusIndex())
+        .logNoSubscriberMessages(BuildConfig.LOG_DEBUG)
+        .throwSubscriberException(BuildConfig.LOG_DEBUG)
+        .installDefaultEventBus();
   }
 
 }

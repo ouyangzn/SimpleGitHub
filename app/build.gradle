@@ -18,6 +18,7 @@ android {
     targetSdkVersion rootProject.ext.targetSdkVersion
     versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
     versionName "1.0.0"
+
   }
   Properties properties = new Properties()
   properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -67,6 +68,11 @@ greendao {
   schemaVersion 1
   daoPackage "com.ouyangzn.github.dao"
 }
+apt {
+  arguments {
+    eventBusIndex "com.ouyangzn.github.event.EventBusIndex"
+  }
+}
 
 dependencies {
   compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -107,6 +113,9 @@ dependencies {
   apt "com.jakewharton:butterknife-compiler:${BUTTERKNIFE_COMPILER_VERSION}"
   // greendao
   compile "org.greenrobot:greendao:${GREENDAO_VERSION}"
+  // eventBus
+  compile "org.greenrobot:eventbus:${EVENT_BUS_VERSION}"
+  apt "org.greenrobot:eventbus-annotation-processor:${EVENTBUS_ANNOTATION_PROCESSOR_VERSION}"
 
   // chrome调试与realm的调试
   debugCompile "com.facebook.stetho:stetho:${STETHO_VERSION}"
