@@ -12,6 +12,15 @@
 # limitations under the License.
 
 language: android
+
+jdk:
+  - oraclejdk8
+
+branches:
+  only:
+  - master
+  - develop
+
 android:
   components:
     # Uncomment the lines below if you want to
@@ -34,7 +43,6 @@ android:
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
     - sys-img-armeabi-v7a-android-22
-    - sys-img-armeabi-v7a-android-17
 
 before_install:
  - chmod +x gradlew
