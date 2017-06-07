@@ -49,7 +49,6 @@ android {
       minifyEnabled false
       shrinkResources false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-      buildConfigField "boolean", "LOG_DEBUG", "true"
       ndk {
         abiFilters "armeabi-v7a"
       }
@@ -59,7 +58,6 @@ android {
     //          shrinkResources true
     //          proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     //          signingConfig signingConfigs.release
-    //          buildConfigField "boolean", "LOG_DEBUG", "false"
     //          ndk {
     //            abiFilters "armeabi-v7a"
     //          }
