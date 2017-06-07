@@ -37,8 +37,9 @@ android {
         keyAlias properties.getProperty("key.alias")
         keyPassword properties.getProperty("key.password")
       } catch (ex) {
-        throw new InvalidUserDataException(
-            "You should define keystore.password、key.alias and key.password in local.properties.")
+        //        throw new InvalidUserDataException(
+        //            "You should define keystore.password、key.alias and key.password in local.properties.")
+        println "You should define keystore.password、key.alias and key.password in local.properties."
       }
     }
   }
