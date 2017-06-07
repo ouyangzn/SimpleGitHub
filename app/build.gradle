@@ -20,46 +20,58 @@ android {
     versionName "1.1.0"
 
   }
-  Properties properties = new Properties()
-  properties.load(project.rootProject.file('local.properties').newDataInputStream())
+  //  Properties properties = new Properties()
+  //  try {
+  //    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+  //  } catch (ex) {
+  //    println "no file \"local.properties\""
+  //  }
   signingConfigs {
     release {
       try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
         storeFile file("../appkey.jks")
         storePassword properties.getProperty("keystore.password")
         keyAlias properties.getProperty("key.alias")
         keyPassword properties.getProperty("key.password")
       } catch (ex) {
-        throw new InvalidUserDataException(
-            "You should define keystore.password、key.alias and key.password in local.properties.")
+        //        throw new InvalidUserDataException(
+        //            "You should define keystore.password、key.alias and key.password in local.properties.")
+        println "You should define keystore.password、key.alias and key.password in local.properties."
       }
     }
   }
 
   buildTypes {
-    release {
-      minifyEnabled true
-      shrinkResources true
-      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-      signingConfig signingConfigs.release
-      buildConfigField "boolean", "LOG_DEBUG", "false"
-      ndk {
-        abiFilters "armeabi-v7a"
-      }
-    }
     debug {
-      minifyEnabled true
-      shrinkResources true
+      minifyEnabled false
+      shrinkResources false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-      buildConfigField "boolean", "LOG_DEBUG", "true"
       ndk {
         abiFilters "armeabi-v7a"
       }
     }
+    //        release_signed {
+    //          minifyEnabled true
+    //          shrinkResources true
+    //          proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    //          signingConfig signingConfigs.release
+    //          ndk {
+    //            abiFilters "armeabi-v7a"
+    //          }
+    //        }
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
+  }
+  lintOptions {
+    checkReleaseBuilds true
+    abortOnError false
+    disable 'InvalidPackage'
+    lintConfig file('lint.xml')
   }
 }
 

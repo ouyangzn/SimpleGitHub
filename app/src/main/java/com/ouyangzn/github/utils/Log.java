@@ -39,56 +39,56 @@ public class Log {
     }
 
     /** verbose和debug等级的日志是否要打印 */
-//    public static boolean LOG_DEBUG = BuildConfig.LOG_DEBUG;
+    //    public static boolean DEBUG = BuildConfig.DEBUG;
     
 
     public static void v(String tag, String msg) {
-        if (BuildConfig.LOG_DEBUG && LOG_LEVER <= VERBOSE)
+        if (BuildConfig.DEBUG && LOG_LEVER <= VERBOSE)
             android.util.Log.v(tag, msg);
     }
     
     public static void v(String tag, String msg, Throwable tr) {
-        if (BuildConfig.LOG_DEBUG && LOG_LEVER <= VERBOSE)
+        if (BuildConfig.DEBUG && LOG_LEVER <= VERBOSE)
             android.util.Log.v(tag, msg, tr);
     }
 
     public static void d(String tag, String msg) {
-        if (BuildConfig.LOG_DEBUG && LOG_LEVER <= DEBUG)
+        if (BuildConfig.DEBUG && LOG_LEVER <= DEBUG)
             android.util.Log.d(tag, msg);
     }
     
     public static void d(String tag, String msg, Throwable tr) {
-        if (BuildConfig.LOG_DEBUG && LOG_LEVER <= DEBUG)
+        if (BuildConfig.DEBUG && LOG_LEVER <= DEBUG)
             android.util.Log.d(tag, msg, tr);
     }
     
     public static void i(String tag, String msg) {
-        if (LOG_LEVER <= INFO || BuildConfig.LOG_DEBUG)
+        if (LOG_LEVER <= INFO || BuildConfig.DEBUG)
             android.util.Log.i(tag, msg);
     }
     
     public static void i(String tag, String msg, Throwable tr) {
-        if (LOG_LEVER <= INFO || BuildConfig.LOG_DEBUG)
+        if (LOG_LEVER <= INFO || BuildConfig.DEBUG)
             android.util.Log.i(tag, msg, tr);
     }
 
     public static void w(String tag, String msg) {
-        if (LOG_LEVER <= WARN || BuildConfig.LOG_DEBUG)
+        if (LOG_LEVER <= WARN || BuildConfig.DEBUG)
             android.util.Log.w(tag, msg);
     }
     
     public static void w(String tag, String msg, Throwable tr) {
-        if (LOG_LEVER <= WARN || BuildConfig.LOG_DEBUG)
+        if (LOG_LEVER <= WARN || BuildConfig.DEBUG)
             android.util.Log.w(tag, msg, tr);
     }
 
     public static void e(String tag, String msg) {
-        if (LOG_LEVER <= ERROR || BuildConfig.LOG_DEBUG)
+        if (LOG_LEVER <= ERROR || BuildConfig.DEBUG)
             android.util.Log.e(tag, msg);
     }
     
     public static void e(String tag, String msg, Throwable tr) {
-        if (LOG_LEVER <= ERROR || BuildConfig.LOG_DEBUG)
+        if (LOG_LEVER <= ERROR || BuildConfig.DEBUG)
             android.util.Log.e(tag, msg, tr);
     }
 

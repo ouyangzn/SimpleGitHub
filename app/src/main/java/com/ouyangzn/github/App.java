@@ -128,8 +128,8 @@ public class App extends Application {
     DaoHelper.initDao(sApp);
     EventBus.builder()
         .addIndex(new EventBusIndex())
-        .logNoSubscriberMessages(BuildConfig.LOG_DEBUG)
-        .throwSubscriberException(BuildConfig.LOG_DEBUG)
+        .logNoSubscriberMessages(BuildConfig.DEBUG)
+        .throwSubscriberException(BuildConfig.DEBUG)
         .installDefaultEventBus();
   }
 
