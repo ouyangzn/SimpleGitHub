@@ -20,11 +20,18 @@ android {
     versionName "1.1.0"
 
   }
-  Properties properties = new Properties()
-  properties.load(project.rootProject.file('local.properties').newDataInputStream())
+  //  Properties properties = new Properties()
+  //  try {
+  //    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+  //  } catch (ex) {
+  //    println "no file \"local.properties\""
+  //  }
   signingConfigs {
     release {
       try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
         storeFile file("../appkey.jks")
         storePassword properties.getProperty("keystore.password")
         keyAlias properties.getProperty("key.alias")
@@ -48,8 +55,8 @@ android {
       }
     }
     debug {
-      minifyEnabled true
-      shrinkResources true
+      minifyEnabled false
+      shrinkResources false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
       buildConfigField "boolean", "LOG_DEBUG", "true"
       ndk {
