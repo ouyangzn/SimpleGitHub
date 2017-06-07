@@ -57,9 +57,9 @@ before_install:
   - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
 
 before_script:
-  - echo n | android create avd --force --name android-24_armeabi-v7a --target android-24 --abi armeabi-v7a --tag default
+  - echo n | android create avd --force --name android-22_armeabi-v7a --target android-22 --abi armeabi-v7a --tag default
   - pushd ${ANDROID_HOME}/tools
-  - emulator @android-24_armeabi-v7a -no-window -gpu off &
+  - emulator @android-22_armeabi-v7a -no-window -gpu off &
   - popd
   - android-wait-for-emulator
   - adb shell wm dismiss-keyguard
