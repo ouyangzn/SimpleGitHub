@@ -67,28 +67,21 @@ public class UiUtils {
   }
 
   /**
-   * 给toolbar添加一张图片
+   * 给toolbar右边添加一个按钮
    *
    * @param toolbar toolbar
    * @param resId 图片资源id
-   * @param gravity 添加的位置，对应{@link Gravity#LEFT}、{@link Gravity#RIGHT}
-   * @param margin 图片的四周边距{@link Toolbar.LayoutParams#setMargins(int, int, int, int)}
    * @return 被添加的ImageView
    */
-  public static ImageView addImage2Toolbar(Toolbar toolbar, int resId, int gravity, int[] margin) {
+  public static ImageView addToolbarRightBtn(Toolbar toolbar, int resId) {
     Context context = toolbar.getContext();
-    ImageView img = new ImageView(context);
+    ImageView img = new ImageView(context, null,
+        android.support.v7.appcompat.R.attr.toolbarNavigationButtonStyle);
     img.setImageResource(resId);
     img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     Toolbar.LayoutParams params = new Toolbar.LayoutParams(Toolbar.LayoutParams.WRAP_CONTENT,
         Toolbar.LayoutParams.WRAP_CONTENT);
-    params.gravity = gravity | Gravity.CENTER;
-    try {
-      params.setMargins(margin[0], margin[1], margin[2], margin[3]);
-    } catch (Exception e) {
-      int margin_15 = ScreenUtils.dp2px(context, 15);
-      params.setMargins(margin_15, 0, margin_15, 0);
-    }
+    params.gravity = Gravity.END | Gravity.CENTER;
     img.setLayoutParams(params);
     toolbar.addView(img);
     return img;

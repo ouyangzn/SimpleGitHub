@@ -27,6 +27,7 @@ import com.ouyangzn.github.module.account.AboutFragment;
 import com.ouyangzn.github.module.account.LoginFragment;
 import com.ouyangzn.github.module.account.UserInfoFragment;
 import com.ouyangzn.github.module.collect.CollectionsFragment;
+import com.ouyangzn.github.module.search.SearchFragment;
 import com.ouyangzn.github.module.stars.StarsFragment;
 
 import static com.ouyangzn.github.module.account.UserInfoFragment.EXTRA_KEY_USER;
@@ -36,6 +37,10 @@ import static com.ouyangzn.github.module.account.UserInfoFragment.EXTRA_KEY_USER
  * Description：ui跳转工具类
  */
 public class Actions {
+
+  public static void gotoSearch(Activity activity) {
+    startActivity(activity, SearchFragment.class);
+  }
 
   /**
    * 跳转到用户信息

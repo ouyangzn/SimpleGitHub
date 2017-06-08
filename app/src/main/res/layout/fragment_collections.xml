@@ -24,7 +24,7 @@
         app:inputType="text"
         app:input_hint="@string/hint_input_keyword"
         app:input_imeOptions="actionSearch"
-        app:singleLine="false"
+        app:singleLine="true"
         />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_collections"

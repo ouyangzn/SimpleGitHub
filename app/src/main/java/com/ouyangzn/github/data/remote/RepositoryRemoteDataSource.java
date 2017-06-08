@@ -53,8 +53,8 @@ public class RepositoryRemoteDataSource implements IRepositoryDataSource {
   }
 
   @Override
-  public Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int perPage, int page) {
-    return queryByKeyword(factor, GitHub.SORT_STARS, GitHub.ORDER_DESC, perPage, page);
+  public Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int limit, int page) {
+    return queryByKeyword(factor, GitHub.SORT_STARS, GitHub.ORDER_DESC, limit, page);
   }
 
   @Override public Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int page) {

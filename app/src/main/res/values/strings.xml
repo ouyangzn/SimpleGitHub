@@ -1,5 +1,6 @@
 <resources>
-  <string name="app_name">open source</string>
+  <string name="app_name">简易GitHub</string>
+  <string name="title_search">搜索</string>
   <string name="title_collect">收藏</string>
   <string name="title_stars">Stars</string>
   <string name="title_user_info">用户信息</string>
@@ -12,6 +13,7 @@
   <string name="login">登录</string>
   <string name="confirm">确定</string>
   <string name="cancel">取消</string>
+  <string name="nav_collections">收藏</string>
   <string name="nav_about">关于</string>
   <string name="nav_username">账号</string>
   <string name="nav_my_stars">我的stars</string>

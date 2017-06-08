@@ -14,7 +14,8 @@
   ~ limitations under the License.
   -->
 <resources>
-  <string name="app_name">open source</string>
+  <string name="app_name">Simple GitHub</string>
+  <string name="title_search">Search</string>
   <string name="title_collect">Collected</string>
   <string name="title_stars">Stars</string>
   <string name="title_user_info">Information</string>
@@ -27,9 +28,10 @@
   <string name="login">login</string>
   <string name="confirm">Confirm</string>
   <string name="cancel">Cancel</string>
+  <string name="nav_collections">Collections</string>
   <string name="nav_about">About</string>
-  <string name="nav_username">username</string>
-  <string name="nav_my_stars">my stars</string>
+  <string name="nav_username">Account</string>
+  <string name="nav_my_stars">My Stars</string>
   <string name="language_all">All</string>
   <string name="language_java">Java</string>
   <string name="language_oc">Object-C</string>

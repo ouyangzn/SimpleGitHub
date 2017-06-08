@@ -2,6 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
   <group android:checkableBehavior="none">
     <item
+        android:id="@+id/nav_collections"
+        android:title="@string/nav_collections"/>
+    <item
         android:id="@+id/nav_account"
         android:title="@string/nav_username"/>
     <item

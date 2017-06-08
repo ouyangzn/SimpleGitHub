@@ -38,7 +38,7 @@ public interface IRepositoryDataSource {
   Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, String sort, String order,
       int perPage, int page);
 
-  Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int perPage, int page);
+  Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int limit, int page);
 
   Observable<RepoSearchResult> queryByKeyword(SearchFactor factor, int page);
 

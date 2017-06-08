@@ -59,7 +59,7 @@ public class RxJavaUtils {
   }
 
   /**
-   * 包裹成subscribeOn子线程，observeOn主线程, activity销毁时取消
+   * 包裹成subscribeOn子线程，observeOn主线程, Fragment销毁时取消
    *
    * @param observable Observable
    * @param <T> T
@@ -70,7 +70,7 @@ public class RxJavaUtils {
       LifecycleProvider<FragmentEvent> provider) {
     return observable.subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .compose(provider.bindUntilEvent(FragmentEvent.DESTROY));
+        .compose(provider.<T>bindUntilEvent(FragmentEvent.DESTROY));
   }
 
   /**

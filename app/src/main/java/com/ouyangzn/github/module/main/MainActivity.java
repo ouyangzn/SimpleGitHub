@@ -26,7 +26,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -43,7 +42,6 @@ import com.ouyangzn.github.module.main.MainContract.IMainView;
 import com.ouyangzn.github.utils.Actions;
 import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.ImageLoader;
-import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.utils.UiUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,11 +82,9 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override protected void initView(Bundle savedInstanceState) {
     Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
     UiUtils.setCenterTitle(toolbar, R.string.app_name);
-    ImageView collectImg =
-        UiUtils.addImage2Toolbar(toolbar, R.drawable.selector_collect, Gravity.END,
-            new int[] { 0, 0, ScreenUtils.dp2px(mContext, 15), 0 });
-    collectImg.setId(R.id.id_toolbar_right_img);
-    collectImg.setOnClickListener(this);
+    ImageView imgSearch = UiUtils.addToolbarRightBtn(toolbar, R.drawable.selector_search_toolbar);
+    imgSearch.setId(R.id.id_toolbar_right_img);
+    imgSearch.setOnClickListener(this);
     // @BindView 找不到，NavigationView下的view直接find也找不到
     mNavView = ButterKnife.findById(this, R.id.nav_view);
     mNavView.setNavigationItemSelectedListener(this);
@@ -147,7 +143,7 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
   @Override public void onClick(View v) {
     switch (v.getId()) {
       case R.id.id_toolbar_right_img: {
-        Actions.gotoCollections(this);
+        Actions.gotoSearch(this);
         break;
       }
     }
@@ -166,6 +162,10 @@ public class MainActivity extends BaseActivity<IMainView, IMainPresenter>
     switch (id) {
       case R.id.nav_about: {
         Actions.gotoAbout(this);
+        break;
+      }
+      case R.id.nav_collections: {
+        Actions.gotoCollections(this);
         break;
       }
       case R.id.nav_account: {

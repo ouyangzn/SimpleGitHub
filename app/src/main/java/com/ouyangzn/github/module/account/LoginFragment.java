@@ -29,6 +29,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ouyangzn.github.App;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
@@ -39,6 +40,7 @@ import com.ouyangzn.github.utils.Log;
 import com.ouyangzn.github.utils.RxJavaUtils;
 import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.view.InputEdit;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
 /**
@@ -49,6 +51,7 @@ public class LoginFragment extends BaseFragment {
 
   @BindView(R.id.input_login_username) InputEdit mInputUsername;
   @BindView(R.id.input_login_password) InputEdit mInputPassword;
+  @BindView(R.id.btn_login) Button mBtnLogin;
   private ProgressDialog mProgressDialog;
 
   @Override protected Status getCurrentStatus() {
@@ -65,6 +68,11 @@ public class LoginFragment extends BaseFragment {
 
   @Override protected void initView(View parent) {
     requestNoToolbar();
+    Observable.combineLatest(RxTextView.textChanges(mInputUsername.getEditText()),
+        RxTextView.textChanges(mInputPassword.getEditText()),
+        // 表示匿名类的方法有2个参数，一个返回值，返回：!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password))
+        (username, password) -> !TextUtils.isEmpty(username) && !TextUtils.isEmpty(password))
+        .subscribe(enable -> mBtnLogin.setEnabled(enable), error -> Log.e(TAG, "", error));
   }
 
   @Override public BasePresenter initPresenter() {
