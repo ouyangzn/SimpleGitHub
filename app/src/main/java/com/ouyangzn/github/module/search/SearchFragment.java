@@ -110,11 +110,10 @@ public class SearchFragment extends BaseFragment
     mRecyclerView.setAdapter(mAdapter);
   }
 
-  //protected final LifecycleProvider<FragmentEvent> mProvider =
-  //    NaviLifecycle.createFragmentLifecycleProvider(this);
   private void requestData() {
     RxJavaUtils.wrapFragment(
         mDataSource.queryByKeyword(mSearchFactor, mSearchFactor.limit, mSearchFactor.page),
+        // 不知道为什么，必须强转才能编译通过
         (LifecycleProvider<FragmentEvent>) mProvider)
         .doOnSubscribe(() -> mRefreshLayout.setRefreshing(true))
         .subscribeOn(AndroidSchedulers.mainThread())

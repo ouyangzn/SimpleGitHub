@@ -10,9 +10,16 @@
     <item name="android:editTextColor">@color/primary_text</item>
     <item name="android:textColorPrimary">@color/primary_text</item>
     <item name="android:textSize">@dimen/font_normal</item>
+    <item name="android:windowAnimationStyle">@style/ActivityLoadAnimation</item>
+    <!-- 侧滑菜单样式 -->
+    <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
   </style>
 
-  <style name="AppTheme.NoActionBar">
+  <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
+    <item name="color">@color/white</item>
+  </style>
+
+  <style name="AppTheme.NoActionBar" parent="AppTheme">
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
   </style>
@@ -35,5 +42,14 @@
   <style name="DialogAnimation" parent="android:Animation">
     <item name="android:windowEnterAnimation">@anim/anim_scale_in_dialog</item>
     <item name="android:windowExitAnimation">@anim/anim_scale_out_dialog</item>
+  </style>
+  <!-- activity跳转动画时间 -->
+  <integer name="anim_activity_in_out_duration">@android:integer/config_shortAnimTime</integer>
+
+  <style name="ActivityLoadAnimation" parent="@android:style/Animation.Activity">
+    <item name="android:activityOpenEnterAnimation">@anim/slide_in_right_activity</item>
+    <item name="android:activityOpenExitAnimation">@anim/slide_out_left_activity</item>
+    <item name="android:activityCloseEnterAnimation">@anim/slide_in_left_activity</item>
+    <item name="android:activityCloseExitAnimation">@anim/slide_out_right_activity</item>
   </style>
 </resources>

@@ -24,6 +24,5 @@
       android:gravity="center_vertical"
       android:paddingBottom="@dimen/padding_normal"
       android:paddingTop="@dimen/padding_normal"
-      android:text="ouyangzhaoneng@gmail.com"
       />
 </LinearLayout>

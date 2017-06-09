@@ -18,14 +18,7 @@ android {
     targetSdkVersion rootProject.ext.targetSdkVersion
     versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionHotfix
     versionName "1.1.0"
-
   }
-  //  Properties properties = new Properties()
-  //  try {
-  //    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-  //  } catch (ex) {
-  //    println "no file \"local.properties\""
-  //  }
   signingConfigs {
     release {
       try {
@@ -53,15 +46,15 @@ android {
         abiFilters "armeabi-v7a"
       }
     }
-    //        release_signed {
-    //          minifyEnabled true
-    //          shrinkResources true
-    //          proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-    //          signingConfig signingConfigs.release
-    //          ndk {
-    //            abiFilters "armeabi-v7a"
-    //          }
-    //        }
+    release_signed {
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
+      ndk {
+        abiFilters "armeabi-v7a"
+      }
+    }
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
