@@ -51,5 +51,7 @@ public class CommonConstants {
     public static final int LIMIT_20 = 20;
     /** 分页--每页10条数据 */
     public static final int LIMIT_10 = 10;
+    /** 默认页码-1 */
+    public static final int PAGE_FIRST = 1;
   }
 }

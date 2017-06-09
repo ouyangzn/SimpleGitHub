@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.module.common;
+package com.ouyangzn.github.module.stars;
 
-import android.content.Context;
 import android.widget.ImageView;
 import com.ouyangzn.github.R;
-import com.ouyangzn.github.bean.localbean.CollectedRepo;
-import com.ouyangzn.github.bean.localbean.CollectedRepoOwner;
+import com.ouyangzn.github.bean.apibean.Repository;
+import com.ouyangzn.github.bean.apibean.User;
 import com.ouyangzn.github.utils.ImageLoader;
 import com.ouyangzn.github.view.CornerMarkText;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
@@ -30,20 +29,17 @@ import java.util.List;
  * Created by ouyangzn on 2016/9/6.<br/>
  * Description：
  */
-public class CollectAdapter extends BaseRecyclerViewAdapter<CollectedRepo> {
+public class StarsAdapter extends BaseRecyclerViewAdapter<Repository> {
 
-  private Context mContext;
-
-  public CollectAdapter(Context context, List<CollectedRepo> data) {
+  public StarsAdapter(List<Repository> data) {
     super(R.layout.item_repo, data);
-    this.mContext = context;
   }
 
-  @Override protected void convert(BaseViewHolder holder, CollectedRepo repo) {
+  @Override protected void convert(BaseViewHolder holder, Repository repo) {
     holder.setText(R.id.tv_project_name, repo.getFullName());
     holder.setText(R.id.tv_project_desc, repo.getDescription());
-    CollectedRepoOwner owner = repo.getOwner();
-    holder.setText(R.id.tv_author, owner.getLogin());
+    User owner = repo.getOwner();
+    holder.setText(R.id.tv_author, owner.getAuthorName());
     holder.setText(R.id.tv_stars, mContext.getString(R.string.stars, repo.getStargazersCount()));
     ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
     ImageLoader.load(photo, owner.getAvatarUrl());

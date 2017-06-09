@@ -30,7 +30,6 @@ import com.ouyangzn.github.base.LazyLoadFragment;
 import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
-import com.ouyangzn.github.module.common.RepositoryAdapter;
 import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.DialogUtils;
 import com.ouyangzn.github.utils.Log;
@@ -39,10 +38,13 @@ import com.ouyangzn.github.utils.UiUtils;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
 import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import static com.ouyangzn.github.module.main.MainContract.IMainView;
 import static com.ouyangzn.github.utils.Actions.openUrl;
+import static com.ouyangzn.github.utils.UiUtils.initRefreshLayoutColor;
+import static com.ouyangzn.github.utils.UiUtils.stopRefresh;
 
 /**
  * Created by ouyangzn on 2016/10/24.<br/>
@@ -98,7 +100,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
   @Override protected void lazyInitView(View parent) {
     search(false);
     requestNoToolbar();
-
+    initRefreshLayoutColor(mRefreshLayout);
     mRefreshLayout.setOnRefreshListener(() -> search(true));
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -175,7 +177,7 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void showErrorOnQueryData(String tips) {
     toast(tips);
-    stopRefresh();
+    stopRefresh(mRefreshLayout);
     if (mAdapter.isLoadingMore()) {
       switchStatus(Status.STATUS_NORMAL);
       mAdapter.loadMoreFailure();
@@ -186,15 +188,16 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void showQueryDataResult(RepoSearchResult result) {
     switchStatus(Status.STATUS_NORMAL);
-    stopRefresh();
+    stopRefresh(mRefreshLayout);
     mSearchFactor.page++;
-    boolean hasMore = result.getRepositories().size() == mSearchFactor.limit;
+    List<Repository> repoList = result.getRepositories();
+    boolean hasMore = repoList.size() == mSearchFactor.limit;
     mAdapter.setHasMore(hasMore);
     mAdapter.setLanguageVisible(CommonConstants.GitHub.LANG_ALL.equals(mSearchFactor.language));
     if (mAdapter.isLoadingMore()) {
-      mAdapter.loadMoreFinish(hasMore, result.getRepositories());
+      mAdapter.loadMoreFinish(hasMore, repoList);
     } else {
-      mAdapter.resetData(result.getRepositories());
+      mAdapter.resetData(repoList);
     }
   }
 
@@ -206,13 +209,4 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
     toast(R.string.error_collect_failure);
   }
 
-  @Override public void setLoadingIndicator(boolean isActive) {
-
-  }
-
-  private void stopRefresh() {
-    if (mRefreshLayout != null && mRefreshLayout.isRefreshing()) {
-      mRefreshLayout.setRefreshing(false);
-    }
-  }
 }

@@ -19,6 +19,7 @@ import com.ouyangzn.github.utils.Formatter;
 import java.util.Date;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_20;
+import static com.ouyangzn.github.base.CommonConstants.NormalCons.PAGE_FIRST;
 
 /**
  * Created by ouyangzn on 2016/9/14.<br/>
@@ -30,7 +31,7 @@ public class SearchFactor {
   /** 项目的语言 */
   public String language;
   /** 当前页，默认为1 */
-  public int page = 1;
+  public int page = PAGE_FIRST;
   /** 每页数据量 */
   public int limit = LIMIT_20;
   /** 项目创建时间 */

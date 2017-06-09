@@ -36,7 +36,6 @@ import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseActivity;
 import com.ouyangzn.github.bean.apibean.User;
 import com.ouyangzn.github.event.Event;
-import com.ouyangzn.github.module.common.MainPagerAdapter;
 import com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import com.ouyangzn.github.module.main.MainContract.IMainView;
 import com.ouyangzn.github.utils.Actions;

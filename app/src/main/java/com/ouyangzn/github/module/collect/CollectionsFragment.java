@@ -29,7 +29,6 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
-import com.ouyangzn.github.module.common.CollectAdapter;
 import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.DialogUtils;
 import com.ouyangzn.github.utils.ScreenUtils;
@@ -44,6 +43,7 @@ import rx.android.schedulers.AndroidSchedulers;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
 import static com.ouyangzn.github.utils.Actions.openUrl;
+import static com.ouyangzn.github.utils.UiUtils.initRefreshLayoutColor;
 
 /**
  * Created by ouyangzn on 2017/5/27.<br/>
@@ -107,6 +107,7 @@ public class CollectionsFragment extends
       return false;
     }).compose(mProvider.bindUntilEvent(FragmentEvent.DESTROY_VIEW)).subscribe();
 
+    initRefreshLayoutColor(mRefreshLayout);
     mRefreshLayout.setOnRefreshListener(() -> {
       // 下拉刷新的话清除搜索关键字
       String keyword = mSearchEdit.getInputText().trim();

@@ -27,34 +27,31 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
-import com.ouyangzn.github.base.BasePresenter;
+import com.ouyangzn.github.bean.apibean.RepoSearchResult;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.localbean.SearchFactor;
-import com.ouyangzn.github.data.IRepositoryDataSource;
-import com.ouyangzn.github.data.remote.RepositoryRemoteDataSource;
-import com.ouyangzn.github.module.common.SearchResultAdapter;
+import com.ouyangzn.github.module.search.SearchContract.ISearchPresenter;
+import com.ouyangzn.github.module.search.SearchContract.ISearchView;
 import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.DialogUtils;
-import com.ouyangzn.github.utils.Log;
-import com.ouyangzn.github.utils.RxJavaUtils;
 import com.ouyangzn.github.utils.ScreenUtils;
 import com.ouyangzn.github.utils.UiUtils;
 import com.ouyangzn.github.view.InputEdit;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
-import com.trello.rxlifecycle.LifecycleProvider;
-import com.trello.rxlifecycle.android.FragmentEvent;
 import java.util.ArrayList;
 import java.util.List;
-import rx.android.schedulers.AndroidSchedulers;
 
+import static com.ouyangzn.github.base.CommonConstants.NormalCons.PAGE_FIRST;
 import static com.ouyangzn.github.utils.Actions.openUrl;
+import static com.ouyangzn.github.utils.UiUtils.initRefreshLayoutColor;
+import static com.ouyangzn.github.utils.UiUtils.stopRefresh;
 
 /**
  * Created by ouyangzn on 2017/6/7.<br/>
  * Description：搜索
  */
-public class SearchFragment extends BaseFragment
-    implements BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
+public class SearchFragment extends BaseFragment<ISearchView, ISearchPresenter>
+    implements ISearchView, BaseRecyclerViewAdapter.OnRecyclerViewItemClickListener,
     BaseRecyclerViewAdapter.OnRecyclerViewItemLongClickListener,
     BaseRecyclerViewAdapter.OnLoadingMoreListener {
 
@@ -62,7 +59,6 @@ public class SearchFragment extends BaseFragment
   @BindView(R.id.recycler_search) RecyclerView mRecyclerView;
   @BindView(R.id.view_search) InputEdit mSearchEdit;
 
-  private IRepositoryDataSource mDataSource;
   private SearchFactor mSearchFactor;
   private SearchResultAdapter mAdapter;
 
@@ -74,8 +70,8 @@ public class SearchFragment extends BaseFragment
     return R.layout.fragment_search;
   }
 
-  @Override public BasePresenter initPresenter() {
-    return null;
+  @Override public ISearchPresenter initPresenter() {
+    return new SearchPresenter(getContext(), mProvider);
   }
 
   @Override public void onDestroyView() {
@@ -84,7 +80,6 @@ public class SearchFragment extends BaseFragment
   }
 
   @Override protected void initData(Bundle savedInstanceState) {
-    mDataSource = new RepositoryRemoteDataSource();
     mSearchFactor = new SearchFactor();
     mAdapter = new SearchResultAdapter(getContext(), new ArrayList<>(0));
     mAdapter.setOnRecyclerViewItemClickListener(this);
@@ -94,13 +89,14 @@ public class SearchFragment extends BaseFragment
 
   @Override protected void initView(View parent) {
     requestNoToolbar();
+    initRefreshLayoutColor(mRefreshLayout);
+    mRefreshLayout.setOnRefreshListener(() -> requestData(true));
     mSearchEdit.setOnEditorActionListener(event -> {
       if (event.actionId() == EditorInfo.IME_ACTION_SEARCH) {
         String keyword = mSearchEdit.getInputText().trim();
         if (TextUtils.isEmpty(keyword)) return;
-        mSearchFactor.page = 1;
         mSearchFactor.keyword = keyword;
-        requestData();
+        requestData(true);
         ScreenUtils.hideKeyBoard(mSearchEdit.getEditText());
       }
     });
@@ -108,40 +104,6 @@ public class SearchFragment extends BaseFragment
     mAdapter.setEmptyView(mInflater.inflate(R.layout.item_no_data, mRecyclerView, false));
     UiUtils.setRecyclerViewLoadMore(mAdapter, mRecyclerView);
     mRecyclerView.setAdapter(mAdapter);
-  }
-
-  private void requestData() {
-    RxJavaUtils.wrapFragment(
-        mDataSource.queryByKeyword(mSearchFactor, mSearchFactor.limit, mSearchFactor.page),
-        // 不知道为什么，必须强转才能编译通过
-        (LifecycleProvider<FragmentEvent>) mProvider)
-        .doOnSubscribe(() -> mRefreshLayout.setRefreshing(true))
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .subscribe(result -> {
-          UiUtils.stopRefresh(mRefreshLayout);
-          onResult(result.getRepositories());
-        }, error -> {
-          Log.e(TAG, "", error);
-          UiUtils.stopRefresh(mRefreshLayout);
-          onSearchFail();
-        });
-  }
-
-  private void onResult(List<Repository> repoList) {
-    mSearchFactor.page++;
-    boolean hasMore = repoList.size() == mSearchFactor.limit;
-    if (!mAdapter.isLoadingMore()) {
-      mAdapter.setHasMore(hasMore);
-      mAdapter.resetData(repoList);
-    } else {
-      // loadMore获取数据速度太快了的时候，会crash：Cannot call this method(-->notifyDataSetChanged())
-      // while RecyclerView is computing a layout or scrolling
-      mRecyclerView.post(() -> mAdapter.loadMoreFinish(hasMore, repoList));
-    }
-  }
-
-  private void onSearchFail() {
-    toast(R.string.error_network_error);
   }
 
   @OnClick({ R.id.tv_search_cancel }) public void onClick(View v) {
@@ -153,8 +115,39 @@ public class SearchFragment extends BaseFragment
     }
   }
 
+  @Override public void showErrorOnQueryData(String tips) {
+    toast(tips);
+    stopRefresh(mRefreshLayout);
+    if (mAdapter.isLoadingMore()) {
+      mAdapter.loadMoreFailure();
+    }
+  }
+
+  @Override public void showQueryDataResult(RepoSearchResult result) {
+    stopRefresh(mRefreshLayout);
+    mSearchFactor.page++;
+    List<Repository> repoList = result.getRepositories();
+    boolean hasMore = repoList.size() == mSearchFactor.limit;
+    if (!mAdapter.isLoadingMore()) {
+      mAdapter.setHasMore(hasMore);
+      mAdapter.resetData(repoList);
+    } else {
+      // loadMore获取数据速度太快了的时候，会crash：Cannot call this method(-->notifyDataSetChanged())
+      // while RecyclerView is computing a layout or scrolling
+      mRecyclerView.post(() -> mAdapter.loadMoreFinish(hasMore, repoList));
+    }
+  }
+
+  @Override public void showCollected() {
+    toast(R.string.tip_collect_success);
+  }
+
+  @Override public void showCollectedFailure() {
+    toast(R.string.error_collect_failure);
+  }
+
   @Override public void requestMoreData() {
-    requestData();
+    requestData(false);
   }
 
   @Override public void onItemClick(View view, int position) {
@@ -164,19 +157,27 @@ public class SearchFragment extends BaseFragment
 
   @Override public boolean onItemLongClick(View view, final int position) {
     AlertDialog.Builder builder = DialogUtils.getAlertDialog(getContext());
-    builder.setItems(R.array.long_click_main_dialog_item, (dialog, which) -> {
+    builder.setItems(R.array.long_click_search_dialog_item, (dialog, which) -> {
       Repository item = mAdapter.getItem(position);
       switch (which) {
         case 0:
           copyUrl(item.getHtmlUrl());
           break;
         case 1:
-          //cancelCollectRepo(item);
+          mPresenter.collectRepo(item);
           break;
       }
       dialog.dismiss();
     }).show();
     return true;
+  }
+
+  private void requestData(boolean refresh) {
+    if (refresh) {
+      mRefreshLayout.setRefreshing(true);
+      mSearchFactor.page = PAGE_FIRST;
+    }
+    mPresenter.queryData(mSearchFactor);
   }
 
   private void copyUrl(String url) {

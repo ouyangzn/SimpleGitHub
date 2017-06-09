@@ -98,10 +98,23 @@ public class UiUtils {
     toolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
   }
 
-  public static TextView setCenterTitle(Toolbar toolbar, @StringRes int resId) {
-    return setCenterTitle(toolbar, toolbar.getContext().getString(resId));
+  /**
+   * 给toolbar添加一个title
+   *
+   * @param toolbar Toolbar
+   * @param title title
+   * @return title的TextView
+   */
+  public static TextView setCenterTitle(Toolbar toolbar, @StringRes int title) {
+    return setCenterTitle(toolbar, toolbar.getContext().getString(title));
   }
 
+  /**
+   * 给toolbar添加一个title
+   * @param toolbar Toolbar
+   * @param title title
+   * @return title的TextView
+   */
   public static TextView setCenterTitle(Toolbar toolbar, String title) {
     TextView titleView = new TextView(toolbar.getContext());
     titleView.setGravity(Gravity.CENTER);
@@ -119,10 +132,24 @@ public class UiUtils {
     return titleView;
   }
 
+  /**
+   * 停止刷新
+   * @param refreshLayout SwipeRefreshLayout
+   */
   public static void stopRefresh(SwipeRefreshLayout refreshLayout) {
     if (refreshLayout != null && refreshLayout.isRefreshing()) {
       refreshLayout.setRefreshing(false);
     }
+  }
+
+  /**
+   * 设置SwipeRefreshLayout符合app主题色
+   *
+   * @param refreshLayout SwipeRefreshLayout
+   */
+  public static void initRefreshLayoutColor(SwipeRefreshLayout refreshLayout) {
+    refreshLayout.setColorSchemeResources(R.color.primary_light, R.color.primary,
+        R.color.primary_dark);
   }
 
 }

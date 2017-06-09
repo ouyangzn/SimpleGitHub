@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016.  ouyangzn   <ouyangzn@163.com>
+ * Copyright (c) 2016.  ouyangzn   <email : ouyangzn@163.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.module.common;
+package com.ouyangzn.github.module.main;
 
 import android.content.Context;
 import android.widget.ImageView;

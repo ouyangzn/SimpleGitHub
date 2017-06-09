@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.module.common;
+package com.ouyangzn.github.module.main;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

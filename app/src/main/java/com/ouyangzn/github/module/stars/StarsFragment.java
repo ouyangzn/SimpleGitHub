@@ -29,7 +29,6 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.bean.apibean.Repository;
-import com.ouyangzn.github.module.common.StarsAdapter;
 import com.ouyangzn.github.module.stars.StarsContract.IStarsPresenter;
 import com.ouyangzn.github.module.stars.StarsContract.IStarsView;
 import com.ouyangzn.github.utils.CommonUtils;

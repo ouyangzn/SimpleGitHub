@@ -40,4 +40,8 @@
     <item>Copy Url</item>
     <item>Collect</item>
   </array>
+  <array name="long_click_search_dialog_item">
+    <item>Copy Url</item>
+    <item>Collect</item>
+  </array>
 </resources>

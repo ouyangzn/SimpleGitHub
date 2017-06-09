@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.ouyangzn.github.module.common;
+package com.ouyangzn.github.module.search;
 
 import android.content.Context;
 import android.widget.ImageView;

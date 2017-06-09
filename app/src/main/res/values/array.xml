@@ -40,4 +40,8 @@
     <item>复制网址</item>
     <item>收藏</item>
   </array>
+  <array name="long_click_search_dialog_item">
+    <item>复制网址</item>
+    <item>收藏</item>
+  </array>
 </resources>
