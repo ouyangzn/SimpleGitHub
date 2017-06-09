@@ -69,7 +69,7 @@ android {
 }
 
 greendao {
-  schemaVersion 1
+  schemaVersion 2
   daoPackage "com.ouyangzn.github.dao"
 }
 apt {

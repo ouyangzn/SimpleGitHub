@@ -84,7 +84,7 @@ public class CollectionsFragment extends
   }
 
   @Override public void onDestroyView() {
-    // 不置空会导致内存泄漏
+    // 不置空可能会导致内存泄漏
     mRecyclerView.setAdapter(null);
     super.onDestroyView();
   }

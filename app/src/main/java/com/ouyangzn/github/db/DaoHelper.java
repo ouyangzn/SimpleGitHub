@@ -34,11 +34,7 @@ public class DaoHelper {
   }
 
   public static void initDao(Context context) {
-    DaoMaster.OpenHelper helper = new DaoMaster.OpenHelper(context, "open-resource") {
-      @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // 数据库版本升级
-      }
-    };
+    DaoMaster.OpenHelper helper = new DBOpenHelper(context, "open-resource");
     Database db = helper.getWritableDb();
     sDaoSession = new DaoMaster(db).newSession();
   }
@@ -48,5 +44,27 @@ public class DaoHelper {
       initDao(App.getApp());
     }
     return sDaoSession;
+  }
+
+  private static class DBOpenHelper extends DaoMaster.OpenHelper {
+
+    private DBOpenHelper(Context context, String name) {
+      super(context, name);
+    }
+
+    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+      // 数据库版本升级
+      switch (oldVersion) {
+        case 1: {
+          onUpgrade1(db);
+          break;
+        }
+      }
+    }
+
+    private void onUpgrade1(SQLiteDatabase db) {
+      // 收藏表增加列"标签"
+      db.execSQL("ALTER TABLE COLLECTED_REPO ADD COLUMN 'LABEL' TEXT;");
+    }
   }
 }

@@ -26,21 +26,9 @@ public class DebugApp extends App {
   @Override public void onCreate() {
     super.onCreate();
     initStetho();
-    //Stetho.initializeWithDefaults(this);
   }
 
   private void initStetho() {
-    //RealmInspectorModulesProvider provider = RealmInspectorModulesProvider.builder(this)
-    //    //.withFolder(getCacheDir())
-    //    .withEncryptionKey(DB_NAME, getGlobalRealmKey())
-    //    //.withMetaTables()
-    //    //.withDescendingOrder()
-    //    //.withLimit(1000)
-    //    //.databaseNamePattern(Pattern.compile(".+\\.realm"))
-    //    .build();
-    Stetho.initialize(Stetho.newInitializerBuilder(this)
-        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-        .build());
+    Stetho.initializeWithDefaults(this);
   }
 }

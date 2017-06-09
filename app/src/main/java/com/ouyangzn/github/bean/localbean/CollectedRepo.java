@@ -41,10 +41,12 @@ import org.greenrobot.greendao.annotation.Index;
   @Convert(converter = CollectedRepoOwnerConvert.class, columnType = String.class)
   private CollectedRepoOwner owner;
   private String description;
+  /** 标签 */
+  private String label;
 
-  @Generated(hash = 1441903010)
+  @Generated(hash = 782496928)
   public CollectedRepo(Long id, long collectTime, String htmlUrl, String fullName, String language,
-      int stargazersCount, CollectedRepoOwner owner, String description) {
+      int stargazersCount, CollectedRepoOwner owner, String description, String label) {
     this.id = id;
     this.collectTime = collectTime;
     this.htmlUrl = htmlUrl;
@@ -53,6 +55,7 @@ import org.greenrobot.greendao.annotation.Index;
     this.stargazersCount = stargazersCount;
     this.owner = owner;
     this.description = description;
+    this.label = label;
   }
 
   @Generated(hash = 813661088) public CollectedRepo() {
@@ -91,7 +94,7 @@ import org.greenrobot.greendao.annotation.Index;
         + owner
         + ", description='"
         + description
-        + '\''
+        + '\'' + ", label='" + label + '\''
         + '}';
   }
 
@@ -159,4 +162,11 @@ import org.greenrobot.greendao.annotation.Index;
     this.owner = owner;
   }
 
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
 }
