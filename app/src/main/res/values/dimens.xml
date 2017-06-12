@@ -22,7 +22,7 @@
   <dimen name="padding_large">8dp</dimen>
   <dimen name="padding_normal">4dp</dimen>
   <dimen name="padding_small">2dp</dimen>
-
-  <dimen name="divider_height">1px</dimen>
-  <dimen name="toolbar_height">49dp</dimen>
+  <dimen name="height_divider">1px</dimen>
+  <dimen name="height_toolbar">49dp</dimen>
+  <dimen name="height_item">45dp</dimen>
 </resources>

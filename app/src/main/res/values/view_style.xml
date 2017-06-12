@@ -16,6 +16,11 @@
 <resources>
   <integer name="duration_dialog_anim">300</integer>
 
+  <style name="PopupWindowLoadAnimation">
+    <item name="android:windowEnterAnimation">@anim/anim_scale_right_in</item>
+    <item name="android:windowExitAnimation">@anim/anim_scale_right_out</item>
+  </style>
+
   <style name="TabIndicator" parent="Widget.Design.TabLayout">
     <!--tab的最大的宽度-->
     <!--<item name="tabMaxWidth">@dimen/design_tab_max_width</item>-->
@@ -59,5 +64,19 @@
     <item name="android:background">@drawable/bg_border_corners5_light_blue</item>
     <item name="android:textSize">@dimen/font_normal</item>
     <item name="android:textColor">@color/color_btn_text</item>
+  </style>
+  <!-- 分割线 -->
+  <style name="style_divider_line">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">@dimen/height_divider</item>
+    <item name="android:background">@color/divider</item>
+  </style>
+
+  <style name="style_divide_line_margin_15">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">@dimen/height_divider</item>
+    <item name="android:layout_marginLeft">15dp</item>
+    <item name="android:layout_marginRight">15dp</item>
+    <item name="android:background">@color/divider</item>
   </style>
 </resources>

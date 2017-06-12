@@ -100,7 +100,7 @@ public abstract class BaseFragment<V extends BaseView, T extends BasePresenter<V
     if (overlay) {
       mContentContainer.setPadding(0, 0, 0, 0);
     } else {
-      mContentContainer.setPadding(0, getResources().getDimensionPixelSize(R.dimen.toolbar_height),
+      mContentContainer.setPadding(0, getResources().getDimensionPixelSize(R.dimen.height_toolbar),
           0, 0);
     }
   }

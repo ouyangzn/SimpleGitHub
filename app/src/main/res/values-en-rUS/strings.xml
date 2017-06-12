@@ -61,4 +61,9 @@
   <string name="error_network_error">Network error, retry please</string>
   <string name="error_need_login">Need Login</string>
   <string name="error_login_failure">Login failure, please check you username or password</string>
+  <string name="repo_detail_owner">Owner：%s</string>
+  <string name="repo_detail_language">Language：%s</string>
+  <string name="repo_detail_url">Url：%s</string>
+  <string name="repo_detail_description">Description：</string>
+  <string name="repo_detail_latest_commit">Latest Commit：%s</string>
 </resources>

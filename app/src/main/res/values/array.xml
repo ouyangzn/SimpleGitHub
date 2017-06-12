@@ -44,4 +44,8 @@
     <item>复制网址</item>
     <item>收藏</item>
   </array>
+  <array name="dialog_item_repo_detail_more">
+    <item>浏览器打开</item>
+    <item>标记并收藏</item>
+  </array>
 </resources>

@@ -15,6 +15,8 @@
 
 package com.ouyangzn.github.bean.apibean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -22,8 +24,17 @@ import com.google.gson.annotations.SerializedName;
  * Created by ouyangzn on 2016/9/6.<br/>
  * Description：
  */
-public class Repository {
+public class Repository implements Parcelable {
 
+  public static final Creator<Repository> CREATOR = new Creator<Repository>() {
+    @Override public Repository createFromParcel(Parcel source) {
+      return new Repository(source);
+    }
+
+    @Override public Repository[] newArray(int size) {
+      return new Repository[size];
+    }
+  };
   @Expose @SerializedName("created_at") String createdAt;
   @Expose String description;
   @Expose @SerializedName("full_name") String fullName;
@@ -37,6 +48,25 @@ public class Repository {
   @Expose @SerializedName("stargazers_count") Integer stargazersCount;
   @Expose @SerializedName("updated_at") String updatedAt;
   @Expose Integer watchers;
+
+  public Repository() {
+  }
+
+  protected Repository(Parcel in) {
+    this.createdAt = in.readString();
+    this.description = in.readString();
+    this.fullName = in.readString();
+    this.homepage = in.readString();
+    this.htmlUrl = in.readString();
+    this.id = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.language = in.readString();
+    this.name = in.readString();
+    this.owner = in.readParcelable(User.class.getClassLoader());
+    this.score = (Double) in.readValue(Double.class.getClassLoader());
+    this.stargazersCount = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.updatedAt = in.readString();
+    this.watchers = (Integer) in.readValue(Integer.class.getClassLoader());
+  }
 
   public String getCreatedAt() {
     return this.createdAt;
@@ -158,5 +188,25 @@ public class Repository {
         ", updatedAt='" + updatedAt + '\'' +
         ", watchers=" + watchers +
         '}';
+  }
+
+  @Override public int describeContents() {
+    return 0;
+  }
+
+  @Override public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(this.createdAt);
+    dest.writeString(this.description);
+    dest.writeString(this.fullName);
+    dest.writeString(this.homepage);
+    dest.writeString(this.htmlUrl);
+    dest.writeValue(this.id);
+    dest.writeString(this.language);
+    dest.writeString(this.name);
+    dest.writeParcelable(this.owner, flags);
+    dest.writeValue(this.score);
+    dest.writeValue(this.stargazersCount);
+    dest.writeString(this.updatedAt);
+    dest.writeValue(this.watchers);
   }
 }

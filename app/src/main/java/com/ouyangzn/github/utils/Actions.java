@@ -22,15 +22,18 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BaseFragmentActivity;
+import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.User;
 import com.ouyangzn.github.module.account.AboutFragment;
 import com.ouyangzn.github.module.account.LoginFragment;
 import com.ouyangzn.github.module.account.UserInfoFragment;
 import com.ouyangzn.github.module.collect.CollectionsFragment;
+import com.ouyangzn.github.module.repodetail.RepoDetailFragment;
 import com.ouyangzn.github.module.search.SearchFragment;
 import com.ouyangzn.github.module.stars.StarsFragment;
 
 import static com.ouyangzn.github.module.account.UserInfoFragment.EXTRA_KEY_USER;
+import static com.ouyangzn.github.module.repodetail.RepoDetailFragment.KEY_REPO;
 
 /**
  * Created by ouyangzn on 2017/5/24.<br/>
@@ -38,6 +41,35 @@ import static com.ouyangzn.github.module.account.UserInfoFragment.EXTRA_KEY_USER
  */
 public class Actions {
 
+  /**
+   * 跳转到详情
+   *
+   * @param fragment 当前所在的fragment对象
+   * @param repo Repository
+   */
+  public static void gotoRepoDetail(Fragment fragment, Repository repo) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(KEY_REPO, repo);
+    startActivity(fragment, RepoDetailFragment.class, bundle);
+  }
+
+  /**
+   * 跳转到详情
+   *
+   * @param activity 当前所在的activity对象
+   * @param repo Repository
+   */
+  public static void gotoRepoDetail(Activity activity, Repository repo) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(KEY_REPO, repo);
+    startActivity(activity, RepoDetailFragment.class, bundle);
+  }
+
+  /**
+   * 跳转到搜索
+   *
+   * @param activity 当前所在的activity对象
+   */
   public static void gotoSearch(Activity activity) {
     startActivity(activity, SearchFragment.class);
   }

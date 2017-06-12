@@ -44,4 +44,8 @@
     <item>Copy Url</item>
     <item>Collect</item>
   </array>
+  <array name="dialog_item_repo_detail_more">
+    <item>Open in browser</item>
+    <item>Tag and collect</item>
+  </array>
 </resources>

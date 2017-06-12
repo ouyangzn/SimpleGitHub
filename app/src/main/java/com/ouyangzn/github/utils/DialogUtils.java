@@ -17,8 +17,15 @@ package com.ouyangzn.github.utils;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
 import com.ouyangzn.github.R;
+import com.ouyangzn.github.view.ListPopupWindow;
+import java.util.List;
 
 /**
  * dialog工具类
@@ -77,4 +84,40 @@ public class DialogUtils {
   public static synchronized AlertDialog.Builder getAlertDialog(Context context) {
     return new AlertDialog.Builder(context, R.style.BaseAlertDialog);
   }
+
+  /**
+   * 获取一个PopupWindow
+   *
+   * @param contentView 内容view
+   * @return PopupWindow
+   */
+  public static synchronized PopupWindow getPopupWindow(View contentView) {
+    PopupWindow mPopupWindow = new PopupWindow(contentView);
+    mPopupWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
+    mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+    mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+    mPopupWindow.setOutsideTouchable(true);
+    mPopupWindow.setFocusable(true);
+    mPopupWindow.setAnimationStyle(R.style.PopupWindowLoadAnimation);
+    return mPopupWindow;
+  }
+
+  /**
+   * 显示一个选择项PopupWindow
+   *
+   * @param context Context
+   * @param items 选项
+   * @param anchorView 挂靠的view
+   * @param listener 点击选项的监听
+   */
+  public static ListPopupWindow showListPop(Context context, List<String> items, View anchorView,
+      ListPopupWindow.OnItemClickListener listener) {
+    ListPopupWindow window = new ListPopupWindow(context, items, listener);
+    //window.showAsDropDown(anchorView, ScreenUtils.dp2px(context, -4), anchorView.getHeight() / 2);
+    // 我也不知道为什么是anchorView.getBottom() * 3 / 2，但是这样确实显示在了这个控件下方
+    window.showAtLocation(anchorView, Gravity.TOP | Gravity.RIGHT, ScreenUtils.dp2px(context, 4),
+        anchorView.getBottom() * 3 / 2);
+    return window;
+  }
+
 }

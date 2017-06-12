@@ -18,6 +18,7 @@ package com.ouyangzn.github.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Paint;
+import android.os.Build;
 import android.support.annotation.StringRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -27,7 +28,9 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
@@ -37,6 +40,35 @@ import com.ouyangzn.recyclerview.BaseRecyclerViewAdapter;
  * Description：UI操作相关工具类，包括界面（activity等）跳转
  */
 public class UiUtils {
+
+  /**
+   * 弹出popupWindow时使背景变暗
+   *
+   * @param popupWindow PopupWindow
+   */
+  public static void dimWhenPop(PopupWindow popupWindow) {
+    View container;
+    if (popupWindow.getBackground() == null) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        container = (View) popupWindow.getContentView().getParent();
+      } else {
+        container = popupWindow.getContentView();
+      }
+    } else {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        container = (View) popupWindow.getContentView().getParent().getParent();
+      } else {
+        container = (View) popupWindow.getContentView().getParent();
+      }
+    }
+    Context context = popupWindow.getContentView().getContext();
+    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();
+    p.flags |=
+        WindowManager.LayoutParams.FLAG_DIM_BEHIND; // add a flag here instead of clear others
+    p.dimAmount = 0.6f;
+    wm.updateViewLayout(container, p);
+  }
 
   /**
    * 给textView添加下划线
@@ -80,7 +112,7 @@ public class UiUtils {
     img.setImageResource(resId);
     img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     Toolbar.LayoutParams params = new Toolbar.LayoutParams(Toolbar.LayoutParams.WRAP_CONTENT,
-        Toolbar.LayoutParams.WRAP_CONTENT);
+        Toolbar.LayoutParams.MATCH_PARENT);
     params.gravity = Gravity.END | Gravity.CENTER;
     img.setLayoutParams(params);
     toolbar.addView(img);

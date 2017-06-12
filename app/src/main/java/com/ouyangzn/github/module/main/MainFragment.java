@@ -42,7 +42,7 @@ import java.util.List;
 
 import static com.ouyangzn.github.module.main.MainContract.IMainPresenter;
 import static com.ouyangzn.github.module.main.MainContract.IMainView;
-import static com.ouyangzn.github.utils.Actions.openUrl;
+import static com.ouyangzn.github.utils.Actions.gotoRepoDetail;
 import static com.ouyangzn.github.utils.UiUtils.initRefreshLayoutColor;
 import static com.ouyangzn.github.utils.UiUtils.stopRefresh;
 
@@ -142,7 +142,8 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void onItemClick(View view, int position) {
     Repository repository = mAdapter.getItem(position);
-    openUrl(this.getActivity(), repository.getHtmlUrl());
+    //openUrl(this.getActivity(), repository.getHtmlUrl());
+    gotoRepoDetail(this, repository);
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {
