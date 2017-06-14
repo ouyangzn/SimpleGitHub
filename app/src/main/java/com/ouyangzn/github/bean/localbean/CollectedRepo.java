@@ -37,21 +37,24 @@ import org.greenrobot.greendao.annotation.Index;
   private String fullName;
   private String language;
   private int stargazersCount;
+  private String updatedAt;
   @Convert(converter = CollectedRepoOwnerConvert.class, columnType = String.class)
   private CollectedRepoOwner owner;
   private String description;
   /** 标签 */
   private String label;
 
-  @Generated(hash = 782496928)
+  @Generated(hash = 647364791)
   public CollectedRepo(Long id, long collectTime, String htmlUrl, String fullName, String language,
-      int stargazersCount, CollectedRepoOwner owner, String description, String label) {
+      int stargazersCount, String updatedAt, CollectedRepoOwner owner, String description,
+      String label) {
     this.id = id;
     this.collectTime = collectTime;
     this.htmlUrl = htmlUrl;
     this.fullName = fullName;
     this.language = language;
     this.stargazersCount = stargazersCount;
+    this.updatedAt = updatedAt;
     this.owner = owner;
     this.description = description;
     this.label = label;
@@ -67,6 +70,7 @@ import org.greenrobot.greendao.annotation.Index;
     collectedRepo.fullName = repo.getFullName();
     collectedRepo.language = repo.getLanguage();
     collectedRepo.stargazersCount = repo.getStargazersCount();
+    collectedRepo.updatedAt = repo.getUpdatedAt();
     collectedRepo.description = repo.getDescription();
     collectedRepo.owner = CollectedRepoOwner.convert(repo.getOwner());
     collectedRepo.label = repo.getLabel();
@@ -90,12 +94,11 @@ import org.greenrobot.greendao.annotation.Index;
         + language
         + '\''
         + ", stargazersCount="
-        + stargazersCount
+        + stargazersCount + ", updatedAt='" + updatedAt + '\''
         + ", owner="
         + owner
         + ", description='"
-        + description
-        + '\'' + ", label='" + label + '\''
+        + description + '\'' + ", label='" + label + '\''
         + '}';
   }
 
@@ -137,6 +140,14 @@ import org.greenrobot.greendao.annotation.Index;
 
   public void setLanguage(String language) {
     this.language = language;
+  }
+
+  public String getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(String updatedAt) {
+    this.updatedAt = updatedAt;
   }
 
   public int getStargazersCount() {

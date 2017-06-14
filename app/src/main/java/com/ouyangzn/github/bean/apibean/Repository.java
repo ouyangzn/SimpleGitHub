@@ -81,6 +81,7 @@ public class Repository implements Parcelable {
     repo.fullName = collectedRepo.getFullName();
     repo.language = collectedRepo.getLanguage();
     repo.stargazersCount = collectedRepo.getStargazersCount();
+    repo.updatedAt = collectedRepo.getUpdatedAt();
     repo.description = collectedRepo.getDescription();
     repo.label = collectedRepo.getLabel();
     repo.owner = User.convert(collectedRepo.getOwner());
