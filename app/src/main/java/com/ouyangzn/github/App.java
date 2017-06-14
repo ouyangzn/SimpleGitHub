@@ -107,11 +107,14 @@ public class App extends Application {
     SpUtils.put(sApp, KEY_AUTHORIZATION, null);
   }
 
+  /**
+   * <p>注意每个需要使用此gson解析的变量需要确保加上了@Expose注解</p>
+   */
   public Gson getGson() {
     if (mGson == null) {
       mGson = new Gson();
-      mGson = new GsonBuilder().registerTypeAdapterFactory(
-          TypeAdapters.newFactory(int.class, Integer.class, new IntegerAdapter()))
+      mGson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
+          .registerTypeAdapterFactory(TypeAdapters.newFactory(int.class, Integer.class, new IntegerAdapter()))
           .registerTypeAdapterFactory(
               TypeAdapters.newFactory(double.class, Double.class, new DoubleAdapter()))
           .registerTypeAdapterFactory(

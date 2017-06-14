@@ -102,8 +102,7 @@ public class MainPresenter extends IMainPresenter {
 
   @Override public void collectRepo(final Repository repo) {
     RxJavaUtils.wrap(Observable.defer(() -> {
-      CollectedRepo collectedRepo = new CollectedRepo();
-      collectedRepo.convert(repo);
+      CollectedRepo collectedRepo = CollectedRepo.convert(repo);
       collectedRepo.setCollectTime(System.currentTimeMillis());
       return Observable.just(mCollectData.collectRepo(collectedRepo));
     })).subscribe(success -> {

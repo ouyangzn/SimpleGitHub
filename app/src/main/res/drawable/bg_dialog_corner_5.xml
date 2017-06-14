@@ -13,15 +13,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-  <scale
-      android:duration="@android:integer/config_shortAnimTime"
-      android:fromXScale="1"
-      android:fromYScale="1"
-      android:pivotX="100%p"
-      android:pivotY="0%p"
-      android:toXScale="0"
-      android:toYScale="0"
-      />
-</set>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+  <corners android:radius="5dp"/>
+  <padding
+      android:bottom="10dp"
+      android:left="10dp"
+      android:right="10dp"
+      android:top="10dp"/>
+  <solid android:color="@color/white"/>
+</shape>

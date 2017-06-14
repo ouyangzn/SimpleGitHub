@@ -24,6 +24,7 @@ import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.base.BaseFragmentActivity;
 import com.ouyangzn.github.bean.apibean.Repository;
 import com.ouyangzn.github.bean.apibean.User;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
 import com.ouyangzn.github.module.account.AboutFragment;
 import com.ouyangzn.github.module.account.LoginFragment;
 import com.ouyangzn.github.module.account.UserInfoFragment;
@@ -40,6 +41,18 @@ import static com.ouyangzn.github.module.repodetail.RepoDetailFragment.KEY_REPO;
  * Description：ui跳转工具类
  */
 public class Actions {
+
+  /**
+   * 跳转到详情
+   *
+   * @param fragment 当前所在的fragment对象
+   * @param repo CollectedRepo
+   */
+  public static void gotoRepoDetail(Fragment fragment, CollectedRepo repo) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(KEY_REPO, Repository.convert(repo));
+    startActivity(fragment, RepoDetailFragment.class, bundle);
+  }
 
   /**
    * 跳转到详情

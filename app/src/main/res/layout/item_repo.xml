@@ -103,7 +103,7 @@
           android:paddingLeft="@dimen/padding_normal"
           android:paddingRight="@dimen/padding_normal"
           android:paddingTop="@dimen/padding_small"
-          android:text="@string/stars"
+          android:text="@string/count_stars"
           android:textSize="@dimen/font_normal"
           />
     </LinearLayout>

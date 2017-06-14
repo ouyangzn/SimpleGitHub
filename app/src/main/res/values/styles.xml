@@ -36,10 +36,14 @@
     <item name="android:backgroundDimEnabled">true</item>
     <item name="android:backgroundDimAmount">0.6</item>
     <item name="android:windowCloseOnTouchOutside">true</item>
-    <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+    <item name="android:windowAnimationStyle">@style/DialogAnimation_Scale</item>
   </style>
 
-  <style name="DialogAnimation" parent="android:Animation">
+  <style name="DialogNoBackground" parent="BaseAlertDialog">
+    <item name="android:windowBackground">@color/transparent</item>
+  </style>
+
+  <style name="DialogAnimation_Scale" parent="android:Animation">
     <item name="android:windowEnterAnimation">@anim/anim_scale_in_dialog</item>
     <item name="android:windowExitAnimation">@anim/anim_scale_out_dialog</item>
   </style>

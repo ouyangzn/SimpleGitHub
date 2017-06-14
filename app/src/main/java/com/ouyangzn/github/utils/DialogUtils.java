@@ -15,14 +15,21 @@
 
 package com.ouyangzn.github.utils;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.support.annotation.StyleRes;
 import android.support.v7.app.AlertDialog;
-import android.view.Gravity;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupWindow;
+import android.widget.TextView;
+import butterknife.ButterKnife;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.view.ListPopupWindow;
 import java.util.List;
@@ -79,10 +86,21 @@ public class DialogUtils {
   /**
    * 获取一个对话框AlertDialog
    *
-   * @param context
+   * @param context Context
    */
   public static synchronized AlertDialog.Builder getAlertDialog(Context context) {
-    return new AlertDialog.Builder(context, R.style.BaseAlertDialog);
+    return getAlertDialog(context, R.style.BaseAlertDialog);
+  }
+
+  /**
+   * 获取一个对话框AlertDialog
+   *
+   * @param context Context
+   * @param style dialog的样式
+   */
+  public static synchronized AlertDialog.Builder getAlertDialog(Context context,
+      @StyleRes int style) {
+    return new AlertDialog.Builder(context, style);
   }
 
   /**
@@ -107,17 +125,57 @@ public class DialogUtils {
    *
    * @param context Context
    * @param items 选项
-   * @param anchorView 挂靠的view
    * @param listener 点击选项的监听
    */
-  public static ListPopupWindow showListPop(Context context, List<String> items, View anchorView,
+  public static ListPopupWindow getListPopupWindow(Context context, List<String> items,
       ListPopupWindow.OnItemClickListener listener) {
-    ListPopupWindow window = new ListPopupWindow(context, items, listener);
-    //window.showAsDropDown(anchorView, ScreenUtils.dp2px(context, -4), anchorView.getHeight() / 2);
-    // 我也不知道为什么是anchorView.getBottom() * 3 / 2，但是这样确实显示在了这个控件下方
-    window.showAtLocation(anchorView, Gravity.TOP | Gravity.RIGHT, ScreenUtils.dp2px(context, 4),
-        anchorView.getBottom() * 3 / 2);
-    return window;
+    return new ListPopupWindow(context, items, listener);
   }
 
+  /**
+   * 显示一个可输入对话框
+   *
+   * @param activity 所在的activity
+   * @param title 输入框title
+   * @param contentHint 输入框提示信息
+   * @param content 输入框内容,可为null
+   * @param onConfirmClick 点击确定
+   * @param onCancelClick 点击取消
+   */
+  public static void showInputDialog(Activity activity, String title, String contentHint,
+      String content, OnConfirmClickListener onConfirmClick, OnClickListener onCancelClick) {
+    AlertDialog.Builder builder = DialogUtils.getAlertDialog(activity, R.style.DialogNoBackground);
+    AlertDialog dialog = builder.setView(R.layout.dialog_input_view).create();
+    dialog.show();
+    TextView tvTitle = ButterKnife.findById(dialog, R.id.tv_dialog_input_title);
+    tvTitle.setText(title);
+    EditText editText = ButterKnife.findById(dialog, R.id.et_dialog_input);
+    editText.setHint(contentHint);
+    if (!TextUtils.isEmpty(content)) {
+      editText.setText(content);
+      editText.setSelection(content.length());
+    }
+    Button btnConfirm = ButterKnife.findById(dialog, R.id.btn_dialog_input_confirm);
+    btnConfirm.setTag(dialog);
+    btnConfirm.setOnClickListener(v -> {
+      if (onConfirmClick != null) onConfirmClick.onConfirm(dialog, editText.getText().toString());
+    });
+    Button btnCancel = ButterKnife.findById(dialog, R.id.btn_dialog_input_cancel);
+    btnCancel.setTag(dialog);
+    btnCancel.setOnClickListener(v -> {
+      ScreenUtils.hideKeyBoard(v);
+      dialog.dismiss();
+      if (onCancelClick != null) onCancelClick.onClick(v);
+    });
+  }
+
+  public interface OnConfirmClickListener {
+    /**
+     * 点击确定按钮的回调
+     *
+     * @param dialog dialog
+     * @param content 填写的内容
+     */
+    void onConfirm(AlertDialog dialog, String content);
+  }
 }

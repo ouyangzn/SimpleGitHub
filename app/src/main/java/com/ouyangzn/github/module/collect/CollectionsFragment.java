@@ -29,6 +29,7 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ouyangzn.github.R;
 import com.ouyangzn.github.base.BaseFragment;
 import com.ouyangzn.github.bean.localbean.CollectedRepo;
+import com.ouyangzn.github.utils.Actions;
 import com.ouyangzn.github.utils.CommonUtils;
 import com.ouyangzn.github.utils.DialogUtils;
 import com.ouyangzn.github.utils.ScreenUtils;
@@ -42,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 import rx.android.schedulers.AndroidSchedulers;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
-import static com.ouyangzn.github.utils.Actions.openUrl;
 import static com.ouyangzn.github.utils.UiUtils.initRefreshLayoutColor;
 
 /**
@@ -201,10 +201,6 @@ public class CollectionsFragment extends
     toast(R.string.error_collect_cancel_failure);
   }
 
-  @Override public void setLoadingIndicator(boolean isActive) {
-    //mRefreshLayout.setRefreshing(isActive);
-  }
-
   @Override public void requestMoreData() {
     String keyword = mSearchEdit.getInputText().trim();
     if (TextUtils.isEmpty(keyword)) {
@@ -216,7 +212,8 @@ public class CollectionsFragment extends
 
   @Override public void onItemClick(View view, int position) {
     CollectedRepo repo = mCollectAdapter.getItem(position);
-    openUrl(this.getActivity(), repo.getHtmlUrl());
+    //openUrl(this.getActivity(), repo.getHtmlUrl());
+    Actions.gotoRepoDetail(this, repo);
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {

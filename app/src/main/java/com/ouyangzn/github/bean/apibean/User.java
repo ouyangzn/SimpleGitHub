@@ -17,7 +17,9 @@ package com.ouyangzn.github.bean.apibean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.ouyangzn.github.bean.localbean.CollectedRepoOwner;
 
 /**
  * Created by ouyangzn on 2016/9/6.<br/>
@@ -33,24 +35,24 @@ public class User implements Parcelable {
       return new User[size];
     }
   };
-  private Integer id;
-  private String type;
-  private String url;
-  private String email;
-  @SerializedName("avatar_url") private String avatarUrl;
-  @SerializedName("events_url") private String eventsUrl;
-  @SerializedName("followers_url") private String followersUrl;
-  @SerializedName("following_url") private String followingUrl;
-  @SerializedName("gists_url") private String gistsUrl;
-  @SerializedName("gravatar_id") private String gravatarId;
-  @SerializedName("html_url") private String htmlUrl;
-  @SerializedName("login") private String authorName;
-  @SerializedName("organizations_url") private String organizationsUrl;
-  @SerializedName("received_events_url") private String receivedEventsUrl;
-  @SerializedName("repos_url") private String reposUrl;
-  @SerializedName("site_admin") private Boolean siteAdmin;
-  @SerializedName("starred_url") private String starredUrl;
-  @SerializedName("subscriptions_url") private String subscriptionsUrl;
+  @Expose private Integer id;
+  @Expose private String type;
+  @Expose private String url;
+  @Expose private String email;
+  @Expose @SerializedName("avatar_url") private String avatarUrl;
+  @Expose @SerializedName("events_url") private String eventsUrl;
+  @Expose @SerializedName("followers_url") private String followersUrl;
+  @Expose @SerializedName("following_url") private String followingUrl;
+  @Expose @SerializedName("gists_url") private String gistsUrl;
+  @Expose @SerializedName("gravatar_id") private String gravatarId;
+  @Expose @SerializedName("html_url") private String htmlUrl;
+  @Expose @SerializedName("login") private String authorName;
+  @Expose @SerializedName("organizations_url") private String organizationsUrl;
+  @Expose @SerializedName("received_events_url") private String receivedEventsUrl;
+  @Expose @SerializedName("repos_url") private String reposUrl;
+  @Expose @SerializedName("site_admin") private Boolean siteAdmin;
+  @Expose @SerializedName("starred_url") private String starredUrl;
+  @Expose @SerializedName("subscriptions_url") private String subscriptionsUrl;
 
   public User() {
   }
@@ -74,6 +76,14 @@ public class User implements Parcelable {
     this.type = in.readString();
     this.url = in.readString();
     this.email = in.readString();
+  }
+
+  public static User convert(CollectedRepoOwner owner) {
+    User user = new User();
+    user.id = owner.getId().intValue();
+    user.authorName = owner.getName();
+    user.avatarUrl = owner.getAvatarUrl();
+    return user;
   }
 
   public String getEmail() {

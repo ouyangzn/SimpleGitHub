@@ -142,7 +142,6 @@ public class MainFragment extends LazyLoadFragment<IMainView, IMainPresenter>
 
   @Override public void onItemClick(View view, int position) {
     Repository repository = mAdapter.getItem(position);
-    //openUrl(this.getActivity(), repository.getHtmlUrl());
     gotoRepoDetail(this, repository);
   }
 

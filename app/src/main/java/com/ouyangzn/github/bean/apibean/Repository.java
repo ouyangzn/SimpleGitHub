@@ -19,6 +19,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.ouyangzn.github.bean.localbean.CollectedRepo;
 
 /**
  * Created by ouyangzn on 2016/9/6.<br/>
@@ -35,19 +36,22 @@ public class Repository implements Parcelable {
       return new Repository[size];
     }
   };
-  @Expose @SerializedName("created_at") String createdAt;
-  @Expose String description;
-  @Expose @SerializedName("full_name") String fullName;
-  @Expose String homepage;
-  @Expose @SerializedName("html_url") String htmlUrl;
-  @Expose Integer id;
-  @Expose String language;
-  @Expose String name;
-  @Expose User owner;
-  @Expose Double score;
-  @Expose @SerializedName("stargazers_count") Integer stargazersCount;
-  @Expose @SerializedName("updated_at") String updatedAt;
-  @Expose Integer watchers;
+  @Expose @SerializedName("created_at") private String createdAt;
+  @Expose private String description;
+  @Expose @SerializedName("full_name") private String fullName;
+  @Expose private String homepage;
+  @Expose @SerializedName("html_url") private String htmlUrl;
+  @Expose private Integer id;
+  @Expose private String language;
+  @Expose private String name;
+  @Expose private User owner;
+  @Expose private Double score;
+  @Expose @SerializedName("stargazers_count") private Integer stargazersCount;
+  @Expose @SerializedName("updated_at") private String updatedAt;
+  @Expose private Integer watchers;
+  /** 以下变量为本地使用，不是api接口返回，不需要解析 */
+  private String label;
+  private long collectTime;
 
   public Repository() {
   }
@@ -66,6 +70,22 @@ public class Repository implements Parcelable {
     this.stargazersCount = (Integer) in.readValue(Integer.class.getClassLoader());
     this.updatedAt = in.readString();
     this.watchers = (Integer) in.readValue(Integer.class.getClassLoader());
+    this.label = in.readString();
+    this.collectTime = in.readLong();
+  }
+
+  public static Repository convert(CollectedRepo collectedRepo) {
+    Repository repo = new Repository();
+    repo.id = collectedRepo.getId().intValue();
+    repo.htmlUrl = collectedRepo.getHtmlUrl();
+    repo.fullName = collectedRepo.getFullName();
+    repo.language = collectedRepo.getLanguage();
+    repo.stargazersCount = collectedRepo.getStargazersCount();
+    repo.description = collectedRepo.getDescription();
+    repo.label = collectedRepo.getLabel();
+    repo.owner = User.convert(collectedRepo.getOwner());
+    repo.collectTime = collectedRepo.getCollectTime();
+    return repo;
   }
 
   public String getCreatedAt() {
@@ -172,22 +192,64 @@ public class Repository implements Parcelable {
     this.watchers = watchers;
   }
 
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  public long getCollectTime() {
+    return collectTime;
+  }
+
+  public void setCollectTime(long collectTime) {
+    this.collectTime = collectTime;
+  }
+
   @Override public String toString() {
-    return "Repository{" +
-        "createdAt='" + createdAt + '\'' +
-        ", description='" + description + '\'' +
-        ", fullName='" + fullName + '\'' +
-        ", homepage='" + homepage + '\'' +
-        ", htmlUrl='" + htmlUrl + '\'' +
-        ", id=" + id +
-        ", language='" + language + '\'' +
-        ", name='" + name + '\'' +
-        ", owner=" + owner +
-        ", score=" + score +
-        ", stargazersCount=" + stargazersCount +
-        ", updatedAt='" + updatedAt + '\'' +
-        ", watchers=" + watchers +
-        '}';
+    return "Repository{"
+        + "createdAt='"
+        + createdAt
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", fullName='"
+        + fullName
+        + '\''
+        + ", homepage='"
+        + homepage
+        + '\''
+        + ", htmlUrl='"
+        + htmlUrl
+        + '\''
+        + ", id="
+        + id
+        + ", language='"
+        + language
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", owner="
+        + owner
+        + ", score="
+        + score
+        + ", stargazersCount="
+        + stargazersCount
+        + ", updatedAt='"
+        + updatedAt
+        + '\''
+        + ", watchers="
+        + watchers
+        + ", label='"
+        + label
+        + '\''
+        + ", collectTime="
+        + collectTime
+        + '}';
   }
 
   @Override public int describeContents() {
@@ -208,5 +270,7 @@ public class Repository implements Parcelable {
     dest.writeValue(this.stargazersCount);
     dest.writeString(this.updatedAt);
     dest.writeValue(this.watchers);
+    dest.writeString(this.label);
+    dest.writeLong(this.collectTime);
   }
 }

@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.PAGE_FIRST;
-import static com.ouyangzn.github.utils.Actions.openUrl;
+import static com.ouyangzn.github.utils.Actions.gotoRepoDetail;
 import static com.ouyangzn.github.utils.UiUtils.initRefreshLayoutColor;
 import static com.ouyangzn.github.utils.UiUtils.stopRefresh;
 
@@ -152,7 +152,7 @@ public class SearchFragment extends BaseFragment<ISearchView, ISearchPresenter>
 
   @Override public void onItemClick(View view, int position) {
     Repository repo = mAdapter.getItem(position);
-    openUrl(this.getActivity(), repo.getHtmlUrl());
+    gotoRepoDetail(this, repo);
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {

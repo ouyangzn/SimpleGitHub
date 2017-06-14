@@ -26,9 +26,9 @@ import java.util.List;
  */
 public class RepoSearchResult {
 
-  @Expose @SerializedName("total_count") Integer totalCount;
-  @Expose @SerializedName("incomplete_results") Boolean incompleteResults;
-  @Expose @SerializedName("items") List<Repository> repositories = new ArrayList();
+  @Expose @SerializedName("total_count") private Integer totalCount;
+  @Expose @SerializedName("incomplete_results") private Boolean incompleteResults;
+  @Expose @SerializedName("items") private List<Repository> repositories = new ArrayList();
 
   public Boolean getIncompleteResults() {
     return this.incompleteResults;

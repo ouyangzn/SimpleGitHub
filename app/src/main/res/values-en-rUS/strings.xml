@@ -15,6 +15,7 @@
   -->
 <resources>
   <string name="app_name">Simple GitHub</string>
+  <!-- 页面title -->
   <string name="title_search">Search</string>
   <string name="title_collect">Collected</string>
   <string name="title_stars">Stars</string>
@@ -22,12 +23,20 @@
   <string name="title_about">About</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
-  <string name="action_settings">Settings</string>
+  <!-- 通用型字符串 -->
   <string name="username_github">GitHub Username</string>
   <string name="password_github">GitHub password</string>
   <string name="login">login</string>
   <string name="confirm">Confirm</string>
   <string name="cancel">Cancel</string>
+  <string name="loading">loading…</string>
+  <string name="loading_more_failure">Click reload</string>
+  <string name="loading_failure">Load failure/(ㄒoㄒ)/~~</string>
+  <string name="count_stars">%d·stars</string>
+  <string name="no_data">no data</string>
+  <string name="label">label</string>
+  <string name="login_just_browsing">just input username for browsing</string>
+  <!-- 侧滑栏菜单 -->
   <string name="nav_collections">Collections</string>
   <string name="nav_about">About</string>
   <string name="nav_username">Account</string>
@@ -44,23 +53,24 @@
   <string name="language_ruby">ruby</string>
   <string name="language_c_sharp">c#</string>
   <string name="language_shell">shell</string>
-  <string name="loading">loading…</string>
-  <string name="loading_failure">Load failure/(ㄒoㄒ)/~~</string>
-  <string name="stars">%d·stars</string>
+  <!-- EditText hint、Button text... -->
   <string name="hint_input_keyword">search</string>
-  <string name="no_data">no data</string>
-  <string name="login_just_browsing">just input username for browsing</string>
+  <string name="hint_input_label">Input Label</string>
+  <!-- toast -->
   <string name="tip_copy_success">copy success</string>
   <string name="tip_collect_success">collect success</string>
   <string name="tip_collect_cancel_success">cancel collect success</string>
+  <!-- error tips -->
   <string name="error_search_failure">search failure, retry please</string>
   <string name="error_collect_failure">operate failure, retry please</string>
   <string name="error_collect_cancel_failure">operate failure, retry please</string>
   <string name="error_main_load_failure">Load failure/(ㄒoㄒ)/~~\n click to refresh</string>
   <string name="error_username_null">Username can\'t be null</string>
+  <string name="error_password_null">Password can\'t be null</string>
   <string name="error_network_error">Network error, retry please</string>
   <string name="error_need_login">Need Login</string>
   <string name="error_login_failure">Login failure, please check you username or password</string>
+  <!-- repo detail page -->
   <string name="repo_detail_owner">Owner：%s</string>
   <string name="repo_detail_language">Language：%s</string>
   <string name="repo_detail_url">Url：%s</string>

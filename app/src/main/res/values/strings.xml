@@ -1,5 +1,6 @@
 <resources>
   <string name="app_name">简易GitHub</string>
+  <!-- 页面title -->
   <string name="title_search">搜索</string>
   <string name="title_collect">收藏</string>
   <string name="title_stars">Stars</string>
@@ -7,12 +8,20 @@
   <string name="title_about">关于作者</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
-  <string name="action_settings">Settings</string>
+  <!-- 通用型字符串 -->
   <string name="username_github">github账号</string>
   <string name="password_github">github密码</string>
   <string name="login">登录</string>
   <string name="confirm">确定</string>
   <string name="cancel">取消</string>
+  <string name="loading">加载中…</string>
+  <string name="loading_more_failure">点击加载下一页</string>
+  <string name="loading_failure">数据加载失败/(ㄒoㄒ)/~~</string>
+  <string name="no_data">暂无数据</string>
+  <string name="count_stars">%d·stars</string>
+  <string name="label">标签</string>
+  <string name="login_just_browsing">仅输入账号查看</string>
+  <!-- 侧滑栏菜单 -->
   <string name="nav_collections">收藏</string>
   <string name="nav_about">关于</string>
   <string name="nav_username">账号</string>
@@ -29,17 +38,15 @@
   <string name="language_ruby">ruby</string>
   <string name="language_c_sharp">c#</string>
   <string name="language_shell">shell</string>
-  <string name="loading">加载中…</string>
-  <string name="loading_more_failure">点击加载下一页</string>
-  <string name="loading_failure">数据加载失败/(ㄒoㄒ)/~~</string>
-  <string name="stars">%d·stars</string>
+  <!-- EditText hint、Button text... -->
   <string name="hint_input_keyword">输入关键字搜索</string>
-  <string name="error_search_failure">查询数据失败,请重试</string>
-  <string name="no_data">暂无数据</string>
-  <string name="login_just_browsing">仅输入账号查看</string>
+  <string name="hint_input_label">贴上标签</string>
+  <!-- toast -->
   <string name="tip_copy_success">已复制</string>
   <string name="tip_collect_success">已收藏</string>
   <string name="tip_collect_cancel_success">已取消收藏</string>
+  <!-- 错误相关 -->
+  <string name="error_search_failure">查询数据失败,请重试</string>
   <string name="error_collect_failure">收藏失败,请重新收藏</string>
   <string name="error_collect_cancel_failure">取消收藏失败,请重新取消</string>
   <string name="error_main_load_failure">数据加载失败/(ㄒoㄒ)/~~\n点击重新加载</string>
@@ -48,6 +55,7 @@
   <string name="error_network_error">网络错误,请重试</string>
   <string name="error_need_login">请先登录</string>
   <string name="error_login_failure">登录失败，请检查用户名密码</string>
+  <!-- repo详情 -->
   <string name="repo_detail_owner">开源作者：%s</string>
   <string name="repo_detail_language">语言：%s</string>
   <string name="repo_detail_url">url：%s</string>

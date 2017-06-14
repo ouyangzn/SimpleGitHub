@@ -16,8 +16,6 @@
 package com.ouyangzn.github.module.stars;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -42,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.ouyangzn.github.base.CommonConstants.NormalCons.LIMIT_10;
+import static com.ouyangzn.github.utils.Actions.gotoRepoDetail;
 
 /**
  * Created by ouyangzn on 2017/5/24.<br/>
@@ -145,9 +144,7 @@ public class StarsFragment extends BaseFragment<IStarsView, IStarsPresenter>
 
   @Override public void onItemClick(View view, int position) {
     Repository repo = mAdapter.getItem(position);
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setData(Uri.parse(repo.getHtmlUrl()));
-    startActivity(intent);
+    gotoRepoDetail(this, repo);
   }
 
   @Override public boolean onItemLongClick(View view, final int position) {

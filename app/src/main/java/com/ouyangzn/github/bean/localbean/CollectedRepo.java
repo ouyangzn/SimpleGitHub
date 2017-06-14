@@ -16,7 +16,6 @@
 package com.ouyangzn.github.bean.localbean;
 
 import com.ouyangzn.github.bean.apibean.Repository;
-import com.ouyangzn.github.bean.apibean.User;
 import com.ouyangzn.github.db.convert.CollectedRepoOwnerConvert;
 import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
@@ -61,16 +60,18 @@ import org.greenrobot.greendao.annotation.Index;
   @Generated(hash = 813661088) public CollectedRepo() {
   }
 
-  public void convert(Repository repo) {
-    this.id = repo.getId().longValue();
-    this.htmlUrl = repo.getHtmlUrl();
-    this.fullName = repo.getFullName();
-    this.language = repo.getLanguage();
-    this.stargazersCount = repo.getStargazersCount();
-    this.description = repo.getDescription();
-    this.owner = new CollectedRepoOwner();
-    User owner = repo.getOwner();
-    this.owner.convert(owner);
+  public static CollectedRepo convert(Repository repo) {
+    CollectedRepo collectedRepo = new CollectedRepo();
+    collectedRepo.id = repo.getId().longValue();
+    collectedRepo.htmlUrl = repo.getHtmlUrl();
+    collectedRepo.fullName = repo.getFullName();
+    collectedRepo.language = repo.getLanguage();
+    collectedRepo.stargazersCount = repo.getStargazersCount();
+    collectedRepo.description = repo.getDescription();
+    collectedRepo.owner = CollectedRepoOwner.convert(repo.getOwner());
+    collectedRepo.label = repo.getLabel();
+    collectedRepo.collectTime = repo.getCollectTime();
+    return collectedRepo;
   }
 
   @Override public String toString() {

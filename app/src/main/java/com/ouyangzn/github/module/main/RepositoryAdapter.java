@@ -47,7 +47,8 @@ public class RepositoryAdapter extends BaseRecyclerViewAdapter<Repository> {
     holder.setText(R.id.tv_project_name, item.getFullName());
     holder.setText(R.id.tv_project_desc, item.getDescription());
     holder.setText(R.id.tv_author, item.getOwner().getAuthorName());
-    holder.setText(R.id.tv_stars, mContext.getString(R.string.stars, item.getStargazersCount()));
+    holder.setText(R.id.tv_stars,
+        mContext.getString(R.string.count_stars, item.getStargazersCount()));
     ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
     ImageLoader.load(photo, item.getOwner().getAvatarUrl());
     holder.setVisible(R.id.tv_language, mLanguageVisible);

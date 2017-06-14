@@ -40,7 +40,8 @@ public class StarsAdapter extends BaseRecyclerViewAdapter<Repository> {
     holder.setText(R.id.tv_project_desc, repo.getDescription());
     User owner = repo.getOwner();
     holder.setText(R.id.tv_author, owner.getAuthorName());
-    holder.setText(R.id.tv_stars, mContext.getString(R.string.stars, repo.getStargazersCount()));
+    holder.setText(R.id.tv_stars,
+        mContext.getString(R.string.count_stars, repo.getStargazersCount()));
     ImageView photo = (ImageView) holder.getConvertView().findViewById(R.id.img_author_photo);
     ImageLoader.load(photo, owner.getAvatarUrl());
     holder.setVisible(R.id.tv_language, true);

@@ -15,29 +15,33 @@
 
 package com.ouyangzn.github.bean.localbean;
 
+import com.google.gson.annotations.Expose;
 import com.ouyangzn.github.bean.apibean.User;
 
 /**
  * Created by ouyangzn on 2016/9/27.<br/>
- * Description：
+ * Description：收藏的repo的拥有者
  */
 public class CollectedRepoOwner {
 
-  private Long id;
-  private String avatarUrl;
-  private String login;
+  @Expose private Long id;
+  /** 头像 */
+  @Expose private String avatarUrl;
+  /** 用户名 */
+  @Expose private String name;
 
-  public void convert(User owner) {
-    this.id = owner.getId().longValue();
-    this.login = owner.getAuthorName();
-    this.avatarUrl = owner.getAvatarUrl();
+  public static CollectedRepoOwner convert(User owner) {
+    CollectedRepoOwner cOwner = new CollectedRepoOwner();
+    cOwner.id = owner.getId().longValue();
+    cOwner.name = owner.getAuthorName();
+    cOwner.avatarUrl = owner.getAvatarUrl();
+    return cOwner;
   }
 
   @Override public String toString() {
     return "CollectedRepoOwner{" +
         "id=" + id +
-        ", avatarUrl='" + avatarUrl + '\'' +
-        ", login='" + login + '\'' +
+        ", avatarUrl='" + avatarUrl + '\'' + ", name='" + name + '\'' +
         '}';
   }
 
@@ -57,11 +61,11 @@ public class CollectedRepoOwner {
     this.avatarUrl = avatarUrl;
   }
 
-  public String getLogin() {
-    return this.login;
+  public String getName() {
+    return name;
   }
 
-  public void setLogin(String login) {
-    this.login = login;
+  public void setName(String name) {
+    this.name = name;
   }
 }

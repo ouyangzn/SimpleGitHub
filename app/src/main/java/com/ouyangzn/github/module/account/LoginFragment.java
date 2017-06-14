@@ -20,14 +20,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ouyangzn.github.App;
@@ -128,38 +124,20 @@ public class LoginFragment extends BaseFragment {
   /**
    * 显示输入用户名的dialog
    *
-   * @param onConfirmClick 点确定的回调
+   * @param onConfirmClick 点确定的回调，此回调方法中的参数view为null
    */
   private void showInputUsernameDialog(View.OnClickListener onConfirmClick) {
-    AlertDialog.Builder builder = DialogUtils.getAlertDialog(getContext());
-    AlertDialog dialog = builder.setView(R.layout.dialog_input_view).create();
-    dialog.show();
-    TextView tvTitle = ButterKnife.findById(dialog, R.id.tv_dialog_input_title);
-    tvTitle.setText(R.string.username_github);
-    EditText etUsername = ButterKnife.findById(dialog, R.id.et_dialog_input);
     String user = App.getUsername();
-    etUsername.setText(user);
-    if (!TextUtils.isEmpty(user)) {
-      etUsername.setSelection(user.length());
-    }
-    Button btnConfirm = ButterKnife.findById(dialog, R.id.btn_dialog_input_confirm);
-    btnConfirm.setTag(dialog);
-    btnConfirm.setOnClickListener(v -> {
-      ScreenUtils.hideKeyBoard(v);
-      dialog.dismiss();
-      String username = etUsername.getText().toString().trim();
+    DialogUtils.showInputDialog(getActivity(), getString(R.string.username_github), null, user,
+        (dialog, username) -> {
       if (TextUtils.isEmpty(username)) {
         toast(R.string.error_username_null);
         return;
       }
-      App.setUsername(username);
-      if (onConfirmClick != null) onConfirmClick.onClick(v);
-    });
-    Button btnCancel = ButterKnife.findById(dialog, R.id.btn_dialog_input_cancel);
-    btnCancel.setTag(dialog);
-    btnCancel.setOnClickListener(v -> {
-      ScreenUtils.hideKeyBoard(v);
+          ScreenUtils.hideKeyBoard(dialog.getCurrentFocus());
       dialog.dismiss();
-    });
+          App.setUsername(username);
+          if (onConfirmClick != null) onConfirmClick.onClick(null);
+        }, ScreenUtils::hideKeyBoard);
   }
 }
